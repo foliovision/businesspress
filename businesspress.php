@@ -117,6 +117,8 @@ class BusinessPress extends BusinessPress_Plugin_Private {
       //add_action( 'admin_notices', array( $this, 'show_disallow_not_defined') );
     }
     
+    add_action( 'admin_notices', array( $this, 'notice_configure') );
+    
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
     
@@ -127,13 +129,18 @@ class BusinessPress extends BusinessPress_Plugin_Private {
     
     add_action( 'load-update-core.php', array( $this, 'upgrade_screen_start') );
     add_action( 'core_upgrade_preamble', array( $this, 'upgrade_screen') );
-        
+    
+    
+    $this->aOptions = get_option( 'businesspress' ); 
   }
   
   
   
   
   function activate($capsStatus = 0) {
+    
+    return; //  todo: for now, we need to change the way the plugin activates
+    
     $fvsb_genSettings = array();
     $fvsb_genSettings['version'] = BusinessPress::FVSB_VERSION;
     $fvsb_genSettings['upgradeType'] =  $this->autoupdateType;
@@ -213,6 +220,13 @@ class BusinessPress extends BusinessPress_Plugin_Private {
       $required_caps[] = 'do_not_allow';
     }
     return $required_caps;
+  }
+  
+  
+  
+  
+  function check_user_permission() {
+    return true;  //  todo: !
   }
 
   
@@ -532,20 +546,15 @@ class BusinessPress extends BusinessPress_Plugin_Private {
   
   
   
-  function get_email_domain() {
-    $email = get_option('admin_email');
-    $domain = preg_replace( '~.*@~', '', $email );
-    
-    if( file_exists( ABSPATH.'wp-content/businesspress-domain.php' ) ) {
-      $content = file_get_contents( ABSPATH.'wp-content/businesspress-domain.php' );
-      $content = preg_replace( '~[\s\S]*?//\s*~', '', $content );
-      $aURL = parse_url('http://'.$content);
-      if( isset($aURL['host']) && $content == $aURL['host'] ) {
-        $domain = $content;
-      }
-    }
-
-    return $domain;
+  function get_whitelist_domain() {
+    return !empty($this->aOptions['domain']) ? $this->aOptions['domain'] : false;
+  }  
+  
+  
+  
+  
+  function get_whitelist_email() {
+    return !empty($this->aOptions['email']) ? $this->aOptions['email'] : false;
   }
   
   
@@ -681,7 +690,7 @@ JSH;
   function menu() {
     global $current_user;
     get_currentuserinfo();
-    if( false === stripos( $current_user->user_email, $this->get_email_domain() ) ) { //  todo: get rid of this
+    if( !$this->check_user_permission() ) {
       return;
     }
     
@@ -692,7 +701,18 @@ JSH;
         add_options_page('BusinessPress', 'BusinessPress', 'manage_options', 'businesspress', array( $this, 'screen') );
       }
     }
-  }  
+  }
+  
+  
+  
+  
+  function notice_configure() {
+    if( !empty($_GET['page']) && $_GET['page'] == 'businesspress' ) return;
+    
+    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+      <div class="updated"><p><a href="<?php echo esc_attr( site_url('wp-admin/options-general.php?page=businesspress') ); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
+    <?php endif;
+  }
 
   
   
@@ -770,43 +790,36 @@ JSH;
     <div class="wrap">
     <h2>BusinessPress</h2>
     
-      <?php if( $domain = $this->get_email_domain() ) : ?>
+      <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+        <p>You must configure the plugin before it becomes operational.</p>
+        <input id="businesspress-enable" class="button button-primary" type="submit" value="Enable Restriction Mode" />
+        <script>
+          jQuery('#businesspress-enable').click( function() { jQuery('.options-hidden').slideToggle() } );
+        </script>
+        <div class="options-hidden" style="display: none; ">
+      <?php endif; ?>
+      
+    
+      <?php if( $domain = $this->get_whitelist_domain() ) : ?>
         <div class="message error"><p>Access to this screen is limited to users with email on <?php echo $domain; ?>.</p></div>
+      <?php elseif( $email = $this->get_whitelist_email() ) : ?>
+        <div class="message error"><p>Access to this screen is limited to user with email address equal to <?php echo $email; ?>.</p></div>
       <?php endif; ?>
       <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-        <p>Capabilities you can <b>disable</b> for all users when restriction mode is turned <b>ON</b>:</p>
-        <table>
-    <?php
-    $iItem = 0;
-    $iItemsPerRow = 3;
-    echo '<tr>';
-    foreach( $capArray as $cap => $value ) {
-      if( 0 == $iItem % $iItemsPerRow ) {
-        echo "</tr><tr>";
-      }
-      ?>
-      <td>
-        <input type="checkbox" id="<?php echo $cap; ?>" name="capabilitiesCheckbox[]" value="<?php echo $cap; ?>" <?php if( $value === 1 ) echo 'checked'?>>
-        <label for="<?php echo $cap; ?>"><?php echo ucfirst( str_replace( '_', ' ', $cap ) ); ?></label>
-      </td>
-      <?php
-      $iItem++;
-    }
-    echo '</tr>';
-    ?>
-        </table>
-        <br />
-        <?php $aSettings = $this->get_setting('all'); ?>
-        <label for="admin_email">Admin Email: </label><input id="admin_email" type="text" name="admin_email" value="<?php echo $aSettings['adminEmail']; ?>" /><br /><br />
-        <label for="autoupgrades">Autoupgrades: </label>
-        <select id="autoupgrades" name="autoupgrades">
-          <option value="none"  <?php if( $aSettings['upgradeType'] == "none" ) echo 'selected' ?>>None</option>
-          <option value="minor" <?php if( $aSettings['upgradeType'] == "minor" ) echo 'selected' ?>>Minor</option>
-          <option value="major" <?php if( $aSettings['upgradeType'] == "major" ) echo 'selected' ?>>Major</option>
-        </select>
-        <br /><br />
-        <input type="submit" class="button" name="change_cap_array" value="Save options" /> 
+        <div id="dashboard-widgets" class="metabox-holder columns-1">
+          <div id='postbox-container-1' class='postbox-container'>    
+            <?php
+            add_meta_box( 'businesspress_settings', __('BusinessPress Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
+            
+            do_meta_boxes('businesspress_settings', 'normal', false );
+            //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
+            //wp_nonce_field( 'meta-box-order-nonce', 'meta-box-order-nonce', false );
+            ?>
+          </div>
+        </div>
+        <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
       </form>
+      
       <hr>
     <?php
     if( !$bStatus ) {
@@ -824,6 +837,10 @@ JSH;
         <input type="hidden" name="change_mod_permits_do" value="<?php echo $intVal; ?>" />
         <input type="submit" class="button" name="change_mod_permits" value="<?php echo $strVal; ?> &raquo;" />
       </form>
+      
+      <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+        </div>
+      <?php endif; ?>      
     </div>
     <?php
   }  
@@ -848,6 +865,101 @@ window.location.href = goto;
 </script>
 JSR;
 
+  }
+  
+  
+  
+  
+  function settings_box() {
+    $styleDomain = $this->get_whitelist_domain() ? '' : ' style="display:none"';
+    $styleEmail = $this->get_whitelist_email() ? '' : ' style="display:none"';
+    
+    if( strlen($styleDomain) && strlen($styleEmail) ) {
+      $styleEmail = '';
+    }
+    
+    $checkedDomain = $this->get_whitelist_domain() ? 'checked="checked"' : '';
+    $checkedEmail = $this->get_whitelist_email() ? 'checked="checked"' : '';    
+    
+    if( strlen($checkedDomain) && strlen($checkedEmail) ) {
+      $checkedEmail = 'checked="checked"';
+    }    
+    ?>
+    <p>Please enter the
+      <input type="radio" id="whitelist-email" name="whitelist" class="businessp-checkbox" value="email"<?php echo $checkedEmail; ?>>
+      <label for="whitelist-email">admin email address</label> or
+      <input type="radio" id="whitelist-domain" name="whitelist" class="businessp-checkbox" value="domain"<?php echo $checkedDomain; ?>>
+      <label for="whitelist-domain">domain</lable>. Only user with a matching email address or domain will be able to change the settings here.</p>            
+    <table class="form-table2">
+      <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
+        <td><label for="email">Domain</label></td>
+        <td><input type="text" id="domain" name="domain" class="text" /></td>
+      </tr>      
+      <tr class="whitelist-email"<?php echo $styleEmail; ?>>
+        <td><label for="email">Email</label></td>
+        <td><input type="text" id="email" name="email" class="text" /></td>
+      </tr>
+      <tr>
+        <td>
+          <p>Allow other<br />users to perform</p>
+        </td>
+        <td>
+
+<table>
+<?php
+$iItem = 0;
+$iItemsPerRow = 3;
+echo '<tr>';
+foreach( $capArray as $cap => $value ) {
+if( 0 == $iItem % $iItemsPerRow ) {
+echo "</tr><tr>";
+}
+?>
+<td>
+<input type="checkbox" id="<?php echo $cap; ?>" name="capabilitiesCheckbox[]" value="<?php echo $caadmip; ?>" <?php if( $value === 1 ) echo 'checked'?>>
+<label for="<?php echo $cap; ?>"><?php echo ucfirst( str_replace( '_', ' ', $cap ) ); ?></label>
+</td>
+<?php
+$iItem++;
+}
+echo '</tr>';
+?>
+</table>
+<br />
+<?php $aSettings = $this->get_setting('all'); ?>
+<label for="admin_email">Admin Email: </label><input id="admin_email" type="text" name="admin_email" value="<?php echo $aSettings['adminEmail']; ?>" /><br /><br />
+<label for="autoupgrades">Autoupgrades: </label>
+<select id="autoupgrades" name="autoupgrades">
+  <option value="none"  <?php if( $aSettings['upgradeType'] == "none" ) echo 'selected' ?>>None</option>
+  <option value="minor" <?php if( $aSettings['upgradeType'] == "minor" ) echo 'selected' ?>>Minor</option>
+  <option value="major" <?php if( $aSettings['upgradeType'] == "major" ) echo 'selected' ?>>Major</option>
+</select>
+<br /><br />
+<input type="submit" class="button" name="change_cap_array" value="Save options" />
+        </td>
+      </tr>
+        <tr>    		
+          <td colspan="2">
+            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+          </td>
+        </tr>                                    
+      </table>
+      <script>
+      if( jQuery('#whitelist-domain:checked').length ) {
+        jQuery('tr.whitelist-email').hide();
+        jQuery('tr.whitelist-domain').show();
+      }
+      
+      jQuery('#whitelist-domain').change( function() {
+        jQuery('tr.whitelist-email').hide();
+        jQuery('tr.whitelist-domain').show();
+      });
+      jQuery('#whitelist-email').change( function() {
+        jQuery('tr.whitelist-email').show();
+        jQuery('tr.whitelist-domain').hide();
+      });      
+      </script>         
+    <?php
   }
   
   
