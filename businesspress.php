@@ -165,7 +165,16 @@ class BusinessPress extends BusinessPress_Plugin_Private {
     
     remove_filter( 'update_footer', 'core_update_footer' );
     remove_action( 'admin_notices', 'update_nag', 3 );
-    remove_action( 'network_admin_notices', 'update_nag', 3 );        
+    remove_action( 'network_admin_notices', 'update_nag', 3 );
+    
+    global $WPMUDEV_Dashboard_Notice3;
+    
+    if( $WPMUDEV_Dashboard_Notice3 !== null ){
+      remove_action( 'admin_print_styles', array( &$WPMUDEV_Dashboard_Notice3, 'notice_styles' ) );
+      remove_action( 'all_admin_notices', array( &$WPMUDEV_Dashboard_Notice3, 'activate_notice' ), 5 );
+      remove_action( 'all_admin_notices', array( &$WPMUDEV_Dashboard_Notice3, 'install_notice' ), 5 );
+    }
+    
   }
   
   
