@@ -54,3 +54,7 @@ From that point forward, you will have to elevated admin privileges over the web
 = A question that someone might have =
 
 An answer to that question.
+
+== Screenshots ==
+
+1. the plugin settings screen
