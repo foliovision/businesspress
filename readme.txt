@@ -8,7 +8,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-BusinessPress lets you control the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.
+BusinessPress lets you control and delay the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.
 
 == Description ==
 
@@ -20,11 +20,9 @@ This plugin also allows you to stop your client from installing new plugins (to 
 
 ###You can disable the following capabilities
 
-* Install plugins/themes
-* Delete plugins/themes
-* Edit plugins/themes
-* Update plugins/themes
-* Activate plugins
+* Activate and deactivate plugins and themes
+* Update plugins and themes
+* Install, Edit and delete plugns and themes
 
 ###Coming soon
 
@@ -35,13 +33,17 @@ This plugin also allows you to stop your client from installing new plugins (to 
 
 == Installation ==
 
-Once the plugin is installed, only admin users who have email on the same address as the General Settings -> Email Address are allowed to change the settings (allow installing plugins etc.).
+Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
 
-If you are maintaining the site for your client and you need to move this permission to you, create the wp-content/businesspress-domain.php file and enter your domain into it:
+Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
 
-<?php // my-domain.com
+From that point forward, you will have to elevated admin privileges over the website.
 
 == Changelog ==
+
+= 0.5 =
+
+* Reworking the activation.
 
 = 0.4.9 =
 
