@@ -8,7 +8,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-BusinessPress lets you control and delay the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.
+BusinessPress lets you control the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.
 
 == Description ==
 
