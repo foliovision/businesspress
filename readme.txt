@@ -12,11 +12,11 @@ BusinessPress lets you control the WordPress core updates and plugin installing/
 
 == Description ==
 
-WordPress has a major release twice year, each time with a risk of breaking the way your website works. This plugin removes all the messages to update (button from dashboard, the admin footer link and admin notice).
+WordPress has a major release three times per year, each time with a risk of breaking the way your website works. This plugin removes most of the messages to update (button from dashboard, the admin footer link and admin notice), while adding more information about versions to the updates page. You will see which version you are running and which versions which are available to you and given a choice about your updates.
 
 WordPress also automatically updates your website to the latest minor release. We like that, but these updates can cause issues as well. That's why BusinessPress delays the updates for 5 days.
 
-This plugin also allows you to stop your client from installing new plugins (to break the website) while allowing them to take care of the plugin updates.
+This plugin also allows you to prevent your client from installing new plugins (many of which could either cripple or slow their website) while allowing clients to safely take care of existing plugin updates themselves.
 
 ###You can disable the following capabilities
 
@@ -28,6 +28,7 @@ This plugin also allows you to stop your client from installing new plugins (to 
 
 * Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
 * Protecting your site privacy from WordPress.org API services
+* Switch help and news links to your own support and news channels.
 
 [Support](http://foliovision.com/support/)
 
