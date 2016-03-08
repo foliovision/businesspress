@@ -12,36 +12,39 @@ BusinessPress lets you control the WordPress core updates and plugin installing/
 
 == Description ==
 
-WordPress has a major release twice year, each time with a risk of breaking the way your website works. This plugin removes all the messages to update (button from dashboard, the admin footer link and admin notice).
+WordPress has a major release three times per year, each time with a risk of breaking the way your website works. This plugin removes most of the messages to update (button from dashboard, the admin footer link and admin notice), while adding more information about versions to the updates page. You will see which version you are running and which versions which are available to you and given a choice about your updates.
 
 WordPress also automatically updates your website to the latest minor release. We like that, but these updates can cause issues as well. That's why BusinessPress delays the updates for 5 days.
 
-This plugin also allows you to stop your client from installing new plugins (to break the website) while allowing them to take care of the plugin updates.
+This plugin also allows you to prevent your client from installing new plugins (many of which could either cripple or slow their website) while allowing clients to safely take care of existing plugin updates themselves.
 
 ###You can disable the following capabilities
 
-* Install plugins/themes
-* Delete plugins/themes
-* Edit plugins/themes
-* Update plugins/themes
-* Activate plugins
+* Activate and deactivate plugins and themes
+* Update plugins and themes
+* Install, Edit and delete plugns and themes
 
 ###Coming soon
 
 * Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
 * Protecting your site privacy from WordPress.org API services
+* Switch help and news links to your own support and news channels.
 
 [Support](http://foliovision.com/support/)
 
 == Installation ==
 
-Once the plugin is installed, only admin users who have email on the same address as the General Settings -> Email Address are allowed to change the settings (allow installing plugins etc.).
+Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
 
-If you are maintaining the site for your client and you need to move this permission to you, create the wp-content/businesspress-domain.php file and enter your domain into it:
+Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
 
-<?php // my-domain.com
+From that point forward, you will have to elevated admin privileges over the website.
 
 == Changelog ==
+
+= 0.5 =
+
+* Reworking the activation.
 
 = 0.4.9 =
 
@@ -52,3 +55,7 @@ If you are maintaining the site for your client and you need to move this permis
 = A question that someone might have =
 
 An answer to that question.
+
+== Screenshots ==
+
+1. the plugin settings screen
