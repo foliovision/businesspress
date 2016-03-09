@@ -28,7 +28,7 @@ Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin use
 
 
 
-class BusinessPress extends BusinessPress_Plugin_Private {
+class BusinessPress {
 
   /* DB records
   * ( timestamp ) fvsb_capsDisabled - if true, capabilities are disabled
