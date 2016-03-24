@@ -111,6 +111,7 @@ class BusinessPress {
     }
     
     add_action( 'admin_notices', array( $this, 'notice_configure') );
+    add_action( 'network_admin_notices', array( $this, 'notice_configure') );
     
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
