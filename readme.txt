@@ -34,11 +34,13 @@ This plugin also allows you to prevent your client from installing new plugins (
 
 == Installation ==
 
-Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
+Once the plugin is installed and activated, it checks the current user email domain address and locks down the plugin and theme install/edit permissions to users which have email address matching this domain. That gives your whole company a chance to keep maintaining the site while leaving other users out of it.
 
-Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
+You will also see a notice about this which you need to dismiss and then it won't appear again.
 
-From that point forward, you will have to elevated admin privileges over the website.
+To change the domain you can go to Settings -> BusinessPress. There you will be allowed to edit which permissions are locked down and also edit the domain or lock down to your own email address only.
+
+If you turn of the plugin the domain restriction is forgotten until somebody else activates it again. The users who don't match the domain can't turn it off obviously.
 
 == Changelog ==
 

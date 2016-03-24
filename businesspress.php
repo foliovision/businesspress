@@ -129,7 +129,7 @@ class BusinessPress {
     add_action( 'load-update-core.php', array( $this, 'upgrade_screen_start') );
     add_action( 'core_upgrade_preamble', array( $this, 'upgrade_screen') );
     
-    
+    add_action( 'wp_ajax_businesspress_auto_lockdown_dismiss', array( $this, 'ajax_businesspress_auto_lockdown_dismiss' ) );    
     
   }
   
@@ -176,6 +176,14 @@ class BusinessPress {
       #wp-version-message .button { display: none }
     </style>
     <?php
+  }
+  
+  
+  
+  
+  function ajax_businesspress_auto_lockdown_dismiss() {
+    delete_option('businesspress_auto_lockdown');
+    die('businesspress_auto_lockdown notice removed');
   }
 
   
@@ -461,7 +469,7 @@ class BusinessPress {
   
   
   function deactivate() {
-    
+    delete_option('businesspress');
   }
   
   
@@ -729,14 +737,20 @@ JSH;
   function notice_configure() {
     if( !empty($_GET['page']) && $_GET['page'] == 'businesspress' ) return;
     
-    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) :
-      $sURL = site_url('wp-admin/options-general.php?page=businesspress');      
-      if( $aSitewidePlugins = get_site_option( 'active_sitewide_plugins') ) {
-        if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
-          $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
-        }
+    $sURL = site_url('wp-admin/options-general.php?page=businesspress');      
+    if( $aSitewidePlugins = get_site_option( 'active_sitewide_plugins') ) {
+      if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
+        $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
       }
+    }
+    
+    if( $this->check_user_permission() && get_option('businesspress_auto_lockdown') ) :
+      add_action( 'admin_footer', array( $this, 'script_dismiss' ), 999 )
       ?>
+      <div class="updated"><p><small class="alignright"><a href="#" class="businesspress_auto_lockdown-dismiss">Dismiss</a></small><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> plugin activated! Plugin install/edit permissions locked down to the <code><?php echo get_option('businesspress_auto_lockdown'); ?></code> domain. Since your email address matches this domain you see this this notice and manage these restrictions on the <a href="<?php echo esc_attr($sURL); ?>">settings screen</a>.</p></div>
+    <?php endif;
+
+    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
       <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
   }
@@ -745,10 +759,28 @@ JSH;
   
   
   function plugin_update_hook() {
+    $bChange = false;
     if( empty($this->aOptions['version']) ) {
       $this->aOptions['version'] = BusinessPress::VERSION;
+      $bChange = true;
+    }
+    
+    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) {
+      $current_user = wp_get_current_user();
+      if( is_email($current_user->user_email) ) {      
+        $sDomain = $this->get_email_domain($current_user->user_email);
+        if( $sDomain ) {
+          $this->aOptions['domain'] = $sDomain;
+          update_option( 'businesspress_auto_lockdown', $sDomain );
+          $bChange = true;        
+        }
+      }
+    }
+    
+    if( $bChange ) {
       update_option( 'businesspress', $this->aOptions );
     }
+    
 
     if( version_compare( $this->aOptions['version'], BusinessPress::VERSION, '<' ) ) { 
       
@@ -839,7 +871,25 @@ JSH;
       <?php endif; ?>      
     </div>
     <?php
-  }  
+  }
+  
+  
+  
+  
+  function script_dismiss() {
+    ?>
+    <script>
+    jQuery(function($){
+      $('.businesspress_auto_lockdown-dismiss').click( function() {
+        $('.businesspress_auto_lockdown-dismiss').html('Wait...');
+        $.post( '<?php echo admin_url( 'admin-ajax.php' ); ?>', { action: 'businesspress_auto_lockdown_dismiss' }, function() {
+          $('.businesspress_auto_lockdown-dismiss').parents('.updated').slideUp();
+        });
+      });
+    });
+    </script>
+    <?php
+  }
   
   
   
