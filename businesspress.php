@@ -26,10 +26,9 @@ Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin use
 */
 
 
-require_once( dirname(__FILE__).'/fp-api-private.php' );
 
 
-class BusinessPress extends BusinessPress_Plugin_Private {
+class BusinessPress {
 
   /* DB records
   * ( timestamp ) fvsb_capsDisabled - if true, capabilities are disabled
@@ -45,9 +44,6 @@ class BusinessPress extends BusinessPress_Plugin_Private {
   const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
   
-  /* things about update */
-  var $strPluginSlug = 'businesspress';
-  var $strPrivateAPI = 'http://foliovision.com/plugins/';
   
   private $disallowed_caps_default = array( 
         'install_plugins' => 1,
@@ -95,7 +91,6 @@ class BusinessPress extends BusinessPress_Plugin_Private {
       $this->dump();
     }
     
-    //parent::auto_updates();
     
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
     
