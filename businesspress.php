@@ -735,7 +735,7 @@ JSH;
         if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
           $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
         }
-      }
+      } ?>
       <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
   }
