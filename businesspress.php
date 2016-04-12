@@ -525,6 +525,27 @@ class BusinessPress {
   
   
   
+  function email_error() {
+    ?><div class="error"><p>Error while sending your message.</p></div><?php
+  }
+  
+  
+  
+  
+  function email_ok() {
+    ?><div class="updated"><p>Your messaage has been sent.</p></div><?php
+  }
+  
+  
+  
+  
+  function get_contact_form() {
+    return !empty($this->aOptions['contact_form']) ? $this->aOptions['contact_form'] : false;
+  } 
+  
+  
+  
+  
   function get_disallowed_caps() {
     $aCaps = array();
     
@@ -592,7 +613,7 @@ class BusinessPress {
   
   
 
-  function handle_post() {    
+  function handle_post() {
     if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
       $this->aOptions = array();
       if( !empty($_POST['whitelist']) && $_POST['whitelist'] == 'domain' ) {
@@ -605,11 +626,34 @@ class BusinessPress {
       
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
+      $this->aOptions['contact_form_type'] = $_POST['contact_form_type'];
+      $this->aOptions['contact_form'] = stripslashes(trim($_POST['contact_form']));
+      $this->aOptions['contact_email'] = trim($_POST['contact_email']);
+      
       if( !empty($_POST['cap_activate']) ) $this->aOptions['cap_activate'] = true;
       if( !empty($_POST['cap_update']) ) $this->aOptions['cap_update'] = true;
       if( !empty($_POST['cap_install']) ) $this->aOptions['cap_install'] = true;
       
-      update_option( 'businesspress', $this->aOptions ); 
+      update_option( 'businesspress', $this->aOptions );
+      
+    } else if( isset($_POST['businesspress_contact_nonce']) && check_admin_referer( 'businesspress_contact_nonce', 'businesspress_contact_nonce' ) ) {
+      $res = false;
+      if( isset($this->aOptions['contact_email']) && $this->aOptions['contact_email'] && isset($_POST['message']) && strlen(trim($_POST['message'])) ) {
+        $current_user = wp_get_current_user();
+        $headers = array( 'From' => $current_user->display_name." <".$current_user->user_email.">", 'Reply-To' => $current_user->display_name." <".$current_user->user_email.">" );
+        $res = wp_mail( $this->aOptions['contact_email'], 'Businesspress Contact Submission', $_POST['message'], $headers );
+        
+      }
+      
+      if( $res ) {
+        add_action( 'admin_notices', array( $this, 'email_ok') );
+        add_action( 'network_admin_notices', array( $this, 'email_ok') );
+      } else {
+        add_action( 'admin_notices', array( $this, 'email_error') );
+        add_action( 'network_admin_notices', array( $this, 'email_error') );
+      }
+      
+      
     }
     
     return;
@@ -711,7 +755,7 @@ JSH;
     global $current_user;
     get_currentuserinfo();
     if( !$this->check_user_permission() ) {
-      return;
+      //return;
     }
     
     if( is_multisite() && is_super_admin() ) {
@@ -794,26 +838,52 @@ JSH;
         <div class="options-hidden" style="display: none; ">
       <?php endif; ?>
       
-    
-      <?php if( $domain = $this->get_whitelist_domain() ) : ?>
-        <div class="message error"><p>Access to this screen is limited to users with email on <?php echo $domain; ?>.</p></div>
-      <?php elseif( $email = $this->get_whitelist_email() ) : ?>
-        <div class="message error"><p>Access to this screen is limited to user with email address equal to <?php echo $email; ?>.</p></div>
-      <?php endif; ?>
-      <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
-        <div id="dashboard-widgets" class="metabox-holder columns-1">
-          <div id='postbox-container-1' class='postbox-container'>    
-            <?php
-            add_meta_box( 'businesspress_settings', __('Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
-            
-            do_meta_boxes('businesspress_settings', 'normal', false );
-            //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
-            //wp_nonce_field( 'meta-box-order-nonce', 'meta-box-order-nonce', false );
-            ?>
+      <?php if( !$this->check_user_permission() ) : ?>
+        <?php if( isset($this->aOptions['contact_form_type']) && $this->aOptions['contact_form_type'] == 'html' && $this->get_contact_form() ) {
+          echo apply_filters('the_content',$this->get_contact_form());
+
+        } else if( isset($this->aOptions['contact_email']) && $this->aOptions['contact_email'] ) {
+          ?>
+          <p>Your account doesn't have all the permissions on this WordPress site. You can contact us in case you need to fix any issue.</p>
+          <form method="POST">
+            <textarea class="large-text code" id="contact_form" cols="50" rows="5" name="message" placeholder="Please enter your request here." required></textarea>
+            <input type="submit" class="button button-primary alignright" value="Send" />
+            <?php wp_nonce_field( 'businesspress_contact_nonce', 'businesspress_contact_nonce' ); ?>
+          </form>
+          
+          <?php
+          
+        } else {
+          if( $domain = $this->get_whitelist_domain() ) : ?>
+            <div class="message error"><p>Access to this screen is limited to <?php echo $domain; ?>.</p></div>
+          <?php elseif( $email = $this->get_whitelist_email() ) : ?>
+            <div class="message error"><p>Access to this screen is limited to <?php echo $email; ?>.</p></div>
+          <?php endif;
+          
+        } ?>
+        
+      <?php else : ?>
+        <?php if( $domain = $this->get_whitelist_domain() ) : ?>
+          <div class="message error"><p>Access to this screen is limited to users with email on <?php echo $domain; ?>.</p></div>
+        <?php elseif( $email = $this->get_whitelist_email() ) : ?>
+          <div class="message error"><p>Access to this screen is limited to user with email address equal to <?php echo $email; ?>.</p></div>
+        <?php endif; ?>      
+        <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
+          <div id="dashboard-widgets" class="metabox-holder columns-1">
+            <div id='postbox-container-1' class='postbox-container'>    
+              <?php
+              add_meta_box( 'businesspress_settings', __('Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
+              add_meta_box( 'businesspress_settings_contact', __('Contact Form', 'fv_flowplayer'), array( $this, 'settings_box_contact' ), 'businesspress_settings', 'normal' );
+              
+              do_meta_boxes('businesspress_settings', 'normal', false );
+              //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
+              //wp_nonce_field( 'meta-box-order-nonce', 'meta-box-order-nonce', false );
+              ?>
+            </div>
           </div>
-        </div>
-        <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
-      </form>
+          <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
+        </form>
+      <?php endif; ?>
       
       <!--<hr>
     <?php
@@ -874,8 +944,8 @@ JSR;
       $styleEmail = '';
     }
     
-    $checkedDomain = $this->get_whitelist_domain() ? 'checked="checked"' : '';
-    $checkedEmail = $this->get_whitelist_email() ? 'checked="checked"' : '';    
+    $checkedDomain = $this->get_whitelist_domain() ? ' checked="checked"' : '';
+    $checkedEmail = $this->get_whitelist_email() ? ' checked="checked"' : '';    
     
     if( !$checkedDomain && !$checkedEmail ) {
       $checkedEmail = 'checked="checked"';
@@ -887,11 +957,12 @@ JSR;
     ?>       
     <table class="form-table2">
       <tr>
-        <p>Please enter the
+        <td colspan="2"><p>Please enter the
           <input type="radio" id="whitelist-email" name="whitelist" class="businessp-checkbox" value="email"<?php echo $checkedEmail; ?>>
           <label for="whitelist-email">admin email address</label> or
           <input type="radio" id="whitelist-domain" name="whitelist" class="businessp-checkbox" value="domain"<?php echo $checkedDomain; ?>>
           <label for="whitelist-domain">domain</label>. Only user with a matching email address or domain will be able to change the settings here.</p>
+        </td>
       </tr>
       <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
         <td><label for="email">Domain</label></td>
@@ -947,6 +1018,64 @@ JSR;
       </script>         
     <?php
   }
+  
+  
+  
+  
+  function settings_box_contact() {
+    if( isset($this->aOptions['contact_form_type']) && $this->aOptions['contact_form_type'] == 'html' ) {
+      $styleHTML = '';
+      $checkedHTML = ' checked="checked"';      
+      $styleEmail = ' style="display:none"';
+      $checkedEmail = '';
+    } else {
+      $styleHTML = ' style="display:none"';
+      $checkedHTML = '' ;
+      $styleEmail = '';
+      $checkedEmail = ' checked="checked"';
+    }    
+    ?>
+    <p>When other users try to access this screen or any of the restricted functions they will see the message entered here (you can shortcodes and HTML). If you leave it empty, a generic message like "Access to this screen is limited to {domain or email}." will show up.</p>
+    <table class="form-table2">
+      <tr>
+        <td colspan="2"><p>Use 
+          <input type="radio" id="contact_form_type-email" name="contact_form_type" class="businessp-checkbox" value="email"<?php echo $checkedEmail; ?>>
+          <label for="contact_form_type-email">contact form with email address</label> or
+          <input type="radio" id="contact_form_type-html" name="contact_form_type" class="businessp-checkbox" value="html"<?php echo $checkedHTML; ?>>
+          <label for="contact_form_type-html">custom HTML</label>.</p>
+        </td>
+      </tr>
+      <tr class="contact_form_type-email"<?php echo $styleEmail; ?>>
+        <td><label for="contact_email">Email Address</label></td>
+        <td><input type="text" class="regular-text" id="contact_email" cols="50" rows="10" name="contact_email" value="<?php if( isset($this->aOptions['contact_email']) && $this->aOptions['contact_email'] ) echo $this->aOptions['contact_email']; ?>" /></td>
+      </tr>      
+      <tr class="contact_form_type-html"<?php echo $styleHTML; ?>>
+        <td><label for="contact_form">HTML</label></td>
+        <td><textarea class="large-text code" id="contact_form" cols="50" rows="5" name="contact_form"><?php if( $this->get_contact_form() ) echo esc_textarea( $this->get_contact_form() ); ?></textarea></td>
+      </tr>
+      <tr>    		
+        <td colspan="2">
+          <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+        </td>
+      </tr>                                    
+    </table>
+      <script>
+      if( jQuery('#contact_form_type-html:checked').length ) {
+        jQuery('tr.contact_form_type-email').hide();
+        jQuery('tr.contact_form_type-html').show();
+      }
+      
+      jQuery('#contact_form_type-html').change( function() {
+        jQuery('tr.contact_form_type-email').hide();
+        jQuery('tr.contact_form_type-html').show();
+      });
+      jQuery('#contact_form_type-email').change( function() {
+        jQuery('tr.contact_form_type-email').show();
+        jQuery('tr.contact_form_type-html').hide();
+      });
+      </script>       
+    <?php
+  }  
   
   
   
