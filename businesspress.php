@@ -473,13 +473,13 @@ class BusinessPress {
       if( $this->aCoreUpdatesWhitelist == $item->current ) return $update;  //  this it to prevent endless loop in the process
       
       
-      file_put_contents( ABSPATH.'bpress-delay_core_updates.log', date('r').":\n".var_export( func_get_args(),true)."\n\n", FILE_APPEND );
+      //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', date('r').":\n".var_export( func_get_args(),true)."\n\n", FILE_APPEND );
       $aBlockedUpdates = get_site_option('businesspress_core_update_delay');
       if( !$aBlockedUpdates ) $aBlockedUpdates = array();
       
       if( isset($aBlockedUpdates[$item->current]) ) {
         if( $aBlockedUpdates[$item->current] + 5*24*3600 - 3600 < time() ) {  //  5 days minus 1 hour
-          file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: 5 days old update, go on!\n\n", FILE_APPEND );
+          //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: 5 days old update, go on!\n\n", FILE_APPEND );
           
           unset($aBlockedUpdates[$item->current]);
           update_site_option('businesspress_core_update_delay', $aBlockedUpdates );
@@ -487,7 +487,7 @@ class BusinessPress {
           return $update;
         
         } else {
-          file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: relatively new update (".$aBlockedUpdates[$item->current]." vs. ".time()."), blocking!\n\n", FILE_APPEND );
+          //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: relatively new update (".$aBlockedUpdates[$item->current]." vs. ".time()."), blocking!\n\n", FILE_APPEND );
           return false;
         
         }
@@ -496,7 +496,7 @@ class BusinessPress {
         $aBlockedUpdates[$item->current] = time();
         update_site_option('businesspress_core_update_delay', $aBlockedUpdates );
         
-        file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: new update, blocking!\n\n", FILE_APPEND );
+        //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: new update, blocking!\n\n", FILE_APPEND );
         
         return false;
       }      
