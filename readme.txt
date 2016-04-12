@@ -42,6 +42,10 @@ From that point forward, you will have to elevated admin privileges over the web
 
 == Changelog ==
 
+= 0.5.1 =
+
+* Fix for the "BusinessPress must be configured before it becomes operational." link when network activated
+
 = 0.5 =
 
 * Reworking the activation.

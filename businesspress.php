@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.5
+Version: 0.5.1
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -111,6 +111,7 @@ class BusinessPress {
     }
     
     add_action( 'admin_notices', array( $this, 'notice_configure') );
+    add_action( 'network_admin_notices', array( $this, 'notice_configure') );
     
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
@@ -728,8 +729,14 @@ JSH;
   function notice_configure() {
     if( !empty($_GET['page']) && $_GET['page'] == 'businesspress' ) return;
     
-    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
-      <div class="updated"><p><a href="<?php echo esc_attr( site_url('wp-admin/options-general.php?page=businesspress') ); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
+    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) :
+      $sURL = site_url('wp-admin/options-general.php?page=businesspress');      
+      if( $aSitewidePlugins = get_site_option( 'active_sitewide_plugins') ) {
+        if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
+          $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
+        }
+      }
+      <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
   }
 
