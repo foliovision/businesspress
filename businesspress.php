@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.5.1
+Version: 0.5.2
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -1151,6 +1151,8 @@ JSR;
     
     
     //  this bit if from update-core.php
+    
+    
     ob_start();
 
     global $wp_version, $required_php_version, $required_mysql_version;
@@ -1181,7 +1183,7 @@ JSR;
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
       echo '</h2>';
       echo '<p>';
-      _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.', 'businesspress' );
+      _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
       echo '</p>';
       
     }
@@ -1213,8 +1215,11 @@ JSR;
     
     $new_html .= ob_get_clean();
 
-    
-    $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
+    if( preg_match( '~<h\d[^>]*?>Plugins</h\d>~', $html ) ) {
+      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
+    } else {
+      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)$~', '$1'.$new_html, $html );
+    }
     
     echo $html;
     
