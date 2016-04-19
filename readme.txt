@@ -42,6 +42,10 @@ From that point forward, you will have to elevated admin privileges over the web
 
 == Changelog ==
 
+= 0.5.2 =
+
+* Changing Dashboard -> Updates screen - added extra security to the upgrade button - warning user about the risks of upgrading WordPress in a more comprehensive way
+
 = 0.5.1 =
 
 * Fix for the "BusinessPress must be configured before it becomes operational." link when network activated
