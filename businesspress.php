@@ -771,7 +771,7 @@ JSH;
     echo '<input name="locale" value="'. esc_attr($update->locale) .'" type="hidden"/>';
     if ( $show_buttons ) {
       if ( $first_pass ) {
-        submit_button( $submit, $current ? 'button' : 'primary regular fv-red', 'upgrade', false );
+        submit_button( $submit, $current ? 'button' : 'regular', 'upgrade', false );
         $first_pass = false;
       } else {
         submit_button( $submit, 'button', 'upgrade', false );
@@ -1179,9 +1179,9 @@ JSR;
       echo '</h2>';*/
     } else {
   
-      echo '<h2 class="response">';
+      echo '<strong class="response">';
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
-      echo '</h2>';
+      echo '</strong>';
       echo '<p>';
       _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
       echo '</p>';
@@ -1224,22 +1224,6 @@ JSR;
     echo $html;
     
     ?>
-    <style>
-    .button-primary.fv-red {
-      background: #ba0000;
-      border-color: #aa0000 #990000 #990000;
-      -webkit-box-shadow: 0 1px 0 #990000;
-      box-shadow: 0 1px 0 #990000;
-      text-shadow: 0 -1px 1px #990000,1px 0 1px #990000,0 1px 1px #990000,-1px 0 1px #990000;
-    }
-    .button-primary.fv-red:hover, .button-primary.fv-red:focus {
-      background: #d20000;
-      border-color: #aa0000 #990000 #990000;
-      -webkit-box-shadow: 0 1px 0 #990000;
-      box-shadow: 0 1px 0 #990000;
-      text-shadow: 0 -1px 1px #990000,1px 0 1px #990000,0 1px 1px #990000,-1px 0 1px #990000;      
-    }    
-    </style>
     <script>
     jQuery(function($){
       $('form').submit( function(e) {
