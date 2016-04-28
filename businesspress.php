@@ -102,7 +102,7 @@ class BusinessPress {
     
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     
-    add_action( 'businesspress_cron', array( $this, 'cron_job' ) );
+    //add_action( 'businesspress_cron', array( $this, 'cron_job' ) );
     
     if( is_multisite() ) {
       //add_action( 'network_admin_notices', array( $this, 'show_disallow_not_defined') );  //  todo: what about this?
@@ -529,7 +529,7 @@ class BusinessPress {
     $aCaps = array();
     
     if( empty($this->aOptions['cap_activate']) || !$this->aOptions['cap_activate'] ) $aCaps = array_merge( $aCaps, array('activate_plugins','switch_themes','deactivate_plugins') );
-    if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) $aCaps = array_merge( $aCaps, array('update_plugins','update_themes') );
+    //if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) $aCaps = array_merge( $aCaps, array('update_plugins','update_themes') );
     if( empty($this->aOptions['cap_install']) || !$this->aOptions['cap_install'] ) $aCaps = array_merge( $aCaps, array('install_plugins','install_themes','delete_plugins','delete_themes','edit_plugins','edit_themes') );
     
     return $aCaps;
@@ -1000,7 +1000,7 @@ JSR;
           <p><input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
             <label for="cap_activate">Activate and deactivate plugins and themes</label></p>
           <p><input type="checkbox" id="cap_update" name="cap_update" value="1" <?php if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] ) echo 'checked'; ?> />
-            <label for="cap_update">Update plugins and themes</label><br /></p>
+            <label for="cap_update">Update WordPress core, plugins and themes</label><br /></p>
           <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
             <label for="cap_install">Install, Edit and delete plugins and themes </label></p>
         </td>
@@ -1080,6 +1080,18 @@ JSR;
   
   
   
+  function talk_no_permissions( $what ) {
+    if( $this->get_whitelist_domain() ) {
+      return "Please contact your site admin or your partners at ".$this->get_whitelist_domain()." to ".$what.".";
+    } else if( $this->get_whitelist_email() ) {
+      return "Please contact ".$this->get_whitelist_email()." to ".$what.".";
+    }
+    return false;
+  }
+  
+  
+  
+  
   function upgrade_screen_start() {
     ob_start();
   }
@@ -1090,8 +1102,25 @@ JSR;
   function upgrade_screen() {
     $html = ob_get_clean();
     
+    if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) {
+      $html = preg_replace( '~<form[^>]*?>~', '<!--form opening tag removed by BusinessPres-->', $html );
+      $html = str_replace( '</form>', '<!--form closing tag removed by BusinessPres-->', $html );
+      
+      $html = preg_replace( '~<input[^>]*?type=["\']checkbox["\'][^>]*?>~', '', $html );
+      $html = preg_replace( '~<thead[\s\S]*?</thead>~', '', $html );
+      $html = preg_replace( '~<tfoot[\s\S]*?</tfoot>~', '', $html ); 
+      $html = preg_replace( '~<input[^>]*?upgrade-plugins[^>]*?>~', '', $html );      
+      $html = preg_replace( '~<input[^>]*?upgrade-themes[^>]*?>~', '', $html );
+      
+    }
+    
+    
     global $wp_version;
-    $new_html = "<h2>Current WordPress version: ".$wp_version."</h2>";
+    $new_html = '';
+    if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) {
+      $new_html .= "<div class='error'><p>".$this->talk_no_permissions('upgrade WordPress, plugins or themes')."</p></div>";
+    }
+    $new_html .= "<h2>Current WordPress version: ".$wp_version."</h2>";
     
     if( !class_exists('Core_Upgrader') ) {
       include_once( ABSPATH . '/wp-admin/includes/admin.php' );
@@ -1182,9 +1211,11 @@ JSR;
       echo '<strong class="response">';
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
       echo '</strong>';
-      echo '<p>';
-      _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
-      echo '</p>';
+      if( !empty($this->aOptions['cap_update']) && !$this->aOptions['cap_update'] ) {
+        echo '<p>';
+        _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
+        echo '</p>';
+      }
       
     }
   
@@ -1198,21 +1229,24 @@ JSR;
       }*/
     }
   
-    echo '<ul class="core-updates">';
-    foreach ( (array) $updates as $update ) {
-      echo '<li>';
-      $this->list_core_update( $update );
-      echo '</li>';
+    if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] ) {
+      echo '<ul class="core-updates">';
+      foreach ( (array) $updates as $update ) {
+        echo '<li>';
+        $this->list_core_update( $update );
+        echo '</li>';
+      }
+      echo '</ul>';
+      // Don't show the maintenance mode notice when we are only showing a single re-install option.
+      if ( $updates && ( count( $updates ) > 1 || $updates[0]->response != 'latest' ) ) {
+        echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, your site will return to normal.' ) . '</p>';
+      } elseif ( ! $updates ) {
+        list( $normalized_version ) = explode( '-', $wp_version );
+        echo '<p>' . sprintf( __( '<a href="%s">Learn more about WordPress %s</a>.' ), esc_url( self_admin_url( 'about.php' ) ), $normalized_version ) . '</p>';
+      }
+      
     }
-    echo '</ul>';
-    // Don't show the maintenance mode notice when we are only showing a single re-install option.
-    if ( $updates && ( count( $updates ) > 1 || $updates[0]->response != 'latest' ) ) {
-      echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, your site will return to normal.' ) . '</p>';
-    } elseif ( ! $updates ) {
-      list( $normalized_version ) = explode( '-', $wp_version );
-      echo '<p>' . sprintf( __( '<a href="%s">Learn more about WordPress %s</a>.' ), esc_url( self_admin_url( 'about.php' ) ), $normalized_version ) . '</p>';
-    }    
-    
+  
     $new_html .= ob_get_clean();
 
     if( preg_match( '~<h\d[^>]*?>Plugins</h\d>~', $html ) ) {

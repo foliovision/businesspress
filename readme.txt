@@ -42,6 +42,10 @@ From that point forward, you will have to elevated admin privileges over the web
 
 == Changelog ==
 
+= 0.5.3 =
+
+* Allowing access to Dashboard -> Updates for everybody, but if the upgrade permissions in BusinesPress settings are not allowed, users will only see "Please contact {email for which the permissions are whitelised} to upgrade WordPress, plugins or themes." or "Please contact your site admin or your partners at {domain for which the permissions are whitelised} to upgrade WordPress, plugins or themes." note and a list of updates available.
+
 = 0.5.2 =
 
 * Changing Dashboard -> Updates screen - added extra security to the upgrade button - warning user about the risks of upgrading WordPress in a more comprehensive way
