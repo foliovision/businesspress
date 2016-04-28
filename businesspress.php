@@ -1168,7 +1168,7 @@ JSR;
       $new_html .= "<p><a href='".site_url('wp-admin/options-general.php?page=businesspress')."'>BusinessPress</a> delays these updates 5 days to make sure you are not affected by any bugs in them.</p>";
       
     } else {
-      $new_html .= "<p>No recent actions, be careful with your upgrades!</p>";
+      //$new_html .= "<p>No recent actions, be careful with your upgrades!</p>";
       
     }
     
