@@ -197,8 +197,11 @@ class BusinessPress {
       }
     }
     
-    if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] && !current_user_can('edit_posts') ) {
-      add_filter('show_admin_bar', '__return_false');
+    if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] && get_current_user_id() > 0 ) {
+      $objUser = get_userdata( get_current_user_id() );
+      if( $objUser && isset($objUser->roles) && count($objUser->roles) == 2 && ( $objUser->roles[0] == 'subscriber' && $objUser->roles[1] == 'bbp_participant' || $objUser->roles[0] == 'bbp_participant' && $objUser->roles[1] == 'subscriber' ) ) {  //  this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
+        add_filter('show_admin_bar', '__return_false');
+      }
     }
     
   }
