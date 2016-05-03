@@ -1231,12 +1231,12 @@ JSR;
   function upgrade_screen() {
     $html = ob_get_clean();
     
-    if( $this->can_update_core() ) {
+    if( !$this->check_user_permission() && !$this->can_update_core() ) {
       $html = preg_replace( '~<form[^>]*?>~', '<!--form opening tag removed by BusinessPres-->', $html );
       $html = str_replace( '</form>', '<!--form closing tag removed by BusinessPres-->', $html );
     }
       
-    if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) {
+    if( !$this->check_user_permission() && ( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) ) {
       $html = preg_replace( '~<input[^>]*?type=["\']checkbox["\'][^>]*?>~', '', $html );
       $html = preg_replace( '~<thead[\s\S]*?</thead>~', '', $html );
       $html = preg_replace( '~<tfoot[\s\S]*?</tfoot>~', '', $html ); 
@@ -1248,7 +1248,7 @@ JSR;
     
     global $wp_version;
     $new_html = '';
-    if( !$this->can_update_core() ) {
+    if( !$this->check_user_permission() && !$this->can_update_core() ) {
       $new_html .= "<div class='error'><p>".$this->talk_no_permissions('upgrade WordPress core')."</p></div>";
     }
     $new_html .= "<h2>Current WordPress version: ".$wp_version."</h2>";
@@ -1366,7 +1366,7 @@ JSR;
       echo '<strong class="response">';
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
       echo '</strong>';
-      if( $this->can_update_core() ) {
+      if( $this->check_user_permission() || $this->can_update_core() ) {
         echo '<p>';
         _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
         echo '</p>';
@@ -1384,7 +1384,7 @@ JSR;
       }*/
     }
   
-    if( $this->can_update_core() ) {
+    if( $this->check_user_permission() || $this->can_update_core() ) {
       echo '<ul class="core-updates">';
       foreach ( (array) $updates as $update ) {
         echo '<li>';
