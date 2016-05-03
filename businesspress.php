@@ -221,19 +221,26 @@ class BusinessPress {
   
   function cache_core_version_info() {
     $aVersions = get_option( 'businesspress_core_versions' );
-    if( !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
-      $aResponse = wp_remote_get( 'https://wordpress.org/news/category/releases/' );
-      if( !is_wp_error($aResponse) ) {
-        preg_match_all( '~>(\S+ \d+, 20\d\d)<.*?WordPress ([0-9.-]+) (Beta|Release)?~', $aResponse['body'], $aMatches );
+    if( isset($_GET['martinv5']) || !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
+      $bSuccess = false;
+      $aResponse = wp_remote_get( 'https://codex.wordpress.org/WordPress_Versions' );
+      if( !is_wp_error($aResponse) ) {      
+        preg_match_all( '~<tr[^>]*?>[\s\S]*?([0-9.-]+)[\s\S]*?(\S+ \d+, 20\d\d)[\s\S]*?</tr>~', $aResponse['body'], $aMatches );
+               
         $aVersions = array( 'data' => array() );
         $aVersions['ttl'] = time() + 900;
-        foreach( $aMatches[1] AS $k => $v ) {
-          if( $aMatches[3][$k] ) continue;
-          $aVersions['data'][$aMatches[2][$k]] = $v;
+        if( count($aMatches[2]) > 0 ) {
+          $bSuccess = true;
+          foreach( $aMatches[2] AS $k => $v ) {          
+            $aVersions['data'][$aMatches[1][$k]] = $v;
+          }
         }
         
-      } else {
-        $aVersions = array( 'data' => false, 'ttl' => time()+120 );
+      }
+      
+      if( !$bSuccess ) {
+        $aVersions = get_option( 'businesspress_core_versions', array() );
+        $aVersions['ttl'] =  time()+120;
         
       }
       
@@ -566,6 +573,24 @@ class BusinessPress {
     echo var_export($caps, true);
     echo var_export($genInfo, true); 
     echo PHP_EOL.'-->';
+  }
+  
+  
+  
+  
+  function get_branch_latest() {
+    $sLatest = false;
+    if( $branch = $this->get_version_branch() ) {
+      $aVersions = $this->cache_core_version_info();
+      if( $aVersions && count($aVersions['data']) > 0 ) {
+        foreach( $aVersions['data'] AS $version => $date ) {
+          if( stripos($version,$branch) === 0 && version_compare($version,$sLatest) == 1 ) {
+            $sLatest = $version;
+          }
+        }
+      }
+    }
+    return $sLatest;
   }
   
   
@@ -1232,10 +1257,11 @@ JSR;
     $sStatus = false;
     $iTTL = 0;
     $aVersions = $this->cache_core_version_info();
+
     if( $aVersions ) {      
       if( $this->get_version_branch() && isset($aVersions['data'][$this->get_version_branch()]) ) {
-        $sDate = strtotime($aVersions['data'][$this->get_version_branch()]);
-        $iTTL = time() + 3600*24*30*26; //  the current version is good has time to live set to 26 months
+        $iDate = strtotime($aVersions['data'][$this->get_version_branch()]);
+        $iTTL = $iDate + 3600*24*30*26; //  the current version is good has time to live set to 26 months
         if( $iTTL - time() > 3600 * 24 * 30 * 6 ) { 
           $sStatus = "Secure <i class='fv-bp-green-flag'></i>";
         } else if(  $iTTL - time() > 0 && $iTTL - time() < 3600 * 24 * 30 * 6 ) { //  if the current version is older than 20 monts, warn the user
@@ -1246,9 +1272,10 @@ JSR;
       }
     }
     
-    $new_html .= "<p>Last updated: (I have to parse this from somewhere)<br />";
+    $new_html .= "<p>Master WordPress version: ".$this->get_version_branch()."<br />";
+    $new_html .= "Last updated: ".$aVersions['data'][$this->get_branch_latest()]." (".$this->get_branch_latest().")<br />";
     $new_html .= "Status: ".$sStatus."<br />";
-    $new_html .= "Projected security updates: ".( ($iTTL-time())/(3600*24)/30)." months</p>";
+    $new_html .= "Projected security updates: ".floor( ($iTTL-time())/(3600*24)/30)." months</p>";
     
     if( !class_exists('Core_Upgrader') ) {
       include_once( ABSPATH . '/wp-admin/includes/admin.php' );
