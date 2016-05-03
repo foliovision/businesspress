@@ -196,6 +196,11 @@ class BusinessPress {
         add_filter( 'automatic_updater_disabled', '__return_true', 1000 );
       }
     }
+    
+    if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] && !current_user_can('edit_posts') ) {
+      add_filter('show_admin_bar', '__return_false');
+    }
+    
   }
   
   
@@ -605,6 +610,10 @@ class BusinessPress {
       
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
+      if( isset($_POST['wp_admin_bar_subscribers']) ) {
+        $this->aOptions['wp_admin_bar_subscribers'] = trim($_POST['wp_admin_bar_subscribers']);
+      }
+      
       if( !empty($_POST['cap_activate']) ) $this->aOptions['cap_activate'] = true;
       if( !empty($_POST['cap_update']) ) $this->aOptions['cap_update'] = true;
       if( !empty($_POST['cap_install']) ) $this->aOptions['cap_install'] = true;
@@ -896,6 +905,7 @@ JSH;
           <div id='postbox-container-1' class='postbox-container'>    
             <?php
             add_meta_box( 'businesspress_settings', __('Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
+            add_meta_box( 'businesspress_tweaks', __('Tweaks', 'fv_flowplayer'), array( $this, 'settings_box_tweaks' ), 'businesspress_settings', 'normal' );
             
             do_meta_boxes('businesspress_settings', 'normal', false );
             //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
@@ -1038,6 +1048,30 @@ JSR;
       </script>         
     <?php
   }
+  
+  
+  
+  
+  function settings_box_tweaks() {
+    ?>       
+    <table class="form-table2">
+      <tr>
+        <td>
+          <p><label for="wp_admin_bar_subscribers">Hide WP Admin Bar for subscribers</label></p>
+        </td>
+        <td>
+          <p class="description"><input type="checkbox" id="wp_admin_bar_subscribers" name="wp_admin_bar_subscribers" value="1" <?php if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] ) echo 'checked'; ?> />
+            With this setting it's up to you to provide the front-end interface for profile editing and so on</p>
+        </td>
+      </tr>
+        <tr>    		
+          <td colspan="2">
+            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+          </td>
+        </tr>                                    
+      </table>    
+    <?php
+  }  
   
   
   
