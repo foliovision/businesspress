@@ -796,7 +796,7 @@ JSH;
   
   
   
-  function list_core_update( $update ) {
+  function list_core_update( $update, $show_checkboxes = true ) {
     global $wp_local_package, $wpdb, $wp_version;
       static $first_pass = true;
   
@@ -853,9 +853,13 @@ JSH;
     wp_nonce_field('upgrade-core');
     echo '<p>';
     
-    echo '<p><input type="checkbox" class="check-1" /> I would like to do a core upgrade now.</p>';
-    echo '<p><input type="checkbox" class="check-2" /> I have checked my plugins are up to date and/or compatible.</p>';
-    echo '<p><input type="checkbox" class="check-3" /> I have a recent backup.</p>';
+    if( $show_checkboxes ) {
+      echo '<p><input type="checkbox" class="check-1" /> I would like to do a core upgrade now.</p>';
+      echo '<p><input type="checkbox" class="check-2" /> I have checked my plugins are up to date and/or compatible.</p>';
+      echo '<p><input type="checkbox" class="check-3" /> I have a recent backup.</p>';
+    } else {
+      echo '<div style="display: none"><input type="checkbox" class="check-1" checked="checked" /><input type="checkbox" class="check-2"checked="checked" /><input type="checkbox" class="check-3" checked="checked" /></div>';
+    }
     
     echo '<input name="version" value="'. esc_attr($update->current) .'" type="hidden"/>';
     echo '<input name="locale" value="'. esc_attr($update->locale) .'" type="hidden"/>';
@@ -1264,7 +1268,7 @@ JSR;
     if( $aVersions && isset($aVersions['data']) && count($aVersions['data']) > 0 ) {      
       if( $this->get_version_branch() && isset($aVersions['data'][$this->get_version_branch()]) ) {
         $iDate = strtotime($aVersions['data'][$this->get_version_branch()]);
-        $iTTL = $iDate + 3600*24*30*26; //  the current version is good has time to live set to 26 months
+        $iTTL = $iDate + 3600*24*30*30; //  the current version is good has time to live set to 30 months
         if( $iTTL - time() < 0 ) { 
           $sStatus = "Not Secure - Major Upgrade Required";
         } else if( $iTTL - time() < 3600 * 24 * 30 * 3 ) { //  if the current version is older than 23 monts, warn the user
@@ -1280,9 +1284,14 @@ JSR;
       
     }
         
-    $new_html .= "Last updated: ".date( 'd F Y', strtotime($aVersions['data'][$this->get_branch_latest()]) )."<br />";
+    $new_html .= "Last updated: ".date( 'j F Y', strtotime($aVersions['data'][$this->get_branch_latest()]) )."<br />";
     $new_html .= "Status: ".$sStatus."<br />";
-    $new_html .= "Projected security updates: ".floor( ($iTTL-time())/(3600*24)/30)." months.";
+    $iRemaining = floor( ($iTTL-time())/(3600*24)/30 );
+    if( $iRemaining > 0 ) {
+      $new_html .= "Projected security updates: ".$iRemaining." months.";
+    } else {
+      $new_html .= "Projected security updates: Negative ".abs($iRemaining)." months. Expired or expiration imminent.";
+    }
     $new_html .= "</h4>\n";
     
     if( !class_exists('Core_Upgrader') ) {
@@ -1356,10 +1365,10 @@ JSR;
           if( stripos($update->version,$this->get_version_branch()) === 0 ) {
             echo '<ul class="core-updates">';
             echo '<strong class="response">';
-            _e( 'There is a security upgrade of WordPress available.', 'businesspress' );
+            _e( 'There is a security update of WordPress available.', 'businesspress' );
             echo '</strong>';
             echo '<li>';
-            $this->list_core_update( $update );
+            $this->list_core_update( $update, false );
             echo '</li>';
             echo '</ul>';
           }
@@ -1436,9 +1445,9 @@ JSR;
     $new_html .= ob_get_clean();
 
     if( preg_match( '~<h\d[^>]*?>Plugins</h\d>~', $html ) ) {
-      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
+      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
     } else {
-      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)$~', '$1'.$new_html, $html );
+      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)$~', '$1'.$new_html, $html );
     }
     
     echo $html;
