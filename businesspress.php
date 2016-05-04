@@ -963,6 +963,10 @@ JSH;
     }
     
     ?>
+    <style>
+    #postbox-container-1 {width: 100% !important;}}
+    </style>
+    
     <div class="wrap">
     <h2>BusinessPress</h2>
     
@@ -1095,7 +1099,7 @@ JSR;
           <p><input type="checkbox" id="cap_core" name="cap_core" value="1" <?php if( !empty($this->aOptions['cap_core']) && $this->aOptions['cap_core'] ) echo 'checked'; ?> disabled="true" />
             <label for="cap_core">Update WordPress core</label><br /></p>          
           <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
-            <label for="cap_install">Install, Edit and delete plugins and themes </label></p>
+            <label for="cap_install">Install, edit and delete plugins and themes </label></p>
         </td>
       </tr>
       <tr>
@@ -1245,37 +1249,41 @@ JSR;
       
     }
     
-    
     global $wp_version;
     $new_html = '';
     if( !$this->check_user_permission() && !$this->can_update_core() ) {
       $new_html .= "<div class='error'><p>".$this->talk_no_permissions('upgrade WordPress core')."</p></div>";
     }
-    $new_html .= "<h2>Current WordPress version: ".$wp_version."</h2>";
+    $new_html .= "<h4>WordPress ".$wp_version." installed<br />";
     
     global $wp_version;
     $sStatus = false;
     $iTTL = 0;
     $aVersions = $this->cache_core_version_info();
 
-    if( $aVersions ) {      
+    if( $aVersions && isset($aVersions['data']) && count($aVersions['data']) > 0 ) {      
       if( $this->get_version_branch() && isset($aVersions['data'][$this->get_version_branch()]) ) {
         $iDate = strtotime($aVersions['data'][$this->get_version_branch()]);
         $iTTL = $iDate + 3600*24*30*26; //  the current version is good has time to live set to 26 months
-        if( $iTTL - time() > 3600 * 24 * 30 * 6 ) { 
-          $sStatus = "Secure <i class='fv-bp-green-flag'></i>";
-        } else if(  $iTTL - time() > 0 && $iTTL - time() < 3600 * 24 * 30 * 6 ) { //  if the current version is older than 20 monts, warn the user
-          $sStatus = "Time to Update Core! <i class='fv-bp-orange-flag'></i>";
+        if( $iTTL - time() < 0 ) { 
+          $sStatus = "Not Secure - Major Upgrade Required";
+        } else if( $iTTL - time() < 3600 * 24 * 30 * 3 ) { //  if the current version is older than 23 monts, warn the user
+          $sStatus = "Update Recommended Soon";
         } else {  
-          $sStatus = "Your WordPress version is no longer receiving security updates! <i class='fv-bp-red-flag'></i>";
+          $sStatus = "Secure";
         }
       }
+      
+      if( $this->get_branch_latest() != $wp_version && strtotime($aVersions['data'][$this->get_branch_latest()]) + 3600 * 24 * 5 < time() ) {
+        $sStatus = "Not Secure - Minor Upgrade Required";
+      }
+      
     }
-    
-    $new_html .= "<p>Master WordPress version: ".$this->get_version_branch()."<br />";
-    $new_html .= "Last updated: ".$aVersions['data'][$this->get_branch_latest()]." (".$this->get_branch_latest().")<br />";
+        
+    $new_html .= "Last updated: ".date( 'd F Y', strtotime($aVersions['data'][$this->get_branch_latest()]) )."<br />";
     $new_html .= "Status: ".$sStatus."<br />";
-    $new_html .= "Projected security updates: ".floor( ($iTTL-time())/(3600*24)/30)." months</p>";
+    $new_html .= "Projected security updates: ".floor( ($iTTL-time())/(3600*24)/30)." months.";
+    $new_html .= "</h4>\n";
     
     if( !class_exists('Core_Upgrader') ) {
       include_once( ABSPATH . '/wp-admin/includes/admin.php' );
@@ -1341,6 +1349,24 @@ JSR;
 
     global $wp_version, $required_php_version, $required_mysql_version;
     
+    if( $this->check_user_permission() || $this->can_update_core() ) {
+      $aUpdates = get_site_transient( 'update_core' );
+      if( $aUpdates && count($aUpdates->updates) ) {
+        foreach( $aUpdates->updates AS $update ) {
+          if( stripos($update->version,$this->get_version_branch()) === 0 ) {
+            echo '<ul class="core-updates">';
+            echo '<strong class="response">';
+            _e( 'There is a security upgrade of WordPress available.', 'businesspress' );
+            echo '</strong>';
+            echo '<li>';
+            $this->list_core_update( $update );
+            echo '</li>';
+            echo '</ul>';
+          }
+        }
+      }  
+    }
+    
     $updates = get_core_updates();
   
     if ( !isset($updates[0]->response) || 'latest' == $updates[0]->response ) {
@@ -1386,9 +1412,14 @@ JSR;
   
     if( $this->check_user_permission() || $this->can_update_core() ) {
       echo '<ul class="core-updates">';
+
       foreach ( (array) $updates as $update ) {
         echo '<li>';
-        $this->list_core_update( $update );
+        if( !isset($update->response) || 'latest' == $update->response ) {
+          list_core_update( $update );
+        } else {          
+          $this->list_core_update( $update );
+        }
         echo '</li>';
       }
       echo '</ul>';
