@@ -18,10 +18,11 @@ WordPress also automatically updates your website to the latest minor release. W
 
 This plugin also allows you to prevent your client from installing new plugins (many of which could either cripple or slow their website) while allowing clients to safely take care of existing plugin updates themselves.
 
-###You can disable the following capabilities
+###You can disable the following capabilities for other admin users
 
 * Activate and deactivate plugins and themes
 * Update plugins and themes
+* Update WordPress core
 * Install, Edit and delete plugns and themes
 
 ###Coming soon
@@ -44,7 +45,10 @@ From that point forward, you will have to elevated admin privileges over the web
 
 = 0.5.3 =
 
+* Added new permission to control - "Update WordPress core" - as not every admin should be able to do that
 * Allowing access to Dashboard -> Updates for everybody, but if the upgrade permissions in BusinesPress settings are not allowed, users will only see "Please contact {email for which the permissions are whitelised} to upgrade WordPress, plugins or themes." or "Please contact your site admin or your partners at {domain for which the permissions are whitelised} to upgrade WordPress, plugins or themes." note and a list of updates available.
+* Core Updates control - If you are not using latest WordPress, plugin gives you a chance to upgrade to the latest WordPress version in your current branch. That means you can safely upgrade 4.1.7 to 4.1.10 without having to go to 4.5.1 directly
+* Fixed compatibility with WordPress 3.7
 
 = 0.5.2 =
 
@@ -70,4 +74,6 @@ An answer to that question.
 
 == Screenshots ==
 
-1. the plugin settings screen
+1. The plugin settings screen
+
+2. The improved Updates screen

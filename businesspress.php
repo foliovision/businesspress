@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.5.2
+Version: 0.5.3
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -123,6 +123,8 @@ class BusinessPress {
     
     add_action( 'admin_init', array( $this, 'handle_post') );
     
+    add_action( 'admin_init', array( $this, 'stop_disable_wordpress_core_updates') );
+    
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
     
@@ -146,6 +148,7 @@ class BusinessPress {
   
   
   function admin_screen_cleanup() {
+    
     if( isset($_GET['businesspress_cron_debug']) ) {
       $this->cron_job();
     }
@@ -1195,6 +1198,22 @@ JSR;
   
   
   
+  function stop_disable_wordpress_core_updates() {
+    global $wp_filter;
+    if( !isset($wp_filter['pre_site_transient_update_core']) ) return;
+    
+    foreach( $wp_filter['pre_site_transient_update_core'] AS $key => $filters ) {
+      foreach( $filters AS $k => $v ) {
+        if( stripos($k,'lambda') !== false ) {
+          unset( $wp_filter['pre_site_transient_update_core'][$key][$k] );
+        }
+      }
+    }
+  }
+  
+  
+  
+  
   function store_setting( $key, $value ) {return false;
     $data = $this->get_setting('all') ? $this->get_setting('all') : array();
     if( $this->is_allowed_setting($key) === false ) return -1;
@@ -1360,10 +1379,12 @@ JSR;
     
     if( $this->check_user_permission() || $this->can_update_core() ) {
       $aUpdates = get_site_transient( 'update_core' );
+      if( !$aUpdates ) $aUpdates = get_option( '_site_transient_update_core' );
+      
       if( $aUpdates && count($aUpdates->updates) ) {
         foreach( $aUpdates->updates AS $update ) {
           if( stripos($update->version,$this->get_version_branch()) === 0 ) {
-            echo '<ul class="core-updates">';
+            echo '<ul class="core-updates-businespress">';
             echo '<strong class="response">';
             _e( 'There is a security update of WordPress available.', 'businesspress' );
             echo '</strong>';
@@ -1420,7 +1441,7 @@ JSR;
     }
   
     if( $this->check_user_permission() || $this->can_update_core() ) {
-      echo '<ul class="core-updates">';
+      echo '<ul class="core-updates-businespress">';
 
       foreach ( (array) $updates as $update ) {
         echo '<li>';
