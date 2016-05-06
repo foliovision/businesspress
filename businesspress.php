@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.5.2
+Version: 0.5.3
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -102,7 +102,7 @@ class BusinessPress {
     
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     
-    add_action( 'businesspress_cron', array( $this, 'cron_job' ) );
+    //add_action( 'businesspress_cron', array( $this, 'cron_job' ) );
     
     if( is_multisite() ) {
       //add_action( 'network_admin_notices', array( $this, 'show_disallow_not_defined') );  //  todo: what about this?
@@ -122,6 +122,8 @@ class BusinessPress {
     add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
     
     add_action( 'admin_init', array( $this, 'handle_post') );
+    
+    add_action( 'admin_init', array( $this, 'stop_disable_wordpress_core_updates') );
     
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -146,6 +148,7 @@ class BusinessPress {
   
   
   function admin_screen_cleanup() {
+    
     if( isset($_GET['businesspress_cron_debug']) ) {
       $this->cron_job();
     }
@@ -196,6 +199,59 @@ class BusinessPress {
         add_filter( 'automatic_updater_disabled', '__return_true', 1000 );
       }
     }
+    
+    if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] && get_current_user_id() > 0 ) {
+      $objUser = get_userdata( get_current_user_id() );
+      if( $objUser && isset($objUser->roles) && count($objUser->roles) == 2 && ( $objUser->roles[0] == 'subscriber' && $objUser->roles[1] == 'bbp_participant' || $objUser->roles[0] == 'bbp_participant' && $objUser->roles[1] == 'subscriber' ) ) {  //  this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
+        add_filter('show_admin_bar', '__return_false');
+      }
+    }
+    
+  }
+  
+  
+  
+  
+  function can_update_core() {
+    if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] && !empty($this->aOptions['cap_core']) && $this->aOptions['cap_core'] ) {
+      return true;
+    }
+    return false;
+  }
+  
+  
+  
+  
+  function cache_core_version_info() {
+    $aVersions = get_option( 'businesspress_core_versions' );
+    if( isset($_GET['martinv5']) || !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
+      $bSuccess = false;
+      $aResponse = wp_remote_get( 'https://codex.wordpress.org/WordPress_Versions' );
+      if( !is_wp_error($aResponse) ) {      
+        preg_match_all( '~<tr[^>]*?>[\s\S]*?([0-9.-]+)[\s\S]*?(\S+ \d+, 20\d\d)[\s\S]*?</tr>~', $aResponse['body'], $aMatches );
+               
+        $aVersions = array( 'data' => array() );
+        $aVersions['ttl'] = time() + 900;
+        if( count($aMatches[2]) > 0 ) {
+          $bSuccess = true;
+          foreach( $aMatches[2] AS $k => $v ) {          
+            $aVersions['data'][$aMatches[1][$k]] = $v;
+          }
+        }
+        
+      }
+      
+      if( !$bSuccess ) {
+        $aVersions = get_option( 'businesspress_core_versions', array() );
+        $aVersions['ttl'] =  time()+120;
+        
+      }
+      
+      update_option( 'businesspress_core_versions', $aVersions );
+      
+    }
+    
+    return $aVersions;
   }
   
   
@@ -525,6 +581,24 @@ class BusinessPress {
   
   
   
+  function get_branch_latest() {
+    $sLatest = false;
+    if( $branch = $this->get_version_branch() ) {
+      $aVersions = $this->cache_core_version_info();
+      if( $aVersions && count($aVersions['data']) > 0 ) {
+        foreach( $aVersions['data'] AS $version => $date ) {
+          if( stripos($version,$branch) === 0 && version_compare($version,$sLatest) == 1 ) {
+            $sLatest = $version;
+          }
+        }
+      }
+    }
+    return $sLatest;
+  }
+  
+  
+  
+  
   function get_disallowed_caps() {
     $aCaps = array();
     
@@ -578,7 +652,17 @@ class BusinessPress {
   
   function get_setting_db($key) {
     return is_multisite() ? get_site_option($key) : get_option($key);
-  }  
+  }
+  
+  
+  
+  
+  function get_version_branch() {
+    global $wp_version;
+    if( preg_match( '~\d+\.\d+~', $wp_version, $aMatch ) ) {
+      return $aMatch[0];
+    }
+  }
 
   
   
@@ -605,9 +689,18 @@ class BusinessPress {
       
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
+      if( isset($_POST['wp_admin_bar_subscribers']) ) {
+        $this->aOptions['wp_admin_bar_subscribers'] = trim($_POST['wp_admin_bar_subscribers']);
+      }
+      
       if( !empty($_POST['cap_activate']) ) $this->aOptions['cap_activate'] = true;
+      if( !empty($_POST['cap_core']) ) $this->aOptions['cap_core'] = true;
       if( !empty($_POST['cap_update']) ) $this->aOptions['cap_update'] = true;
       if( !empty($_POST['cap_install']) ) $this->aOptions['cap_install'] = true;
+      
+      if( empty($this->aOptions['cap_update']) ) {
+        unset($this->aOptions['cap_core']);
+      }
       
       update_option( 'businesspress', $this->aOptions ); 
     }
@@ -706,7 +799,7 @@ JSH;
   
   
   
-  function list_core_update( $update ) {
+  function list_core_update( $update, $show_checkboxes = true ) {
     global $wp_local_package, $wpdb, $wp_version;
       static $first_pass = true;
   
@@ -763,9 +856,13 @@ JSH;
     wp_nonce_field('upgrade-core');
     echo '<p>';
     
-    echo '<p><input type="checkbox" class="check-1" /> I would like to do a core upgrade now.</p>';
-    echo '<p><input type="checkbox" class="check-2" /> I have checked my plugins are up to date and/or compatible.</p>';
-    echo '<p><input type="checkbox" class="check-3" /> I have a recent backup.</p>';
+    if( $show_checkboxes ) {
+      echo '<p><input type="checkbox" class="check-1" /> I would like to do a core upgrade now.</p>';
+      echo '<p><input type="checkbox" class="check-2" /> I have checked my plugins are up to date and/or compatible.</p>';
+      echo '<p><input type="checkbox" class="check-3" /> I have a recent backup.</p>';
+    } else {
+      echo '<div style="display: none"><input type="checkbox" class="check-1" checked="checked" /><input type="checkbox" class="check-2"checked="checked" /><input type="checkbox" class="check-3" checked="checked" /></div>';
+    }
     
     echo '<input name="version" value="'. esc_attr($update->current) .'" type="hidden"/>';
     echo '<input name="locale" value="'. esc_attr($update->locale) .'" type="hidden"/>';
@@ -873,6 +970,10 @@ JSH;
     }
     
     ?>
+    <style>
+    #postbox-container-1 {width: 100% !important;}}
+    </style>
+    
     <div class="wrap">
     <h2>BusinessPress</h2>
     
@@ -896,6 +997,7 @@ JSH;
           <div id='postbox-container-1' class='postbox-container'>    
             <?php
             add_meta_box( 'businesspress_settings', __('Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
+            add_meta_box( 'businesspress_tweaks', __('Tweaks', 'fv_flowplayer'), array( $this, 'settings_box_tweaks' ), 'businesspress_settings', 'normal' );
             
             do_meta_boxes('businesspress_settings', 'normal', false );
             //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
@@ -994,15 +1096,17 @@ JSR;
       </tr>
       <tr>
         <td>
-          <p>Allow other users to&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+          <p>Allow other admins to&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
         </td>
         <td>
           <p><input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
             <label for="cap_activate">Activate and deactivate plugins and themes</label></p>
           <p><input type="checkbox" id="cap_update" name="cap_update" value="1" <?php if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] ) echo 'checked'; ?> />
             <label for="cap_update">Update plugins and themes</label><br /></p>
+          <p><input type="checkbox" id="cap_core" name="cap_core" value="1" <?php if( !empty($this->aOptions['cap_core']) && $this->aOptions['cap_core'] ) echo 'checked'; ?> disabled="true" />
+            <label for="cap_core">Update WordPress core</label><br /></p>          
           <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
-            <label for="cap_install">Install, Edit and delete plugins and themes </label></p>
+            <label for="cap_install">Install, edit and delete plugins and themes </label></p>
         </td>
       </tr>
       <tr>
@@ -1034,10 +1138,46 @@ JSR;
       jQuery('#whitelist-email').change( function() {
         jQuery('tr.whitelist-email').show();
         jQuery('tr.whitelist-domain').hide();
-      });      
+      });
+      
+      if( jQuery('#cap_update:checked').length ) {
+        jQuery('#cap_core').prop('disabled',false);
+      }
+      jQuery('#cap_update').change( function() {
+        if( jQuery('#cap_update:checked').length ) {
+          jQuery('#cap_core').prop('disabled',false);
+        } else {
+          jQuery('#cap_core').prop('disabled',true);
+          jQuery('#cap_core').prop('checked',false);
+        }
+      });
       </script>         
     <?php
   }
+  
+  
+  
+  
+  function settings_box_tweaks() {
+    ?>       
+    <table class="form-table2">
+      <tr>
+        <td>
+          <p><label for="wp_admin_bar_subscribers">Hide WP Admin Bar for subscribers</label></p>
+        </td>
+        <td>
+          <p class="description"><input type="checkbox" id="wp_admin_bar_subscribers" name="wp_admin_bar_subscribers" value="1" <?php if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] ) echo 'checked'; ?> />
+            With this setting it's up to you to provide the front-end interface for profile editing and so on</p>
+        </td>
+      </tr>
+        <tr>    		
+          <td colspan="2">
+            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+          </td>
+        </tr>                                    
+      </table>    
+    <?php
+  }  
   
   
   
@@ -1053,6 +1193,22 @@ JSR;
       }
     }
   
+  }
+  
+  
+  
+  
+  function stop_disable_wordpress_core_updates() {
+    global $wp_filter;
+    if( !isset($wp_filter['pre_site_transient_update_core']) ) return;
+    
+    foreach( $wp_filter['pre_site_transient_update_core'] AS $key => $filters ) {
+      foreach( $filters AS $k => $v ) {
+        if( stripos($k,'lambda') !== false ) {
+          unset( $wp_filter['pre_site_transient_update_core'][$key][$k] );
+        }
+      }
+    }
   }
   
   
@@ -1080,6 +1236,18 @@ JSR;
   
   
   
+  function talk_no_permissions( $what ) {
+    if( $this->get_whitelist_domain() ) {
+      return "Please contact your site admin or your partners at ".$this->get_whitelist_domain()." to ".$what.".";
+    } else if( $this->get_whitelist_email() ) {
+      return "Please contact ".$this->get_whitelist_email()." to ".$what.".";
+    }
+    return false;
+  }
+  
+  
+  
+  
   function upgrade_screen_start() {
     ob_start();
   }
@@ -1090,8 +1258,60 @@ JSR;
   function upgrade_screen() {
     $html = ob_get_clean();
     
+    if( !$this->check_user_permission() && !$this->can_update_core() ) {
+      $html = preg_replace( '~<form[^>]*?>~', '<!--form opening tag removed by BusinessPres-->', $html );
+      $html = str_replace( '</form>', '<!--form closing tag removed by BusinessPres-->', $html );
+    }
+      
+    if( !$this->check_user_permission() && ( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) ) {
+      $html = preg_replace( '~<input[^>]*?type=["\']checkbox["\'][^>]*?>~', '', $html );
+      $html = preg_replace( '~<thead[\s\S]*?</thead>~', '', $html );
+      $html = preg_replace( '~<tfoot[\s\S]*?</tfoot>~', '', $html ); 
+      $html = preg_replace( '~<input[^>]*?upgrade-plugins[^>]*?>~', '', $html );      
+      $html = preg_replace( '~<input[^>]*?upgrade-themes[^>]*?>~', '', $html );
+      
+    }
+    
     global $wp_version;
-    $new_html = "<h2>Current WordPress version: ".$wp_version."</h2>";
+    $new_html = '';
+    if( !$this->check_user_permission() && !$this->can_update_core() ) {
+      $new_html .= "<div class='error'><p>".$this->talk_no_permissions('upgrade WordPress core')."</p></div>";
+    }
+    $new_html .= "<h4>WordPress ".$wp_version." installed<br />";
+    
+    global $wp_version;
+    $sStatus = false;
+    $iTTL = 0;
+    $aVersions = $this->cache_core_version_info();
+
+    if( $aVersions && isset($aVersions['data']) && count($aVersions['data']) > 0 ) {      
+      if( $this->get_version_branch() && isset($aVersions['data'][$this->get_version_branch()]) ) {
+        $iDate = strtotime($aVersions['data'][$this->get_version_branch()]);
+        $iTTL = $iDate + 3600*24*30*30; //  the current version is good has time to live set to 30 months
+        if( $iTTL - time() < 0 ) { 
+          $sStatus = "Not Secure - Major Upgrade Required";
+        } else if( $iTTL - time() < 3600 * 24 * 30 * 3 ) { //  if the current version is older than 23 monts, warn the user
+          $sStatus = "Update Recommended Soon";
+        } else {  
+          $sStatus = "Secure";
+        }
+      }
+      
+      if( $this->get_branch_latest() != $wp_version && strtotime($aVersions['data'][$this->get_branch_latest()]) + 3600 * 24 * 5 < time() ) {
+        $sStatus = "Not Secure - Minor Upgrade Required";
+      }
+      
+    }
+        
+    $new_html .= "Last updated: ".date( 'j F Y', strtotime($aVersions['data'][$this->get_branch_latest()]) )."<br />";
+    $new_html .= "Status: ".$sStatus."<br />";
+    $iRemaining = floor( ($iTTL-time())/(3600*24)/30 );
+    if( $iRemaining > 0 ) {
+      $new_html .= "Projected security updates: ".$iRemaining." months.";
+    } else {
+      $new_html .= "Projected security updates: Negative ".abs($iRemaining)." months. Expired or expiration imminent.";
+    }
+    $new_html .= "</h4>\n";
     
     if( !class_exists('Core_Upgrader') ) {
       include_once( ABSPATH . '/wp-admin/includes/admin.php' );
@@ -1139,7 +1359,7 @@ JSR;
       $new_html .= "<p><a href='".site_url('wp-admin/options-general.php?page=businesspress')."'>BusinessPress</a> delays these updates 5 days to make sure you are not affected by any bugs in them.</p>";
       
     } else {
-      $new_html .= "<p>No recent actions, be careful with your upgrades!</p>";
+      //$new_html .= "<p>No recent actions, be careful with your upgrades!</p>";
       
     }
     
@@ -1156,6 +1376,26 @@ JSR;
     ob_start();
 
     global $wp_version, $required_php_version, $required_mysql_version;
+    
+    if( $this->check_user_permission() || $this->can_update_core() ) {
+      $aUpdates = get_site_transient( 'update_core' );
+      if( !$aUpdates ) $aUpdates = get_option( '_site_transient_update_core' );
+      
+      if( $aUpdates && count($aUpdates->updates) ) {
+        foreach( $aUpdates->updates AS $update ) {
+          if( stripos($update->version,$this->get_version_branch()) === 0 ) {
+            echo '<ul class="core-updates-businespress">';
+            echo '<strong class="response">';
+            _e( 'There is a security update of WordPress available.', 'businesspress' );
+            echo '</strong>';
+            echo '<li>';
+            $this->list_core_update( $update, false );
+            echo '</li>';
+            echo '</ul>';
+          }
+        }
+      }  
+    }
     
     $updates = get_core_updates();
   
@@ -1182,9 +1422,11 @@ JSR;
       echo '<strong class="response">';
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
       echo '</strong>';
-      echo '<p>';
-      _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
-      echo '</p>';
+      if( $this->check_user_permission() || $this->can_update_core() ) {
+        echo '<p>';
+        _e( 'Be very careful before you upgrade: in addition to causing your site to fail to load, core upgrades can corrupt your database or cause plugins important to your business to fail, such as membership and ecommerce solutions. <strong>Please be sure to upgrade all your plugins to their most recent version before a major version upgrade.</strong>', 'businesspress' );
+        echo '</p>';
+      }
       
     }
   
@@ -1198,27 +1440,35 @@ JSR;
       }*/
     }
   
-    echo '<ul class="core-updates">';
-    foreach ( (array) $updates as $update ) {
-      echo '<li>';
-      $this->list_core_update( $update );
-      echo '</li>';
+    if( $this->check_user_permission() || $this->can_update_core() ) {
+      echo '<ul class="core-updates-businespress">';
+
+      foreach ( (array) $updates as $update ) {
+        echo '<li>';
+        if( !isset($update->response) || 'latest' == $update->response ) {
+          list_core_update( $update );
+        } else {          
+          $this->list_core_update( $update );
+        }
+        echo '</li>';
+      }
+      echo '</ul>';
+      // Don't show the maintenance mode notice when we are only showing a single re-install option.
+      if ( $updates && ( count( $updates ) > 1 || $updates[0]->response != 'latest' ) ) {
+        echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, your site will return to normal.' ) . '</p>';
+      } elseif ( ! $updates ) {
+        list( $normalized_version ) = explode( '-', $wp_version );
+        echo '<p>' . sprintf( __( '<a href="%s">Learn more about WordPress %s</a>.' ), esc_url( self_admin_url( 'about.php' ) ), $normalized_version ) . '</p>';
+      }
+      
     }
-    echo '</ul>';
-    // Don't show the maintenance mode notice when we are only showing a single re-install option.
-    if ( $updates && ( count( $updates ) > 1 || $updates[0]->response != 'latest' ) ) {
-      echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, your site will return to normal.' ) . '</p>';
-    } elseif ( ! $updates ) {
-      list( $normalized_version ) = explode( '-', $wp_version );
-      echo '<p>' . sprintf( __( '<a href="%s">Learn more about WordPress %s</a>.' ), esc_url( self_admin_url( 'about.php' ) ), $normalized_version ) . '</p>';
-    }    
-    
+  
     $new_html .= ob_get_clean();
 
     if( preg_match( '~<h\d[^>]*?>Plugins</h\d>~', $html ) ) {
-      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
+      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
     } else {
-      $html = preg_replace( '~(<div class="wrap">\s*?<h\d.*?</h\d>)([\s\S]*?)$~', '$1'.$new_html, $html );
+      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)$~', '$1'.$new_html, $html );
     }
     
     echo $html;
