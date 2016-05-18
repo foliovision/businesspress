@@ -896,8 +896,7 @@ JSH;
   
   // DONE + TODO DOCU
   function menu() {
-    global $current_user;
-    get_currentuserinfo();
+    $current_user = wp_get_current_user();    
     if( !$this->check_user_permission() ) {
       return;
     }
@@ -1183,8 +1182,7 @@ JSR;
   
 
   function show_disallow_not_defined() {
-    global $current_user;
-    get_currentuserinfo();
+    $current_user = wp_get_current_user();
     if( false !== stripos( $current_user->user_email, $this->get_email_domain() )) {  //  todo: get rid of this
       if( is_super_admin() || is_admin()  ) {
         if( ( !defined('DISALLOW_FILE_EDIT' ) ) || ( defined('DISALLOW_FILE_EDIT' ) && ( DISALLOW_FILE_EDIT === false ) )  ) {
