@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.5.3
+Version: 0.6
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -131,8 +131,9 @@ class BusinessPress {
     add_action( 'load-update-core.php', array( $this, 'upgrade_screen_start') );
     add_action( 'core_upgrade_preamble', array( $this, 'upgrade_screen') );
     
-    
-    
+    add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
+    add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
+    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
   }
   
   
@@ -581,6 +582,44 @@ class BusinessPress {
   
   
   
+  function fail2ban_login( $username ) {
+    $msg = (wp_cache_get($username, 'userlogins'))
+							? "Authentication failure for $username from "
+							: "Authentication attempt for unknown user $username from ";
+    
+    $this->fail2ban_openlog();
+    syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
+  }
+  
+  
+  
+  
+  function fail2ban_openlog($log = LOG_AUTH) {
+		$host	= array_key_exists('WP_FAIL2BAN_HTTP_HOST',$_ENV) ? $_ENV['WP_FAIL2BAN_HTTP_HOST'] : $_SERVER['HTTP_HOST'];
+		openlog("wordpress($host)", LOG_NDELAY|LOG_PID, $log);
+	}
+    
+  
+  
+  
+  function fail2ban_xmlrpc() {
+    $this->fail2ban_openlog();
+    syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC authentication failure from '.$this->get_remote_addr() );
+  }
+  
+  
+  
+  
+  function fail2ban_xmlrpc_ping( $ixr_error ) {
+    if( $ixr_error->code === 48 ) return $ixr_error;
+    
+    $this->fail2ban_openlog();
+    syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC Pingback error '.$ixr_error->code.' generated from '.$this->get_remote_addr() );
+  }
+  
+  
+  
+  
   function get_branch_latest() {
     $sLatest = false;
     if( $branch = $this->get_version_branch() ) {
@@ -614,6 +653,33 @@ class BusinessPress {
   
   function get_email_domain( $email ) {
     return preg_replace( '~.+@~', '', $email );
+  }
+  
+  
+  
+  
+  function get_remote_addr() {
+		if (defined('WP_FAIL2BAN_PROXIES')) { //  todo: check this out
+			if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
+				$ip = ip2long($_SERVER['REMOTE_ADDR']);
+				foreach(explode(',',WP_FAIL2BAN_PROXIES) as $proxy) {
+					if (2 == count($cidr = explode('/',$proxy))) {
+						$net = ip2long($cidr[0]);
+						$mask = ~ ( pow(2, (32 - $cidr[1])) - 1 );
+					} else {
+						$net = ip2long($proxy);
+						$mask = -1;
+					}
+					if ($net == ($ip & $mask)) {
+						return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
+								? $_SERVER['HTTP_X_FORWARDED_FOR']
+								: substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+					}
+				}
+			}
+		}
+
+		return $_SERVER['REMOTE_ADDR'];    
   }
   
   

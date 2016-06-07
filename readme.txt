@@ -41,7 +41,30 @@ Simply click the notice or go to Settings -> BusinessPress. There you will be al
 
 From that point forward, you will have to elevated admin privileges over the website.
 
+### Fail2ban
+
+To protect against bruteforce hacking of WordPress login form and XML-RPC:
+
+1. Install fail2ban, you will need root access to your server running on Linux
+2. Setup fail2ban filter for BusinessPress, just copy plugin file fail2ban/wordpress.conf into /etc/fail2ban/filter.d/wordpress.conf
+3. Setup fail2ban jail for BusinessPress, just copy plugin file fail2ban/jail.local into /etc/fail2ban/jail.local
+
+Note that if you are on cPanel you might need to adjust the logpath variable to /var/log/messages
+
+4. Restart fail2ban daemon
+5. Do some bad login attempts and you should be able to see entries being added at the end of /var/log/auth.log
+
+Note that if you are on cPanel you might need to check the log at /var/log/messages
+
+6. You can use a command like this to check ban status: fail2ban-client status wordpress
+7. For troubleshooting try this command to check if your filter works: fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/wordpress.conf
+8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
+
 == Changelog ==
+
+= 0.6 =
+
+Fail2ban support added, check install instructions
 
 = 0.5.3 =
 
