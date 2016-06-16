@@ -62,9 +62,13 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.6.1 =
+
+* Fail2ban - removing check for bad pingbacks
+
 = 0.6 =
 
-Fail2ban support added, check install instructions
+* Fail2ban support added, check install instructions
 
 = 0.5.3 =
 

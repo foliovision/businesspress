@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6
+Version: 0.6.1
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -39,7 +39,7 @@ class BusinessPress {
   */
   
   /* constants */
-  const VERSION = '0.5';
+  const VERSION = '0.6.1';
   const FVSB_LOCK_FILE = 'fv-disallow.php';
   const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
@@ -133,7 +133,7 @@ class BusinessPress {
     
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
-    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
+    //add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
   }
   
   
@@ -611,7 +611,7 @@ class BusinessPress {
   
   
   function fail2ban_xmlrpc_ping( $ixr_error ) {
-    if( $ixr_error->code === 48 ) return $ixr_error;
+    if( $ixr_error->code === 48 || $ixr_error->code === 33 ) return $ixr_error;
     
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC Pingback error '.$ixr_error->code.' generated from '.$this->get_remote_addr() );
