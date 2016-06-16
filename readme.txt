@@ -62,9 +62,9 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.6.1 =
+= 0.6.2 =
 
-* Fail2ban - removing check for bad pingbacks
+* Fail2ban - moving checks for bad XML-RPC pingbacks to a different keyword for a different filter
 
 = 0.6 =
 
