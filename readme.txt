@@ -25,6 +25,10 @@ This plugin also allows you to prevent your client from installing new plugins (
 * Update WordPress core
 * Install, Edit and delete plugns and themes
 
+Plugin also supports fail2ban, see install instructions.
+
+Plugin also removes annoying plugin notices from WP Admin Dashboard. See changelog for what's supported.
+
 ###Coming soon
 
 * Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
@@ -61,6 +65,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
 
 == Changelog ==
+
+= 0.6.3 =
+
+* Removing annoying plugin notices - WooThemes Updater (WooCommerce - activation/renewal notices), Gravity Forms (new update notice)
 
 = 0.6.2 =
 

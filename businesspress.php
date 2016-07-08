@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.2
+Version: 0.6.2.1
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -26,6 +26,9 @@ Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin use
 */
 
 
+if( !class_exists('BusinessPress_Notices') && file_exists( dirname(__FILE__).'/businesspress-notices.class.php') ) {
+  include( dirname(__FILE__).'/businesspress-notices.class.php' );
+}
 
 
 class BusinessPress {
@@ -39,7 +42,7 @@ class BusinessPress {
   */
   
   /* constants */
-  const VERSION = '0.6.2';
+  const VERSION = '0.6.2.1';
   const FVSB_LOCK_FILE = 'fv-disallow.php';
   const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
@@ -134,6 +137,7 @@ class BusinessPress {
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
+    
   }
   
   
@@ -961,7 +965,7 @@ JSH;
   
   
   // DONE + TODO DOCU
-  function menu() {
+  function menu() {  
     $current_user = wp_get_current_user();    
     if( !$this->check_user_permission() ) {
       return;
