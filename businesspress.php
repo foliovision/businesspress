@@ -1409,7 +1409,16 @@ JSR;
     }
     
     $aBlockedUpdates = get_site_option('businesspress_core_update_delay');
+    $bFound = false;
     if( $aBlockedUpdates ) {
+      foreach( $aBlockedUpdates AS $key => $value ) {
+        if( stripos($key,'.next.minor') === false ) {
+          $bFound = true;
+        }
+      }
+    }
+      
+    if( $bFound && $aBlockedUpdates ) {
       
       ksort( $aBlockedUpdates );
       $aBlockedUpdates = array_reverse( $aBlockedUpdates );
@@ -1445,13 +1454,23 @@ JSR;
 
     global $wp_version, $required_php_version, $required_mysql_version;
     
+    $aShowed = array();
     if( $this->check_user_permission() || $this->can_update_core() ) {
       $aUpdates = get_site_transient( 'update_core' );
       if( !$aUpdates ) $aUpdates = get_option( '_site_transient_update_core' );
       
       if( $aUpdates && count($aUpdates->updates) ) {
-        foreach( $aUpdates->updates AS $update ) {
+        foreach( $aUpdates->updates AS $update ) {        
           if( stripos($update->version,$this->get_version_branch()) === 0 ) {
+            if( $update->version == $wp_version ) {
+              echo "<strong>You have the latest version of WordPress.</strong>";
+              continue;
+            }
+            
+            if( isset($aShowed[$update->version]) ) continue;
+            
+            $aShowed[$update->version] = true;
+            
             echo '<ul class="core-updates-businespress">';
             echo '<strong class="response">';
             _e( 'There is a security update of WordPress available.', 'businesspress' );
@@ -1466,7 +1485,14 @@ JSR;
     }
     
     $updates = get_core_updates();
-  
+    
+    $bMajorUpdate = false;
+    foreach ( (array) $updates as $update ) {        
+      if( stripos($update->version,$this->get_version_branch()) === false ) {
+        $bMajorUpdate = true;
+      }
+    }
+    
     if ( !isset($updates[0]->response) || 'latest' == $updates[0]->response ) {
       /*echo '<h2>';
       _e('You have the latest version of WordPress.');
@@ -1485,7 +1511,7 @@ JSR;
           echo ' ' . __( 'Future security updates will be applied automatically.' );
       }
       echo '</h2>';*/
-    } else {
+    } else if( $bMajorUpdate ) {
   
       echo '<strong class="response">';
       _e( 'There is a core upgrade version of WordPress available.', 'businesspress' );
@@ -1508,10 +1534,14 @@ JSR;
       }*/
     }
   
-    if( $this->check_user_permission() || $this->can_update_core() ) {
+    if( $bMajorUpdate && ( $this->check_user_permission() || $this->can_update_core() ) ) {
       echo '<ul class="core-updates-businespress">';
 
-      foreach ( (array) $updates as $update ) {
+      foreach ( (array) $updates as $update ) {        
+        if( stripos($update->version,$this->get_version_branch()) === 0 ) {
+          continue; //  don't show the minor updates here!
+        }
+        
         echo '<li>';
         if( !isset($update->response) || 'latest' == $update->response ) {
           list_core_update( $update );
