@@ -27,8 +27,6 @@ This plugin also allows you to prevent your client from installing new plugins (
 
 Plugin also supports fail2ban, see install instructions.
 
-Plugin also removes annoying plugin notices from WP Admin Dashboard. See changelog for what's supported.
-
 ###Coming soon
 
 * Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
@@ -39,7 +37,9 @@ Plugin also removes annoying plugin notices from WP Admin Dashboard. See changel
 
 == Installation ==
 
-Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
+### Basic install
+
+If you are using WordPress Multisite, make sure you Network Activate the plugin. Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
 
 Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
 
@@ -68,7 +68,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 = 0.6.3 =
 
-* Removing annoying plugin notices - WooThemes Updater (WooCommerce - activation/renewal notices), Gravity Forms (new update notice)
+* Fix for WordPress Multisite
 
 = 0.6.2 =
 

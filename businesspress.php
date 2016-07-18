@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.2.1
+Version: 0.6.3
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -26,9 +26,6 @@ Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin use
 */
 
 
-if( !class_exists('BusinessPress_Notices') && file_exists( dirname(__FILE__).'/businesspress-notices.class.php') ) {
-  include( dirname(__FILE__).'/businesspress-notices.class.php' );
-}
 
 
 class BusinessPress {
@@ -42,7 +39,7 @@ class BusinessPress {
   */
   
   /* constants */
-  const VERSION = '0.6.2.1';
+  const VERSION = '0.6.3';
   const FVSB_LOCK_FILE = 'fv-disallow.php';
   const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
@@ -84,7 +81,7 @@ class BusinessPress {
     
     $this->adminEmail = get_option('admin_email');
     
-    $this->aOptions = get_option( 'businesspress' ); 
+    $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' ); 
     
     $this->strArrMessages['E_CANT_WRITE'] = '<div class="error"><p><span style="color:red; font-weight:bold;">FATAL ERROR</span>: Plugin cant write into Wordpress root directory. Check file permissions.</p></div>';
     
@@ -137,7 +134,6 @@ class BusinessPress {
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
-    
   }
   
   
@@ -772,7 +768,11 @@ class BusinessPress {
         unset($this->aOptions['cap_core']);
       }
       
-      update_option( 'businesspress', $this->aOptions ); 
+      if( is_multisite() ){
+        update_site_option( 'businesspress', $this->aOptions );
+      } else {
+        update_option( 'businesspress', $this->aOptions );
+      }
     }
     
     return;
@@ -965,7 +965,7 @@ JSH;
   
   
   // DONE + TODO DOCU
-  function menu() {  
+  function menu() {
     $current_user = wp_get_current_user();    
     if( !$this->check_user_permission() ) {
       return;
