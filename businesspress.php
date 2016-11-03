@@ -134,6 +134,8 @@ class BusinessPress {
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
+
+    add_filter( 'wp', array( $this, 'fail2ban_404' ) );
   }
   
   
@@ -582,6 +584,16 @@ class BusinessPress {
   
   
   
+  function fail2ban_404( $username ) {
+    if( !is_404() ) return;
+
+    $this->fail2ban_openlog();
+    syslog( LOG_INFO,'BusinessPress fail2ban 404 error - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
+  }
+
+
+
+
   function fail2ban_login( $username ) {
     $msg = (wp_cache_get($username, 'userlogins'))
 							? "Authentication failure for $username from "
