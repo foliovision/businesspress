@@ -585,9 +585,13 @@ class BusinessPress {
   
   
   function fail2ban_404( $username ) {
+    if( preg_match( '~\.(jpg|png|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
+
+    if( preg_match( '~(googlebot|bingbot)~', $_SERVER['HTTP_USER_AGENT'] ) ) return;
+
     if( !is_404() ) return;
 
-    $this->fail2ban_openlog();
+    $this->fail2ban_openlog(LOG_AUTH,'wordpress-notfound');
     syslog( LOG_INFO,'BusinessPress fail2ban 404 error - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
   }
 
@@ -606,9 +610,9 @@ class BusinessPress {
   
   
   
-  function fail2ban_openlog($log = LOG_AUTH) {
+  function fail2ban_openlog($log = LOG_AUTH, $daemon = 'wordpress') {
 		$host	= array_key_exists('WP_FAIL2BAN_HTTP_HOST',$_ENV) ? $_ENV['WP_FAIL2BAN_HTTP_HOST'] : $_SERVER['HTTP_HOST'];
-		openlog("wordpress($host)", LOG_NDELAY|LOG_PID, $log);
+		openlog($daemon."($host)", LOG_NDELAY|LOG_PID, $log);
 	}
     
   
