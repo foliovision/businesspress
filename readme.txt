@@ -68,6 +68,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 = 0.6.4 =
 
+* Bugfix - users able to deactivate the plugin in some cases
 * DoS protection - 404 requests are now reported to fail2ban. Make sure you update your fail2ban filter a jail settings. Our settings are 12 retries (login or 404) in 20 minutes
 
 = 0.6.3 =

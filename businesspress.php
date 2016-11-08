@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.3
+Version: 0.6.3.9
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -39,7 +39,7 @@ class BusinessPress {
   */
   
   /* constants */
-  const VERSION = '0.6.3';
+  const VERSION = '0.6.3.9';
   const FVSB_LOCK_FILE = 'fv-disallow.php';
   const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
@@ -136,6 +136,7 @@ class BusinessPress {
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
 
     add_filter( 'wp', array( $this, 'fail2ban_404' ) );
+
   }
   
   
@@ -189,8 +190,10 @@ class BusinessPress {
   
   function apply_restrictions() {
     if( !$this->check_user_permission() )  {
-      add_action( 'admin_print_scripts', array( $this, 'hide_plugin_controls' ), 1 );
+      add_action( 'admin_footer', array( $this, 'hide_plugin_controls' ), 1 );
+      add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 999, 2 );
       add_filter( 'map_meta_cap', array( $this, 'capability_filter' ), 999, 4 );
+      add_filter( 'admin_init', array( $this, 'disable_deactivation' ), 999, 4 );
     }
     
     if( !empty($this->aOptions['core_auto_updates']) ) {
@@ -565,6 +568,24 @@ class BusinessPress {
     //  todo: this might trigger (if notify_email is set in the WP API response) an email notification, consider blocking it with send_core_update_notification_email filter
     return $update;
   }
+
+
+
+
+  function disable_deactivation() {
+    if( isset($_POST['action']) && $_POST['action'] == 'deactivate-selected' && isset($_POST['checked']) && is_array($_POST['checked']) ) {
+      foreach( $_POST['checked'] AS $key => $value ) {
+        if( stripos($value,'businesspress') !== false ) {
+          unset($_POST['checked'][$key]);
+        }
+      }
+    }
+    if( isset($_GET['action']) && $_GET['action'] == 'deactivate' && isset($_GET['plugin']) ) {
+      if( stripos($_GET['plugin'],'businesspress') !== false ) {
+        wp_die(__('Sorry, you are not allowed to deactivate plugins for this site.'));
+      }
+    }
+  }
   
   
   
@@ -856,20 +877,7 @@ class BusinessPress {
     if( ( $aUrlPath[2] === "wp-admin" ) && ( $aUrlPath[3] === "plugins.php" )  ) {
       echo <<< JSH
 <script>
-window.onload = function(){
-  var tr      = document.getElementById("businesspress");
-  if (tr !== null) {
-    var actions  = tr.getElementsByClassName("row-actions-visible");
-    var actions2 = tr.getElementsByClassName("row-actions");
-    var checkbox = tr.getElementsByClassName("check-column");
-    if (actions.length > 0 )
-      actions[0].style.display = "none";
-    else if (actions2.length > 0)
-      actions2[0].style.display = "none";
-    checkbox[0].innerHTML = "";
-    //console.log( actions[0] );
-  }
-};
+jQuery('input[value^=businesspress]').remove();
 </script>
 JSH;
     }
@@ -1011,6 +1019,17 @@ JSH;
       } ?>
       <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
+  }
+
+
+
+
+  function plugin_action_links( $actions, $plugin_file ) {
+    if( stripos($plugin_file,'businesspress') !== false ) {
+      unset($actions['deactivate']);
+    }
+
+    return $actions;
   }
 
   
