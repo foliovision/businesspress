@@ -135,7 +135,7 @@ class BusinessPress {
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
 
-    add_filter( 'wp', array( $this, 'fail2ban_404' ) );
+    add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
 
   }
   
