@@ -608,7 +608,9 @@ class BusinessPress {
   function fail2ban_404( $username ) {
     if( preg_match( '~\.(jpg|png|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
 
-    if( preg_match( '~(googlebot|bingbot)~', $_SERVER['HTTP_USER_AGENT'] ) ) return;
+    if( stripos($_SERVER['REQUEST_URI'], 'fv-gravatar-cache' ) !== false ) return;
+
+    if( preg_match( '~(Mediapartners-Google|googlebot|bingbot)~i', $_SERVER['HTTP_USER_AGENT'] ) ) return;
 
     if( !is_404() ) return;
 
