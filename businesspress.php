@@ -606,7 +606,7 @@ class BusinessPress {
   
   
   function fail2ban_404( $username ) {
-    if( preg_match( '~\.(jpg|png|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
+    if( preg_match( '~\.(jpg|png|gif|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
 
     if( stripos($_SERVER['REQUEST_URI'], 'fv-gravatar-cache' ) !== false ) return;
 
