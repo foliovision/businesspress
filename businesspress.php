@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.4
+Version: 0.6.4.1
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -698,27 +698,34 @@ class BusinessPress {
   
   
   function get_remote_addr() {
-		if (defined('WP_FAIL2BAN_PROXIES')) { //  todo: check this out
-			if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
-				$ip = ip2long($_SERVER['REMOTE_ADDR']);
-				foreach(explode(',',WP_FAIL2BAN_PROXIES) as $proxy) {
-					if (2 == count($cidr = explode('/',$proxy))) {
-						$net = ip2long($cidr[0]);
-						$mask = ~ ( pow(2, (32 - $cidr[1])) - 1 );
-					} else {
-						$net = ip2long($proxy);
-						$mask = -1;
-					}
-					if ($net == ($ip & $mask)) {
-						return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
-								? $_SERVER['HTTP_X_FORWARDED_FOR']
-								: substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
-					}
-				}
-			}
-		}
+    $aProxies = array();
+    $aMaxCDN = array( '108.161.176.0/20', '94.46.144.0/20', '146.88.128.0/20', '198.232.124.0/22', '23.111.8.0/22', '217.22.28.0/22', '64.125.76.64/27', '64.125.76.96/27', '64.125.78.96/27', '64.125.78.192/27', '64.125.78.224/27', '64.125.102.32/27', '64.125.102.64/27', '64.125.102.96/27', '94.31.27.64/27', '94.31.33.128/27', '94.31.33.160/27', '94.31.33.192/27', '94.31.56.160/27', '177.54.148.0/24', '185.18.207.64/26', '50.31.249.224/27', '50.31.251.32/28', '119.81.42.192/27', '119.81.104.96/28', '119.81.67.8/29', '119.81.0.104/30', '119.81.1.144/30', '27.50.77.226/32', '27.50.79.130/32', '119.81.131.130/32', '119.81.131.131/32', '216.12.211.59/32', '216.12.211.60/32', '37.58.110.67/32', '37.58.110.68/32', '158.85.206.228/32', '158.85.206.231/32', '174.36.204.195/32', '174.36.204.196/32', '151.139.0.0/19', '94.46.144.0/21', '103.66.28.0/22', '103.228.104.0/22' );
+      
+    $aProxies = array_merge( $aProxies, $aMaxCDN );
+    
+    if (defined('WP_FAIL2BAN_PROXIES')) { //  todo: check this out      
+      $aProxies = array_merge( $aProxies, explode( ',' ,WP_FAIL2BAN_PROXIES ) );
+    }
+    
+    if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
+      $ip = ip2long($_SERVER['REMOTE_ADDR']);
+      foreach( $aProxies as $proxy ) {
+        if (2 == count($cidr = explode('/',$proxy))) {
+          $net = ip2long($cidr[0]);
+          $mask = ~ ( pow(2, (32 - $cidr[1])) - 1 );
+        } else {
+          $net = ip2long($proxy);
+          $mask = -1;
+        }
+        if ($net == ($ip & $mask)) {
+          return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
+              ? $_SERVER['HTTP_X_FORWARDED_FOR']
+              : substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+        }
+      }
+    }
 
-		return $_SERVER['REMOTE_ADDR'];    
+    return $_SERVER['REMOTE_ADDR'];    
   }
   
   
