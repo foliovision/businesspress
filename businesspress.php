@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.4.1
+Version: 0.6.5
 Author: Foliovision
 Author URI: http://foliovision.com
 */
