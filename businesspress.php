@@ -683,6 +683,7 @@ class BusinessPress {
     if( empty($this->aOptions['cap_activate']) || !$this->aOptions['cap_activate'] ) $aCaps = array_merge( $aCaps, array('activate_plugins','switch_themes','deactivate_plugins') );
     if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) $aCaps = array_merge( $aCaps, array('update_plugins','update_themes') );
     if( empty($this->aOptions['cap_install']) || !$this->aOptions['cap_install'] ) $aCaps = array_merge( $aCaps, array('install_plugins','install_themes','delete_plugins','delete_themes','edit_plugins','edit_themes') );
+    if( empty($this->aOptions['cap_export']) || !$this->aOptions['cap_export'] ) $aCaps = array_merge( $aCaps, array('export') );
     
     return $aCaps;
   }
@@ -809,6 +810,7 @@ class BusinessPress {
       if( !empty($_POST['cap_core']) ) $this->aOptions['cap_core'] = true;
       if( !empty($_POST['cap_update']) ) $this->aOptions['cap_update'] = true;
       if( !empty($_POST['cap_install']) ) $this->aOptions['cap_install'] = true;
+      if( !empty($_POST['cap_export']) ) $this->aOptions['cap_export'] = true;
       
       if( empty($this->aOptions['cap_update']) ) {
         unset($this->aOptions['cap_core']);
@@ -1084,7 +1086,7 @@ JSH;
     
     ?>
     <style>
-    #postbox-container-1 {width: 100% !important;}}
+    #postbox-container-1 {width: 100% !important;}
     </style>
     
     <div class="wrap">
@@ -1220,6 +1222,8 @@ JSR;
             <label for="cap_core">Update WordPress core</label><br /></p>          
           <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
             <label for="cap_install">Install, edit and delete plugins and themes </label></p>
+          <p><input type="checkbox" id="cap_export" name="cap_export" value="1" <?php if( !empty($this->aOptions['cap_export']) && $this->aOptions['cap_export'] ) echo 'checked'; ?> />
+            <label for="cap_export">Export data</label></p>
         </td>
       </tr>
       <tr>
@@ -1641,15 +1645,3 @@ JSR;
 }
 
 $businesspress = new BusinessPress();
-
-
-
-
-// Remove the Export Menu - This is just visible
-function hide_export_from_non_admins() {
-  if( ! current_user_can( 'install_themes' ) ) {
-    remove_submenu_page('tools.php', 'export.php');
-  }
-}
-add_action( 'admin_menu', 'hide_export_from_non_admins' );
-
