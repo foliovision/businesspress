@@ -66,6 +66,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.6.6 =
+
+* Added setting to Allow other admins to -> Export site content
+
 = 0.6.5 =
 
 * Fail2ban - added support for MaxCDN - matching IPs are treated as proxy servers to detect the real user IP reliably

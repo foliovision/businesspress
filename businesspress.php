@@ -1211,7 +1211,7 @@ JSR;
       </tr>
       <tr>
         <td>
-          <p>Allow other admins to&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+          <p>Allow other admins to&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
         </td>
         <td>
           <p><input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
@@ -1223,7 +1223,7 @@ JSR;
           <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
             <label for="cap_install">Install, edit and delete plugins and themes </label></p>
           <p><input type="checkbox" id="cap_export" name="cap_export" value="1" <?php if( !empty($this->aOptions['cap_export']) && $this->aOptions['cap_export'] ) echo 'checked'; ?> />
-            <label for="cap_export">Export data</label></p>
+            <label for="cap_export">Export site content</label></p>
         </td>
       </tr>
       <tr>
