@@ -138,6 +138,7 @@ class BusinessPress {
     add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
     
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
+    add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
 
   }
   

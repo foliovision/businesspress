@@ -70,6 +70,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 * Added setting to Allow other admins to -> Export site content
 * Disabling "WordPress x.y.z is available. Please update!" emails
+* Disabling "Your site has updated to WordPress x.y.z" emails
 
 = 0.6.5 =
 
