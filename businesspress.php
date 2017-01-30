@@ -139,7 +139,8 @@ class BusinessPress {
     
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
     add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
-
+    
+    add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
   }
   
   
@@ -213,6 +214,8 @@ class BusinessPress {
       $objUser = get_userdata( get_current_user_id() );
       if( $objUser && isset($objUser->roles) && count($objUser->roles) == 2 && ( $objUser->roles[0] == 'subscriber' && $objUser->roles[1] == 'bbp_participant' || $objUser->roles[0] == 'bbp_participant' && $objUser->roles[1] == 'subscriber' ) ) {  //  this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
         add_filter('show_admin_bar', '__return_false');
+        add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
+        add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
       }
     }
     
@@ -1064,6 +1067,14 @@ JSH;
   
   
   
+  function remove_wp_logo() {
+    global $wp_admin_bar;
+    $wp_admin_bar->remove_menu('wp-logo');
+  }
+  
+  
+  
+  
   function screen() { 
     if( is_multisite() && !is_super_admin() ) {
       exit(0);
@@ -1287,7 +1298,7 @@ JSR;
         </td>
         <td>
           <p class="description"><input type="checkbox" id="wp_admin_bar_subscribers" name="wp_admin_bar_subscribers" value="1" <?php if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] ) echo 'checked'; ?> />
-            With this setting it's up to you to provide the front-end interface for profile editing and so on</p>
+            With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.</p>
         </td>
       </tr>
         <tr>    		
@@ -1312,6 +1323,38 @@ JSR;
       }
     }
   
+  }
+  
+  
+  
+  
+  function subscriber__dashboard_redirect() {
+		global $pagenow;
+		if ( 'profile.php' != $pagenow ) {
+			wp_redirect( site_url('wp-admin/profile.php') );
+			exit;
+		}
+	}
+  
+  
+  
+  
+  function subscriber__hide_menus() {
+		global $menu;
+
+		$menu_ids = array();
+
+		// Gather menu IDs (minus profile.php).
+		foreach ( $menu as $index => $values ) {
+			if ( isset( $values[2] ) ) {
+				if ( 'profile.php' == $values[2] ) {
+					continue;
+				}
+
+				// Remove menu pages.
+				remove_menu_page( $values[2] );
+			}
+		}    
   }
   
   
