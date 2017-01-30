@@ -66,6 +66,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.6.7 =
+
+* Setting "Hide WP Admin Bar for subscribers" now also removes all screen except for Profile for them
+* WP logo in Admin Bar is now removed
+
 = 0.6.6 =
 
 * Added setting to Allow other admins to -> Export site content
