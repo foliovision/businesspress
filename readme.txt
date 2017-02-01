@@ -66,6 +66,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.6.7 =
+
+* Improving the notice for password reset link to also say "Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes."
+
 = 0.6.6 =
 
 * Added setting to Allow other admins to -> Export site content

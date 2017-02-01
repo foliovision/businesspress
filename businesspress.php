@@ -140,6 +140,7 @@ class BusinessPress {
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
     add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
 
+    add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
   }
   
   
@@ -1640,6 +1641,14 @@ JSR;
     </script>
     <?php
     
+  }
+  
+  
+  function wp_login_errors( $errors ) {
+    if( isset($_GET['checkemail']) && $_GET['checkemail'] == 'confirm' && isset($errors->errors) && isset($errors->errors['confirm']) && isset($errors->errors['confirm'][0]) ) {
+      $errors->errors['confirm'][0] .= "<br /><br />".__("Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes.",'businesspress');
+    }
+    return $errors;
   }
 
 
