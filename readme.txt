@@ -69,6 +69,8 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 = 0.6.7 =
 
 * Improving the notice for password reset link to also say "Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes."
+* Setting "Hide WP Admin Bar for subscribers" now also removes all screen except for Profile for them
+* WP logo in Admin Bar is now removed
 
 = 0.6.6 =
 
