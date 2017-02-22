@@ -26,8 +26,6 @@ Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin use
 */
 
 
-
-
 class BusinessPress {
 
   /* DB records
@@ -39,9 +37,8 @@ class BusinessPress {
   */
   
   /* constants */
-  const VERSION = '0.6.4';
+  const VERSION = '0.6.6';
   const FVSB_LOCK_FILE = 'fv-disallow.php';
-  const FVSB_DEBUG = 0;
   const FVSB_CRON_ENABLED = 1;
   
   
@@ -66,7 +63,6 @@ class BusinessPress {
   
   private $autoupdateType = 'minor';
   private $adminEmail;
-  private $str_disallow_check_file = "";  // string, path to checkfile
   private $strArrMessages = array(); // string array, contains messages used in this plugin
 
   var $aCoreUpdatesDismiss = array();
@@ -81,14 +77,11 @@ class BusinessPress {
     
     $this->adminEmail = get_option('admin_email');
     
-    $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' ); 
+    $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
     
-    $this->strArrMessages['E_CANT_WRITE'] = '<div class="error"><p><span style="color:red; font-weight:bold;">FATAL ERROR</span>: Plugin cant write into Wordpress root directory. Check file permissions.</p></div>';
-    
-    $this->str_disallow_check_file = trailingslashit($this->get_wp_root_dir()).BusinessPress::FVSB_LOCK_FILE;
-            
-    if( BusinessPress::FVSB_DEBUG == 1 ) {
-      $this->dump();
+    if( $this->get_setting('disable-xml-rpc') ) {
+      add_filter('xmlrpc_enabled', '__return_false');
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
     }
     
     
@@ -101,9 +94,7 @@ class BusinessPress {
     
     
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
-    
-    //add_action( 'businesspress_cron', array( $this, 'cron_job' ) );
-    
+        
     if( is_multisite() ) {
       //add_action( 'network_admin_notices', array( $this, 'show_disallow_not_defined') );  //  todo: what about this?
     } else {
@@ -125,6 +116,8 @@ class BusinessPress {
     
     add_action( 'admin_init', array( $this, 'stop_disable_wordpress_core_updates') );
     
+    add_action( 'init', array( $this, 'load_extensions'), 0 );
+    
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
     
@@ -144,6 +137,8 @@ class BusinessPress {
     
     add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
     
+    add_action( 'admin_enqueue_scripts', array( $this, 'admin_style' ) );
+    
   }
   
   
@@ -159,11 +154,6 @@ class BusinessPress {
   
   
   function admin_screen_cleanup() {
-    
-    if( isset($_GET['businesspress_cron_debug']) ) {
-      $this->cron_job();
-    }
-    
     remove_filter( 'update_footer', 'core_update_footer' );
     remove_action( 'admin_notices', 'update_nag', 3 );
     remove_action( 'network_admin_notices', 'update_nag', 3 );
@@ -179,8 +169,7 @@ class BusinessPress {
   }
   
   
-  
-  
+
   function admin_screen_cleanup_css() {
     //  todo: also hide theme updates
     //  todo: also hide in Network admin
@@ -190,6 +179,34 @@ class BusinessPress {
       #wp-version-message .button { display: none }
     </style>
     <?php
+  }
+  
+  
+  
+  
+  function admin_show_checkbox( $name, $option_key, $title, $help ) {
+    $name = esc_attr($name);    
+    ?>
+      <tr>
+        <th>
+          <label for="<?php echo $name; ?>"><?php _e($title, 'businesspress' ); ?></label>
+        </th>
+        <td>
+          <p class="description"><input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $this->get_setting($option_key) ) echo 'checked="checked"'; ?> />
+            <label for="<?php echo $name; ?>"><?php echo $help; ?></p>
+        </td>
+      </tr>
+    <?php
+  }
+  
+  
+  
+  
+  function admin_style() {
+    if( is_admin() && isset($_GET['page']) && $_GET['page'] == 'businesspress' ) {
+      wp_register_style( 'businesspress_admin', plugins_url('/admin.css',__FILE__), false, BusinessPress::VERSION );
+      wp_enqueue_style( 'businesspress_admin' );
+    }
   }
 
   
@@ -329,201 +346,6 @@ class BusinessPress {
   
 
 
-  
-  function cron_job() {
-    global $wp_filter;
-    
-    $AssocErr = array();  
-    $AssocErr['bDisallowMods'] = 'OK';  // DISALLOW_FILE_MODS should not be defined  
-    $AssocErr['bDisallowEdits'] = 'OK'; // DISALLOW_FILE_EDIT must be defined  
-    $AssocErr['bUpdateSettingsMismatch'] = 'OK';  // Mismatch in settings  
-    $AssocErr['bCurrentUserCan1'] = 'OK'; // Current user can?
-    $AssocErr['bCurrentUserCan2'] = 'OK';
-    
-    $checks = $this->get_setting_db('fvsb_checks');
-    
-    
-    // BASIC CHECKS 
-    if( $checks['disallow_edits_defined'] === 1 ) {
-      if( defined('DISALLOW_FILE_EDIT') ) {
-        if( DISALLOW_FILE_EDIT === false ) {
-          $AssocErr['bDisallowEdits'] = "Disallow File Edit is not defined!"; //  todo: check what this really means
-        }
-      }
-    }
-    
-    if( $checks['disallow_mods_defined'] === 1 ) {
-      if( defined('DISALLOW_FILE_MODS') ) {
-        if( DISALLOW_FILE_MODS === true ) {
-          $AssocErr['bDisallowMods'] = "Disallow File Mods is defined!";
-        }
-      }
-    }
-    
-    
-    // CHECKS RELATED TO UPDATES - we dont want updates!
-    if( $checks['update_filters_mismatch'] === 1 ) {
-  
-      if( $this->get_setting('upgradeType') == 'none' ) {
-        // defines
-        if( defined('AUTOMATIC_UPDATER_DISABLED') && AUTOMATIC_UPDATER_DISABLED === false ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to None, but AUTOMATIC_UPDATER_DISABLED is defined as false.';
-        }
-        if( defined('WP_AUTO_UPDATE_CORE') && ( WP_AUTO_UPDATE_CORE === true || WP_AUTO_UPDATE_CORE === 'minor' ) ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to None, but AUTOMATIC_UPDATE_CORE is defined as true or minor.';
-        }
-        if( array_key_exists('allow_minor_auto_core_updates', $wp_filter) ||
-          array_key_exists('allow_major_auto_core_updates', $wp_filter)  ||
-          array_key_exists('allow_dev_auto_core_updates', $wp_filter) ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to None, but there is some additional plugin changing this behavior.';
-        }
-        
-      }    
-      else if ($this->get_setting('upgradeType') == 'minor') {
-        if( defined('AUTOMATIC_UPDATER_DISABLED') && AUTOMATIC_UPDATER_DISABLED === TRUE ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Minor, but AUTOMATIC_UPDATER_DISABLED is defined as true.';
-        }
-        if( defined('WP_AUTO_UPDATE_CORE') && ( WP_AUTO_UPDATE_CORE === true || WP_AUTO_UPDATE_CORE === false ) ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Minor, but AUTOMATIC_UPDATE_CORE is defined as true or false.';
-        }
-        if( array_key_exists('allow_major_auto_core_updates', $wp_filter) ||
-          array_key_exists('automatic_updater_disabled', $wp_filter) ||
-          array_key_exists('auto_update_core', $wp_filter) ||
-          array_key_exists('allow_dev_auto_core_updates', $wp_filter) ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Minor, but there is some additional plugin changing this behavior.';
-        }
-      
-      }
-      else if ($this->get_setting('upgradeType') == 'major') {
-        if( defined('AUTOMATIC_UPDATER_DISABLED') && AUTOMATIC_UPDATER_DISABLED === TRUE ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Major, but AUTOMATIC_UPDATER_DISABLED is defined as true.';
-        }
-        if( defined('WP_AUTO_UPDATE_CORE') && ( WP_AUTO_UPDATE_CORE === 'minor' || WP_AUTO_UPDATE_CORE === false ) ) {
-          $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Major, but AUTOMATIC_UPDATE_CORE is defined as minor or false.';
-        }
-        if (  array_key_exists("allow_minor_auto_core_updates", $wp_filter) ||
-          array_key_exists("automatic_updater_disabled", $wp_filter) ||
-          array_key_exists("auto_update_core", $wp_filter) ||
-          array_key_exists("allow_dev_auto_core_updates", $wp_filter) ) {
-        $AssocErr['bUpdateSettingsMismatch'] = 'Core autoupdates is set to Major, but there is some additional plugin changing this behavior.';
-        }
-      
-      }
-      
-    }
-    
-    
-    //  Admin capabilities check - check two random (super)admins
-    if( $checks['user_can_if_cant'] === 1 ) {
-      $aAdmins = is_multisite() ? get_super_admins() : get_users('role=administrator');      
-      $iCount = count($aAdmins);
-      
-      $first = rand(0, $iCount - 1);
-      $second = $first;
-      
-      if( $iCount > 1 ) {
-        while ($first == $second) {
-          $second = rand(0, $iCount - 1);
-        }
-      }
-      
-      $disabled = $this->get_setting('capsDisabled');
-      $caps = $this->get_setting_db('fvsb_capsArray');
-      
-      $user_first = get_user_by('login', $aAdmins[$first]);
-      $user_second = get_user_by('login', $aAdmins[$second]);
-      
-      if( $caps['install_plugins'] == 1 && is_multisite() ) {
-        if( user_can($user_first,'install_plugins') && $disabled === '0' ) {
-          $AssocErr['bCurrentUserCan1'] = 'User '.$aAdmins[$first].' can install plugins, even though install_plugins is set as restricted' ;
-        }
-        if( user_can($user_second,'install_plugins') && $disabled == 0  ) {
-          $AssocErr['bCurrentUserCan2'] = 'User '.$aAdmins[$second].' can install plugins, even though install_plugins is set as restricted' ;
-        }
-        
-      } else {
-        if( user_can($aAdmins[$first], 'install_plugins') && $disabled == 0 ) {
-          $AssocErr['bCurrentUserCan1'] = 'User '.$aAdmins[$first].' can install plugins, even though install_plugins is set as restricted' ;
-        }
-        
-        if( user_can($aAdmins[$second], 'install_plugins') && $disabled == 0 ) {
-          $AssocErr['bCurrentUserCan2'] = 'User '.$aAdmins[$second].' can install plugins, even though install_plugins is set as restricted';
-        }
-        
-      }
-    
-    }
-    
-    
-    // Check if capabilities are set the way we want
-    if( $this->get_setting('capsDisabled') > 0 ) {
-      $turnedOff = $this->get_setting('capsDisabled');    
-      if( (time() - $turnedOff) > 3600 ) {  //  if it's turned off more than 1 hour
-        $this->store_setting('capsDisabled', 0);
-      }
-      
-    }
-    
-    // Auto-repairs
-    // if Restriction Mode is disabled we need to be sure file is there, if not -> enable Restriction Mode
-    if( $this->get_setting('capsDisabled') > 0 ) {
-      if( !file_exists( $this->str_disallow_check_file ) ) {
-        $this->store_setting('capsDisabled', 0);
-      }
-    }
-    
-    // if Restriction Mode is enabled so we need to delete the file if it's present
-    if( $this->get_setting('capsDisabled') === 0 ) {
-      if( file_exists( $this->str_disallow_check_file ) ) {
-        unlink($this->str_disallow_check_file); 
-      }
-    }
-    
-    // file caps not defined -> repair it
-    $capArray = $this->get_setting_db('fvsb_capsArray');
-    if( false === $capArray ) {
-      $this->store_setting_db( 'fvsb_capsArray', $this->disallowed_caps_default );
-    }
-    
-    
-    $bSomethingWrong = 0;
-    foreach ($AssocErr as $key => $value ) {
-      if( $value !== 'OK' ) $bSomethingWrong = 1;
-    }
-    
-    if ($bSomethingWrong) {
-      $to = $this->get_setting('adminEmail');
-      $subject = 'BusinessPress encountered a possible problem at ' . home_url();
-  
-      $message = "<h3>Debug</h3>";
-      $message .= "<ul>";
-      foreach($AssocErr as $key => $value ) {
-        $message .= "<li>Disallow File Mods Constant - ".$key.":".$value."</li>";
-      }
-      $message .= "</ul>";
-      
-      $headers  = 'MIME-Version: 1.0' . "\n";
-      $headers .= 'Content-type: text/html; charset="UTF-8";' . "\n";
-      
-      if( isset($_GET['businesspress_cron_debug']) ) {
-        echo $message;
-        die("That's it for BusinessPress debug.");  
-      }
-      
-      wp_mail( $to, $subject, $message, $headers );
-      
-      // reload from cron ???
-      //$this->script_reload();
-    }
-    
-    if( isset($_GET['businesspress_cron_debug']) ) {
-      echo "<p>No issues found!</p>";
-      die("That's it for BusinessPress debug.");  
-    }
-  }
-  
-  
-
 
   function cron_schedule() {
     $timestamp = wp_next_scheduled( 'businesspress_cron' );
@@ -598,21 +420,6 @@ class BusinessPress {
         wp_die(__('Sorry, you are not allowed to deactivate plugins for this site.'));
       }
     }
-  }
-  
-  
-  
-  
-  private function dump(){
-    global $wp_filter;
-    
-    $caps = $this->get_setting_db('fvsb_capsArray');
-    $genInfo = $this->get_setting_db('fvsb_genSettings');
-    
-    echo '<!-- DB STUFF' . PHP_EOL; 
-    echo var_export($caps, true);
-    echo var_export($genInfo, true); 
-    echo PHP_EOL.'-->';
   }
   
   
@@ -762,15 +569,9 @@ class BusinessPress {
   /* this is basic handler for getting FVSB data from database
   * @param $key = can contain {all | version | upgradeType | capsDisabled | adminEmail}
   */
-  function get_setting( $key = 'all' ) {
-    $aSettings = $this->get_setting_db('fvsb_genSettings');
-    if( $aSettings === false ) return -1;
-    
-    if( $this->is_allowed_setting($key) === true ) {
-      if ($key == 'all') return $aSettings;
-      if( !empty($aSettings[$key]) ) return $aSettings[$key];
-    }
-    return false;
+  function get_setting( $key ) {
+    $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
+    return isset($this->aOptions[$key]) && $this->aOptions[$key] ? true : false;
   }
   
   
@@ -829,6 +630,12 @@ class BusinessPress {
         unset($this->aOptions['cap_core']);
       }
       
+      $this->aOptions['search-results'] = !empty($_POST['businesspress-search-results']) ? true : false;
+      $this->aOptions['disable-emojis'] = !empty($_POST['businesspress-disable-emojis']) ? true : false;
+      $this->aOptions['disable-oembed'] = !empty($_POST['businesspress-disable-oembed']) ? true : false;
+      $this->aOptions['disable-rest-api'] = !empty($_POST['businesspress-disable-rest-api']) ? true : false;
+      $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
+      
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
       } else {
@@ -837,59 +644,6 @@ class BusinessPress {
     }
     
     return;
-    
-    $bStatus = file_exists( $this->str_disallow_check_file );
-    
-    
-    
-    if( isset($_POST['change_mod_permits']) && isset($_POST['change_mod_permits_do'])  ) {
-      if( !$bStatus ) {
-        $strContents = "//test string";  
-        if( !file_put_contents( $this->str_disallow_check_file, $strContents )  ) {
-          // WP_ROOT is not writable by script
-          die( $this->strArrMessages['E_CANT_WRITE'] );
-        }
-        $this->store_setting('capsDisabled', time());
-      } else {
-        unlink( $this->str_disallow_check_file );
-        $this->store_setting('capsDisabled', 0);
-      }
-      
-      $this->script_reload( 'act=modchange' );
-    
-    } elseif( isset($_POST['change_cap_array']) && isset($_POST['admin_email']) && isset($_POST['autoupgrades']) ) {
-      if( isset( $_POST['capabilitiesCheckbox'] ) && !empty( $_POST['capabilitiesCheckbox'] ) ) {
-        $aSettings = $this->get_setting_db('fvsb_capsArray');
-        foreach( $this->disallowed_caps_default as $cap => $value ) {
-          $aSettings[$cap] = 0;
-        }
-        foreach( $_POST['capabilitiesCheckbox'] as $cap ) {
-          $aSettings[$cap] = 1;
-        }
-      
-      } else {
-        $aSettings = $this->get_setting_db('fvsb_capsArray');
-        foreach( $aSettings as $cap => $value ) {
-          $aSettings[$cap] = 0;
-        }
-        
-      }
-      
-      // so now, we have storedCapArray filled.
-      $this->store_setting_db( 'fvsb_capsArray', $aSettings );
-      
-      if( !empty($_POST['admin_email']) && is_email($_POST['admin_email']) ) {
-        $this->store_setting('adminEmail', $_POST['admin_email']);
-      } //  todo: report error
-      
-      if( !empty($_POST['autoupgrades']) && in_array( $_POST['autoupgrades'], array( 'minor', 'major', 'none' ) ) ) {
-        $this->store_setting('upgradeType', $_POST['autoupgrades']);
-      }
-      
-      $this->script_reload( 'act=saved' );
-    } elseif( isset( $_GET['act'] ) && 'saved' === $_GET['act'] ) {
-      $this->script_reload( 'act=saved2' );
-    }
   }  
   
   
@@ -1007,7 +761,20 @@ JSH;
     }
     echo '</form>';
   
-  }  
+  }
+  
+  
+  
+  
+  function load_extensions() {
+    if( $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
+    
+    if( $this->get_setting('disable-oembed') ) include( dirname(__FILE__).'/plugins/disable-embeds.php' );
+    
+    if( $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+    
+    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
+  }
   
   
   
@@ -1083,32 +850,16 @@ JSH;
   
   
   function screen() { 
-    if( is_multisite() && !is_super_admin() ) {
-      exit(0);
-    } else if( !is_admin() ) {
-      exit(0);
-    }
-  
-    $bStatus = file_exists( $this->str_disallow_check_file );
-    
-    $capArray = $this->get_setting_db('fvsb_capsArray');
-    if( false === $capArray ) {
-      $this->store_setting_db( 'fvsb_capsArray', $this->disallowed_caps_default );
-    } else {
-      $bChange = false;
-      foreach($this->disallowed_caps_default as $cap => $value ) {
-        if( !isset( $capArray[$cap] ) ) {
-          $capArray[$cap] = 0;
-          $bChange = true;
-        }
-      }
-      if( $bChange ) $this->store_setting_db( 'fvsb_capsArray', $capArray );
-    }
-    
-    ?>
-    <style>
-    #postbox-container-1 {width: 100% !important;}
-    </style>
+    ?>        
+    <div class="businesspress-header">
+      <h2 class="nav-tab-wrapper businesspress-header-nav" id="businesspress-header-nav">
+        <a class="nav-tab nav-tab-active nav-tab-access" href=""><span>BusinessPress</span></a>    
+        <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-prefs" href="#prefs"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Help', 'businesspress' ); ?></span></a>
+      </h2>
+		</div>    
     
     <div class="wrap">
     <h2>BusinessPress</h2>
@@ -1122,45 +873,35 @@ JSH;
         <div class="options-hidden" style="display: none; ">
       <?php endif; ?>
       
-    
-      <?php if( $domain = $this->get_whitelist_domain() ) : ?>
-        <div class="message error"><p>Access to this screen is limited to users with email on <?php echo $domain; ?>.</p></div>
-      <?php elseif( $email = $this->get_whitelist_email() ) : ?>
-        <div class="message error"><p>Access to this screen is limited to user with email address equal to <?php echo $email; ?>.</p></div>
-      <?php endif; ?>
       <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
         <div id="dashboard-widgets" class="metabox-holder columns-1">
           <div id='postbox-container-1' class='postbox-container'>    
             <?php
-            add_meta_box( 'businesspress_settings', __('Settings', 'fv_flowplayer'), array( $this, 'settings_box' ), 'businesspress_settings', 'normal' );
-            add_meta_box( 'businesspress_tweaks', __('Tweaks', 'fv_flowplayer'), array( $this, 'settings_box_tweaks' ), 'businesspress_settings', 'normal' );
+            add_meta_box( 'businesspress_welcome', __('Welcome', 'businesspress'), array( $this, 'settings_box_welcome' ), 'businesspress_settings_welcome', 'normal' );
             
-            do_meta_boxes('businesspress_settings', 'normal', false );
+            add_meta_box( 'businesspress_updates', __('Updates', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
+            
+            add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
+            add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
+            add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
+            add_meta_box( 'businesspress_search', __('Search Results', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+            
+            add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
+            
+            do_meta_boxes('businesspress_settings_welcome', 'normal', false );
+            do_meta_boxes('businesspress_settings_updates', 'normal', false );
+            do_meta_boxes('businesspress_settings_preferences', 'normal', false );
+            do_meta_boxes('businesspress_settings_branding', 'normal', false );
             //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
             //wp_nonce_field( 'meta-box-order-nonce', 'meta-box-order-nonce', false );
             ?>
+            
+            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+            
           </div>
         </div>
         <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
       </form>
-      
-      <!--<hr>
-    <?php
-    if( !$bStatus ) {
-      $strMes = 'Restriction Mode is turned <strong>ON</strong>.';
-      $strVal = 'Enable Capabilities => Turn restriction mode OFF';
-      $intVal = '1';
-    } else {
-      $strMes = 'Restriction Mode is turned <strong>OFF</strong>.';
-      $strVal = 'Disable Capabilities => Turn restriction mode ON';
-      $intVal = '0';
-    }
-    ?>
-      <p><?php echo $strMes; ?></p>
-      <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>"> 
-        <input type="hidden" name="change_mod_permits_do" value="<?php echo $intVal; ?>" />
-        <input type="submit" class="button" name="change_mod_permits" value="<?php echo $strVal; ?> &raquo;" />
-      </form>-->
       
       <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
         </div>
@@ -1193,8 +934,85 @@ JSR;
   
   
   
+  function settings_box_branding() {
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_checkbox(
+                    'wp_admin_bar_subscribers',
+                    'wp_admin_bar_subscribers',
+                    'Hide WP Admin Bar for subscribers',
+                    __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen", 'businesspress' ) );
+      ?>
+    </table>           
+    <?php
+  }
   
-  function settings_box() {
+  
+  
+  
+  function settings_box_performance() {    
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_checkbox(
+                    'businesspress-disable-emojis',
+                    'disable-emojis',
+                    'Disable',
+                    __('Emojis', 'businesspress' ) );
+      ?>
+      
+      <?php $this->admin_show_checkbox(
+                    'businesspress-disable-oembed',
+                    'disable-oembed',
+                    '',
+                    __('oEmbed', 'businesspress' ) );
+      ?>
+    </table>           
+    <?php
+  }
+  
+  
+  
+  
+  function settings_box_search() {
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_checkbox(
+                    'businesspress-search-results',
+                    'search-results',
+                    'Enable Google style results',
+                    sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
+      ?>
+    </table>           
+    <?php
+  }
+  
+  
+  
+  
+  function settings_box_security() {    
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_checkbox(
+                    'businesspress-disable-xml-rpc',
+                    'disable-xml-rpc',
+                    'Disable',
+                    __('XML-RPC', 'businesspress' ) );
+      ?>
+      
+      <?php $this->admin_show_checkbox(
+                    'businesspress-disable-rest-api',
+                    'disable-rest-api',
+                    '',
+                    __('REST API', 'businesspress' ) );
+      ?>
+    </table>           
+    <?php
+  }
+  
+  
+  
+  
+  function settings_box_updates() {
     
     $styleDomain = $this->get_whitelist_domain() ? '' : ' style="display:none"';
     $styleEmail = $this->get_whitelist_email() ? '' : ' style="display:none"';
@@ -1214,26 +1032,31 @@ JSR;
     $domain = $this->get_whitelist_domain() ? $this->get_whitelist_domain() : $this->get_email_domain($current_user->user_email);
     $email = $this->get_whitelist_email() ? $this->get_whitelist_email() : $current_user->user_email;
     ?>       
-    <table class="form-table2">
+    <table class="form-table">
       <tr>
-        <p>Please enter the
-          <input type="radio" id="whitelist-email" name="whitelist" class="businessp-checkbox" value="email"<?php echo $checkedEmail; ?>>
-          <label for="whitelist-email">admin email address</label> or
-          <input type="radio" id="whitelist-domain" name="whitelist" class="businessp-checkbox" value="domain"<?php echo $checkedDomain; ?>>
-          <label for="whitelist-domain">domain</label>. Only user with a matching email address or domain will be able to change the settings here.</p>
+        <th><label><?php _e('Please enter the', 'businesspress' ); ?></label></th>
+        <td>
+          <p>
+            <input type="radio" id="whitelist-email" name="whitelist" class="businessp-checkbox" value="email"<?php echo $checkedEmail; ?>>
+            <label for="whitelist-email"><?php _e('admin email address', 'businesspress' ); ?></label>            <?php _e('or', 'businesspress' ); ?>
+            <input type="radio" id="whitelist-domain" name="whitelist" class="businessp-checkbox" value="domain"<?php echo $checkedDomain; ?>>
+            <label for="whitelist-domain"><?php _e('domain', 'businesspress' ); ?></label>.
+          </p>
+          <p class="description"><?php _e('Only user with a matching email address or domain will be able to change the settings here.', 'businesspress' ); ?></p>
+        </td>
       </tr>
       <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
-        <td><label for="email">Domain</label></td>
+        <th><label for="email">Domain</label></th>
         <td><input class="regular-text" type="text" id="domain" name="domain" class="text" value="<?php echo esc_attr($domain); ?>" readonly /></td>
       </tr>      
       <tr class="whitelist-email"<?php echo $styleEmail; ?>>
-        <td><label for="email">Email</label></td>
+        <th><label for="email">Email</label></th>
         <td><input class="regular-text" type="text" id="email" name="email" class="text" value="<?php echo esc_attr($email); ?>" readonly /></td>
       </tr>
       <tr>
-        <td>
-          <p>Allow other admins to&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
-        </td>
+        <th>
+          <p><label>Allow other admins to</label></p>
+        </th>
         <td>
           <p><input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
             <label for="cap_activate">Activate and deactivate plugins and themes</label></p>
@@ -1248,7 +1071,9 @@ JSR;
         </td>
       </tr>
       <tr>
-        <td>Core auto updates</td>
+        <th>
+          <p><label>Core auto updates</label></p>
+        </th>
         <td>
           <select id="autoupgrades" name="autoupgrades">
             <option value="none"  <?php if( !empty($this->aOptions['core_auto_updates']) && $this->aOptions['core_auto_updates'] == "none" ) echo 'selected' ?>>None</option>
@@ -1256,14 +1081,9 @@ JSR;
             <option value="major" <?php if( !empty($this->aOptions['core_auto_updates']) && $this->aOptions['core_auto_updates'] == "major" ) echo 'selected' ?>>Major</option>
           </select>
         </td>
-      </tr>
-        <tr>    		
-          <td colspan="2">
-            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-          </td>
-        </tr>                                    
-      </table>
-      <script>
+      </tr>        
+    </table>
+    <script>
       if( jQuery('#whitelist-domain:checked').length ) {
         jQuery('tr.whitelist-email').hide();
         jQuery('tr.whitelist-domain').show();
@@ -1289,31 +1109,38 @@ JSR;
           jQuery('#cap_core').prop('checked',false);
         }
       });
-      </script>         
+    </script>         
     <?php
   }
   
   
   
-  
-  function settings_box_tweaks() {
+  function settings_box_welcome() {
     ?>       
-    <table class="form-table2">
-      <tr>
-        <td>
-          <p><label for="wp_admin_bar_subscribers">Hide WP Admin Bar for subscribers</label></p>
-        </td>
-        <td>
-          <p class="description"><input type="checkbox" id="wp_admin_bar_subscribers" name="wp_admin_bar_subscribers" value="1" <?php if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] ) echo 'checked'; ?> />
-            With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.</p>
-        </td>
-      </tr>
-        <tr>    		
-          <td colspan="2">
-            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-          </td>
-        </tr>                                    
-      </table>    
+<table class="form-table2">
+  <tr>
+    <td></td>
+    <td>
+      <div class="one-half first">
+        <p class="description"><?php _e('Short introduction text about plugin features. <br />Our plugin notices should be also included here.', 'businesspress' ); ?></p>
+      </div>
+      <div class="one-half">
+        <p class="description">
+          <?php if( $domain = $this->get_whitelist_domain() ) {
+            printf( __('Access to this screen is limited to users with email address on %s.'), $domain );
+          } elseif( $email = $this->get_whitelist_email() ) {
+            printf( __('Access to this screen is limited to user with email address equal to %s.'), $email );
+          } ?>        
+        </p>
+        <p class="description"><a href="#" class="button-primary"><?php _e('Contact the admin', 'businesspress' ); ?></a> <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
+      </div>            
+    </td>
+  </tr>
+  <tr>    		
+    <td colspan="2">
+    </td>
+  </tr>                                    
+</table>  
     <?php
   }  
   
