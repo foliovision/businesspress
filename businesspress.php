@@ -8,24 +8,6 @@ Author: Foliovision
 Author URI: http://foliovision.com
 */
 
-/*
-Version: 0.5: Reworking settings from scratch
-Version: 0.4.9: Set to only allow minor updates by default
-Version: 0.4.8: Changed name to BusinessPress and code reformated
-Version: 0.4.7: Javascript even if its not erroneous not showing in other places than plugins-list
-Version: 0.4.6: Fixed plugins_loaded EVIL!, Retyping EVIL, and my ONE ADMIN sites
-Version: 0.4.5: Fixed JS error in WP-Admin, 
-Version: 0.4.4: Plugin folder/file was renamed to FV Security Bundle, added comments, added possibility to turn on/off security checks
-Version: 0.4.3: Re-Added showing Message about not defined "DISALLOW_FILE_EDIT", repaired after-upgrade cleaning scripts
-Version: 0.4.2: Repaired disabling of "Deactivate" link when Restriction mode == ON
-Version: 0.4.1: Better uses of MU options + messagess are more clear
-Version: 0.4:   Now FV Security Bundle, whole plugin rewritten, uses filters, multisite support, OOP aproach, lots of functions
-Version: 0.3.1: Lots of bugfixes!
-Version: 0.3:   Added possibility to choose restricted capabilities 
-Version: 0.2.2: The plugin now edits (add/remove) capabilities only to admin users
-*/
-
-
 class BusinessPress {
 
   /* DB records
@@ -84,6 +66,17 @@ class BusinessPress {
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
     }
     
+    if( $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
+    
+    if( $this->get_setting('disable-oembed') ) {
+      include( dirname(__FILE__).'/plugins/disable-embeds.php' );
+      add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
+    }
+    
+    if( $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+    
+    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );    
+    
     
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
     
@@ -115,8 +108,6 @@ class BusinessPress {
     add_action( 'admin_init', array( $this, 'handle_post') );
     
     add_action( 'admin_init', array( $this, 'stop_disable_wordpress_core_updates') );
-    
-    add_action( 'init', array( $this, 'load_extensions'), 0 );
     
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -204,7 +195,7 @@ class BusinessPress {
   
   function admin_style() {
     if( is_admin() && isset($_GET['page']) && $_GET['page'] == 'businesspress' ) {
-      wp_register_style( 'businesspress_admin', plugins_url('/admin.css',__FILE__), false, BusinessPress::VERSION );
+      wp_register_style( 'businesspress_admin', plugins_url('/css/admin.css',__FILE__), false, BusinessPress::VERSION );
       wp_enqueue_style( 'businesspress_admin' );
     }
   }
@@ -766,19 +757,6 @@ JSH;
   
   
   
-  function load_extensions() {
-    if( $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
-    
-    if( $this->get_setting('disable-oembed') ) include( dirname(__FILE__).'/plugins/disable-embeds.php' );
-    
-    if( $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
-    
-    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
-  }
-  
-  
-  
-  
   // DONE + TODO DOCU
   function menu() {
     $current_user = wp_get_current_user();    
@@ -810,6 +788,15 @@ JSH;
       } ?>
       <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
+  }
+  
+  
+  
+  
+  function oembed_template() {
+    if( get_query_var('embed') ) {
+      add_filter( 'template_include', '__return_false' );
+    }    
   }
 
 

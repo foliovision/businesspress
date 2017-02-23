@@ -1,8 +1,8 @@
 <?php
 /**
  * Original Plugin Name: Disable Embeds
- * Description: Don't like the enhanced embeds in WordPress 4.4? Easily disable the feature using this plugin.
- * Version:     1.3.0
+ * Description: Don't like the enhanced embeds in WordPress 4.4? Easily disable the feature using this plugin. With Foliovision mods
+ * Version:     1.3.0.fv
  * Author:      Pascal Birchler
  * Author URI:  https://pascalbirchler.com
  * License:     GPLv2+
@@ -21,12 +21,13 @@
  */
 function disable_embeds_init() {
 	/* @var WP $wp */
-	global $wp;
+  /// Modification by Foliovision
+	/*global $wp;
 
 	// Remove the embed query var.
 	$wp->public_query_vars = array_diff( $wp->public_query_vars, array(
 		'embed',
-	) );
+	) );*/
 
 	// Remove the REST API endpoint.
 	remove_action( 'rest_api_init', 'wp_oembed_register_route' );
@@ -45,7 +46,8 @@ function disable_embeds_init() {
 	add_filter( 'tiny_mce_plugins', 'disable_embeds_tiny_mce_plugin' );
 
 	// Remove all embeds rewrite rules.
-	add_filter( 'rewrite_rules_array', 'disable_embeds_rewrites' );
+  /// Modification by Foliovision
+	//add_filter( 'rewrite_rules_array', 'disable_embeds_rewrites' );
 
 	// Remove filter of the oEmbed result before any HTTP requests are made.
 	remove_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result', 10 );
@@ -92,8 +94,8 @@ function disable_embeds_remove_rewrite_rules() {
 	add_filter( 'rewrite_rules_array', 'disable_embeds_rewrites' );
 	flush_rewrite_rules();
 }
-
-register_activation_hook( __FILE__, 'disable_embeds_remove_rewrite_rules' );
+/// Modification by Foliovision
+//register_activation_hook( __FILE__, 'disable_embeds_remove_rewrite_rules' );
 
 /**
  * Flush rewrite rules on plugin deactivation.
@@ -104,5 +106,5 @@ function disable_embeds_flush_rewrite_rules() {
 	remove_filter( 'rewrite_rules_array', 'disable_embeds_rewrites' );
 	flush_rewrite_rules();
 }
-
-register_deactivation_hook( __FILE__, 'disable_embeds_flush_rewrite_rules' );
+/// Modification by Foliovision
+//register_deactivation_hook( __FILE__, 'disable_embeds_flush_rewrite_rules' );
