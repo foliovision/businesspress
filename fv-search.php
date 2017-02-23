@@ -117,4 +117,62 @@ class FV_Search {
 
 $FV_Search = new FV_Search;
 
+add_action( 'wp_footer', 'user_screen_css' );
+function user_screen_css() {
+    ?>
+    <style>
+    /* Custom search results */
+    .businesspress-search-form {
+        max-width: 500px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px #ccc;
+    }
+    .businesspress-search-form .search-field {
+        border: none;
+        background-color: transparent;
+    }
+    .businesspress-search-form .search-submit {
+        text-indent: -9999px;
+        background: url('http://styling.domainearl.com/site/wp-content/plugins/businesspress/css/search-icon.png') no-repeat center center;
+        background-color: transparent;
+    }
+    .businesspress-search-form search-submit:before {
+        display: none;
+    }
+    .businesspress-search-result {
+        font-family: Arial, sans-serif;
+        margin: 24px 0;
+    }
+    .businesspress-search-result h2 {
+        font-size: 18px;
+        margin-bottom: 0;
+        font-weight: 400;
+    }
+    .businesspress-search-result h2 a,
+    .businesspress-search-result .bpsr-link a {
+        color: #1a0dab;
+        text-decoration: none;
+        box-shadow: none !important;
+        border-bottom: none !important;
+    }
+    .businesspress-search-result .bpsr-link a {
+        color: #006621;
+    }
+    .businesspress-search-result h2 a:hover,
+    .businesspress-search-result .bpsr-link a:hover {
+        text-decoration: underline;
+    }
+    .businesspress-search-result .bpsr-date {
+        color: #808080;
+        font-size: 14px;
+    }
+    .businesspress-search-result p {
+        line-height: 1.35;
+        font-size: 14px;
+    }
+    </style>
+    <?php
+  }
+
 
