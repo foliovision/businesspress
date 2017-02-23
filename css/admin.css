@@ -114,11 +114,18 @@
     vertical-align: top;
 }
 .settings_page_businesspress .form-table td {
-    padding: 16px 10px;
+    padding: 6px 10px;
 }
 .settings_page_businesspress tr th {
     text-align: right;
+    padding: 10px;
 }
 input[type="radio"] + label {
     vertical-align: top;
-}        
+}
+.wp-admin #businesspress_updates select {
+    margin-top: -3px;
+}
+.form-table td p {
+    margin-bottom: 0 !important;
+}
