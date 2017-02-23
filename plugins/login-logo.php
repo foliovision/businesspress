@@ -1,8 +1,8 @@
 <?php
 /*
 Original Plugin Name: Login Logo
-Description: Drop a PNG file named <code>login-logo.png</code> into your <code>wp-content</code> directory. This simple plugin takes care of the rest, with zero configuration. Transparent backgrounds work best. Crop it tight, with a width of 312 pixels, for best results.
-Version: 0.7
+Description: Drop a PNG file named <code>login-logo.png</code> into your <code>wp-content</code> directory. This simple plugin takes care of the rest, with zero configuration. Transparent backgrounds work best. Crop it tight, with a width of 312 pixels, for best results. Foliovsion mod to read the site logo from option.
+Version: 0.7.fv
 License: GPL
 Plugin URI: http://txfx.net/wordpress-plugins/login-logo/
 Author: Mark Jaquith
@@ -68,6 +68,17 @@ class CWS_Login_Logo_Plugin {
 			'path' => WP_CONTENT_DIR . '/login-logo.png',
 			'url' => $this->maybe_ssl( content_url( 'login-logo.png' ) )
 			);
+    
+    /// Addition by Foliovision
+    global $businesspress;
+    if( isset($businesspress) && method_exists($businesspress,'get_setting' ) ) {
+      $aImg = wp_get_attachment_image_src( $businesspress->get_setting('login-logo'), 'medium' );
+      $this->logo_locations['global'] =  array(
+        'path' => -1,
+        'attachment_id' => $businesspress->get_setting('login-logo'),
+        'url' => $this->maybe_ssl( $aImg[0] )
+        );
+    }
 	}
 
 	private function maybe_ssl( $url ) {
@@ -79,6 +90,13 @@ class CWS_Login_Logo_Plugin {
 	private function logo_file_exists() {
 		if ( ! isset( $this->logo_file_exists ) ) {
 			foreach ( $this->logo_locations as $location ) {
+        /// Addition by Foliovision
+        if ( $location['path'] == -1 ) {
+					$this->logo_file_exists = true;
+					$this->logo_location = $location;
+					break;
+				}
+        
 				if ( file_exists( $location['path'] ) ) {
 					$this->logo_file_exists = true;
 					$this->logo_location = $location;
@@ -95,8 +113,14 @@ class CWS_Login_Logo_Plugin {
 		if ( $this->logo_file_exists() ) {
 			if ( 'path' == $what )
 				return $this->logo_location[$what];
-			elseif ( 'url' == $what )
+			elseif ( 'url' == $what ) {
+        /// Addition by Foliovision
+        if( $this->logo_location['path'] == -1 ) return $this->logo_location[$what];
 				return $this->logo_location[$what] . '?v=' . filemtime( $this->logo_location['path'] );
+      }
+      /// Addition by Foliovision
+      elseif ( 'attachment_id' == $what )
+				return $this->logo_location[$what];
 			else
 				return $this->logo_location;
 		}
@@ -127,7 +151,15 @@ class CWS_Login_Logo_Plugin {
 		if ( !$this->logo_file_exists() )
 			return false;
 		if ( !$this->logo_size ) {
-			if ( $sizes = getimagesize( $this->get_location( 'path' ) ) ) {
+      /// Modification by Foliovision
+      if( $this->get_location( 'path' ) == -1 ) {
+        $aImg = wp_get_attachment_image_src( $this->get_location( 'attachment_id' ), 'medium' );
+        $sizes[0] = $aImg[1];
+        $sizes[1] = $aImg[2];
+      } else {
+        $sizes = getimagesize( $this->get_location( 'path' ) );
+      }
+			if ( $sizes ) {
 				$this->logo_size = $sizes;
 				$this->width  = $sizes[0];
 				$this->height = $sizes[1];
