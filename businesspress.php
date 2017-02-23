@@ -840,9 +840,9 @@ JSH;
     ?>        
     <div class="businesspress-header">
       <h2 class="nav-tab-wrapper businesspress-header-nav" id="businesspress-header-nav">
-        <a class="nav-tab nav-tab-active nav-tab-access" href=""><span>BusinessPress</span></a>    
+        <a class="nav-tab nav-tab-access" href="#welcome"><span>BusinessPress</span></a>    
         <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
-        <a class="nav-tab nav-tab-prefs" href="#prefs"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Help', 'businesspress' ); ?></span></a>
       </h2>
@@ -862,30 +862,25 @@ JSH;
       
       <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
         <div id="dashboard-widgets" class="metabox-holder columns-1">
-          <div id='postbox-container-1' class='postbox-container'>    
-            <?php
-            add_meta_box( 'businesspress_welcome', __('Welcome', 'businesspress'), array( $this, 'settings_box_welcome' ), 'businesspress_settings_welcome', 'normal' );
-            
-            add_meta_box( 'businesspress_updates', __('Updates', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
-            
-            add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
-            add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
-            add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
-            add_meta_box( 'businesspress_search', __('Search Results', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
-            
-            add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
-            
-            do_meta_boxes('businesspress_settings_welcome', 'normal', false );
-            do_meta_boxes('businesspress_settings_updates', 'normal', false );
-            do_meta_boxes('businesspress_settings_preferences', 'normal', false );
-            do_meta_boxes('businesspress_settings_branding', 'normal', false );
-            //wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
-            //wp_nonce_field( 'meta-box-order-nonce', 'meta-box-order-nonce', false );
-            ?>
-            
-            <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-            
-          </div>
+          <?php
+          add_meta_box( 'businesspress_welcome', __('Welcome', 'businesspress'), array( $this, 'settings_box_welcome' ), 'businesspress_settings_welcome', 'normal' );
+          
+          add_meta_box( 'businesspress_updates', __('Updates', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
+          
+          add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_search', __('Search Results', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          
+          add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
+          ?>
+          <div id='welcome' class='postbox-container'><?php do_meta_boxes('businesspress_settings_welcome', 'normal', false ); ?></div>
+          <div id='updates' class='postbox-container'><?php do_meta_boxes('businesspress_settings_updates', 'normal', false ); ?></div>
+          <div id='preferences' class='postbox-container'><?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?></div>
+          <div id='branding' class='postbox-container'><?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?></div>
+          
+          <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+          
         </div>
         <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
       </form>
@@ -894,6 +889,45 @@ JSH;
         </div>
       <?php endif; ?>      
     </div>
+    
+    
+  <script>
+  /* TABS */  
+  jQuery(document).ready(function(){
+    
+    var anchor = window.location.hash.substring(1);
+    if( !anchor || jQuery('#' + anchor).length == 0 ) {
+      anchor = 'welcome';
+    }
+    
+    jQuery('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
+    jQuery('[href=#'+anchor+']').addClass('nav-tab-active');
+    jQuery('#dashboard-widgets .postbox-container').hide();
+    jQuery('#' + anchor).show();
+  });
+  jQuery('#businesspress-header-nav a').on('click',function(e){
+    e.preventDefault();
+    
+    var anchor = jQuery(this).attr('href').substring(1);
+    window.location.hash = anchor;
+    
+    jQuery('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
+    jQuery('[href=#'+anchor+']').addClass('nav-tab-active');
+    jQuery('#dashboard-widgets .postbox-container').hide();
+    jQuery('#' + anchor).show();
+  });
+  jQuery('a.fv-settings-anchor').on('click',function(e){
+    var id = jQuery(this).attr('href');
+    if( id.match(/^#./) ){
+      var el = jQuery(id);
+      if(el.length){
+        var tab = el.parents('.postbox-container').attr('id');
+        jQuery('#fv_flowplayer_admin_tabs').find('a[href=#'+tab+']').click()
+      }
+    }
+  })
+</script>
+
     <?php
   }  
   
