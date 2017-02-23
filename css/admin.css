@@ -129,3 +129,11 @@ input[type="radio"] + label {
 .form-table td p {
     margin-bottom: 0 !important;
 }
+.businesspress-login-logo,
+#upload_image_button + label {
+    display: block;
+    margin-bottom: 12px;
+}
+#cap_core {
+    margin-left: 18px;
+}
