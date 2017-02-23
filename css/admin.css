@@ -86,12 +86,6 @@
     font-weight: 700;
     line-height: 1;
 }
-.wp-core-ui.settings_page_businesspress .button {
-    background-color: #0073AA;
-    color: #fff;
-    border: 0;
-    box-shadow: none;
-}
 .one-half {
     float: left;
     width: 48%;

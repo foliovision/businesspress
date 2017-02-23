@@ -77,7 +77,6 @@ class BusinessPress {
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );    
     
-    
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
     
     register_activation_hook( __FILE__, array( $this , 'activate') );
@@ -129,6 +128,8 @@ class BusinessPress {
     add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
     
     add_action( 'admin_enqueue_scripts', array( $this, 'admin_style' ) );
+    
+    add_action( 'plugins_loaded', array( $this, 'load_login_logo', ) );
     
   }
   
@@ -197,6 +198,8 @@ class BusinessPress {
     if( is_admin() && isset($_GET['page']) && $_GET['page'] == 'businesspress' ) {
       wp_register_style( 'businesspress_admin', plugins_url('/css/admin.css',__FILE__), false, BusinessPress::VERSION );
       wp_enqueue_style( 'businesspress_admin' );
+      
+      wp_enqueue_media();
     }
   }
 
@@ -562,7 +565,13 @@ class BusinessPress {
   */
   function get_setting( $key ) {
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
-    return isset($this->aOptions[$key]) && $this->aOptions[$key] ? true : false;
+    
+    if( isset($this->aOptions[$key]) ) {
+      if( $this->aOptions[$key] === true || $this->aOptions[$key] === 'true' ) return true;
+      return trim($this->aOptions[$key]);
+    }
+    
+    return false;
   }
   
   
@@ -626,6 +635,7 @@ class BusinessPress {
       $this->aOptions['disable-oembed'] = !empty($_POST['businesspress-disable-oembed']) ? true : false;
       $this->aOptions['disable-rest-api'] = !empty($_POST['businesspress-disable-rest-api']) ? true : false;
       $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
+      $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -757,6 +767,15 @@ JSH;
   
   
   
+  function load_login_logo() {
+    if( !class_exists('CWS_Login_Logo_Plugin') ) {
+      include( dirname(__FILE__).'/plugins/login-logo.php' );
+    }
+  }
+  
+  
+  
+  
   // DONE + TODO DOCU
   function menu() {
     $current_user = wp_get_current_user();    
@@ -836,7 +855,7 @@ JSH;
   
   
   
-  function screen() { 
+  function screen() {
     ?>        
     <div class="businesspress-header">
       <h2 class="nav-tab-wrapper businesspress-header-nav" id="businesspress-header-nav">
@@ -892,7 +911,7 @@ JSH;
     
     
   <script>
-  /* TABS */  
+  /*  Tabs */  
   jQuery(document).ready(function(){
     
     var anchor = window.location.hash.substring(1);
@@ -926,7 +945,55 @@ JSH;
       }
     }
   })
-</script>
+    
+  /*  Logo upload */
+  jQuery(document).ready(function($) {    
+    var fv_flowplayer_uploader;
+    var fv_flowplayer_uploader_button;
+    $(document).on( 'click', '.upload_image_button', function(e) {
+        e.preventDefault();
+        
+        fv_flowplayer_uploader_button = jQuery(this);
+        jQuery('.fv_flowplayer_target').removeClass('fv_flowplayer_target' );
+        fv_flowplayer_uploader_button.parents('tr').find('input[type=hidden]').addClass('fv_flowplayer_target' );
+                         
+        //If the uploader object has already been created, reopen the dialog
+        if (fv_flowplayer_uploader) {
+            fv_flowplayer_uploader.open();
+            return;
+        }
+        //Extend the wp.media object
+        fv_flowplayer_uploader = wp.media.frames.file_frame = wp.media({
+            title: 'Pick the image',
+            button: {
+                text: 'Choose'
+            },
+            multiple: false
+        });
+        
+        fv_flowplayer_uploader.on('open', function() {
+          jQuery('.media-frame-title h1').text(fv_flowplayer_uploader_button.attr('alt'));
+        });      
+        //When a file is selected, grab the URL and set it as the text field's value
+        fv_flowplayer_uploader.on('select', function() {
+            attachment = fv_flowplayer_uploader.state().get('selection').first().toJSON();
+            console.log(attachment);
+            $('.fv_flowplayer_target').val(attachment.id);
+            $('.businesspress-login-logo').remove();
+            
+            var url = attachment.url;
+            if( typeof(attachment.sizes) != "undefined" && typeof(attachment.sizes.medium) != "undefined" ) {
+              url = attachment.sizes.medium.url;
+            }
+            $('.fv_flowplayer_target').after('<img src="'+url+'" class="businesspress-login-logo" />');
+            $('.fv_flowplayer_target').removeClass('fv_flowplayer_target' );
+        });
+        //Open the uploader dialog
+        fv_flowplayer_uploader.open();
+    });    
+   
+  });     
+  </script>
 
     <?php
   }  
@@ -964,6 +1031,21 @@ JSR;
                     'Hide WP Admin Bar for subscribers',
                     __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen", 'businesspress' ) );
       ?>
+      <tr>
+        <th>
+          <label for="login-logo"><?php _e('Login Logo', 'businesspress' ); ?></label>
+        </th>
+        <td>
+          <p class="description"><input type="hidden" id="login-logo" name="businesspress-login-logo" value="<?php echo esc_attr($this->get_setting('login-logo') ); ?>" class="regular-text code" />
+            <?php
+            if( $this->get_setting('login-logo') > 0 ) {
+              echo wp_get_attachment_image($this->get_setting('login-logo'),'medium', false, array( 'class' => 'businesspress-login-logo' ) );
+            }
+            ?>
+            <input id="upload_image_button" class="upload_image_button button no-margin small" type="button" value="<?php _e('Upload Image', 'fv-wordpress-flowplayer'); ?>" alt="Select Logo" />
+            <label for="login-logo"><?php _e('This will the default Wordpress logo on the login screen to the one you chose. The uploaded logo will also be used on the search results page template.', 'businesspress' ); ?></p>
+        </td>
+      </tr>      
     </table>           
     <?php
   }
