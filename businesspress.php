@@ -124,6 +124,10 @@ class BusinessPress {
     
     add_action( 'plugins_loaded', array( $this, 'load_extensions', ) );
     
+    //  wp-admin color
+    remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
+    add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
+    
   }
   
   
@@ -133,6 +137,13 @@ class BusinessPress {
     $this->aOptions = array();
     $this->aOptions['core_auto_updates'] = 'minor';
     update_option( 'businesspress', $this->aOptions ); 
+  }
+  
+  
+  
+  
+  function admin_color_force() {
+    return $this->get_setting('admin-color');
   }
   
   
@@ -629,6 +640,7 @@ class BusinessPress {
       $this->aOptions['disable-rest-api'] = !empty($_POST['businesspress-disable-rest-api']) ? true : false;
       $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
       $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
+      $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -881,7 +893,7 @@ JSH;
         <div class="options-hidden" style="display: none; ">
       <?php endif; ?>
       
-      <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
+      <form id="businesspress-form" method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
         <div id="dashboard-widgets" class="metabox-holder columns-1">
           <?php
           add_meta_box( 'businesspress_welcome', __('Welcome', 'businesspress'), array( $this, 'settings_box_welcome' ), 'businesspress_settings_welcome', 'normal' );
@@ -913,40 +925,42 @@ JSH;
     
     
   <script>
-  /*  Tabs */  
-  jQuery(document).ready(function(){
+  (function($) {
     
-    var anchor = window.location.hash.substring(1);
-    if( !anchor || jQuery('#' + anchor).length == 0 ) {
-      anchor = 'welcome';
-    }
+    /*  Tabs */      
+    function tab_switch(anchor) {
+      $('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
+      $('[href=#'+anchor+']').addClass('nav-tab-active');
+      $('#dashboard-widgets .postbox-container').hide();
+      $('#' + anchor).show();      
+      
+      $('#businesspress-form').attr('action', $('#businesspress-form').attr('action').replace(/#.+/,'') +'#'+anchor);
+    }    
     
-    jQuery('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
-    jQuery('[href=#'+anchor+']').addClass('nav-tab-active');
-    jQuery('#dashboard-widgets .postbox-container').hide();
-    jQuery('#' + anchor).show();
-  });
-  jQuery('#businesspress-header-nav a').on('click',function(e){
-    e.preventDefault();
-    
-    var anchor = jQuery(this).attr('href').substring(1);
-    window.location.hash = anchor;
-    
-    jQuery('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
-    jQuery('[href=#'+anchor+']').addClass('nav-tab-active');
-    jQuery('#dashboard-widgets .postbox-container').hide();
-    jQuery('#' + anchor).show();
-  });
-  jQuery('a.fv-settings-anchor').on('click',function(e){
-    var id = jQuery(this).attr('href');
-    if( id.match(/^#./) ){
-      var el = jQuery(id);
-      if(el.length){
-        var tab = el.parents('.postbox-container').attr('id');
-        jQuery('#fv_flowplayer_admin_tabs').find('a[href=#'+tab+']').click()
+    $(document).ready(function(){
+      var anchor = window.location.hash.substring(1);
+      if( !anchor || jQuery('#' + anchor).length == 0 ) {
+        anchor = 'welcome';
       }
-    }
-  })
+      
+      tab_switch(anchor);
+    });
+    $('#businesspress-header-nav a').on('click',function(e){
+      e.preventDefault();
+      
+      var anchor = $(this).attr('href').substring(1);
+      window.location.hash = anchor;
+      tab_switch(anchor);
+    });
+    
+    /* Color scheme */
+    $('.color-palette').click( function() {
+      $(this).siblings('input[name=admin_color]').click();
+      $('.color-option').removeClass('selected');
+      $(this).parents('.color-option').addClass('selected');
+    });
+    
+  })(jQuery);
     
   /*  Logo upload */
   jQuery(document).ready(function($) {    
@@ -1047,7 +1061,7 @@ JSR;
             <input id="upload_image_button" class="upload_image_button button no-margin small" type="button" value="<?php _e('Upload Image', 'fv-wordpress-flowplayer'); ?>" alt="Select Logo" />
             <label for="login-logo"><?php _e('This will the default Wordpress logo on the login screen to the one you chose. The uploaded logo will also be used on the search results page template.', 'businesspress' ); ?></p>
         </td>
-      </tr>      
+      </tr>
     </table>           
     <?php
   }
@@ -1217,6 +1231,72 @@ JSR;
     </script>         
     <?php
   }
+  
+  
+  
+  
+  function settings_box_user() {    
+    ?>
+    <table class="form-table">
+      <tr>
+        <th><label><?php _e('Impose Admin Color Scheme', 'businesspress' ); ?></label></th>
+        <td><?php
+        //  copy of core code from wp-admin/includes/misc.php admin_color_scheme_picker() with adjustments
+        global $_wp_admin_css_colors;
+        
+          ksort( $_wp_admin_css_colors );
+        
+          if ( isset( $_wp_admin_css_colors['fresh'] ) ) {
+            // Set Default ('fresh') and Light should go first.
+            $_wp_admin_css_colors = array_filter( array_merge( array( 'fresh' => '', 'light' => '' ), $_wp_admin_css_colors ) );
+          }
+        
+          $current_color = $this->get_setting('admin-color');
+          
+          if ( empty( $current_color ) || ! isset( $_wp_admin_css_colors[ $current_color ] ) ) {
+            $current_color = 'fresh';
+          }
+        
+          ?>
+          <fieldset id="color-picker" class="scheme-list">
+            <legend class="screen-reader-text"><span><?php _e( 'Admin Color Scheme' ); ?></span></legend>
+            <?php
+            wp_nonce_field( 'save-color-scheme', 'color-nonce', false );
+            foreach ( $_wp_admin_css_colors as $color => $color_info ) :
+        
+              ?>
+              <div class="color-option <?php echo ( $color == $current_color ) ? 'selected' : ''; ?>">
+                <input name="admin_color" id="admin_color_<?php echo esc_attr( $color ); ?>" type="radio" value="<?php echo esc_attr( $color ); ?>" class="tog" <?php checked( $color, $current_color ); ?> />
+                <input type="hidden" class="css_url" value="<?php echo esc_url( $color_info->url ); ?>" />
+                <input type="hidden" class="icon_colors" value="<?php echo esc_attr( wp_json_encode( array( 'icons' => $color_info->icon_colors ) ) ); ?>" />
+                <label for="admin_color_<?php echo esc_attr( $color ); ?>"><?php echo esc_html( $color_info->name ); ?></label>
+                <table class="color-palette">
+                  <tr>
+                  <?php
+        
+                  foreach ( $color_info->colors as $html_color ) {
+                    ?>
+                    <td style="background-color: <?php echo esc_attr( $html_color ); ?>">&nbsp;</td>
+                    <?php
+                  }
+        
+                  ?>
+                  </tr>
+                </table>
+              </div>
+              <?php
+        
+            endforeach;
+        
+          ?>
+          </fieldset>
+          <?php        
+        ?></td>
+      </tr>
+    </table>           
+    <?php
+  }  
+  
   
   
   
