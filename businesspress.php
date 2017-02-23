@@ -61,11 +61,7 @@ class BusinessPress {
     
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
     
-    
-    if( $this->get_setting('disable-xml-rpc') ) {
-      add_filter('xmlrpc_enabled', '__return_false');
-      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
-    }    
+    $this->disable_xmlrpc();
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
     
@@ -129,6 +125,8 @@ class BusinessPress {
     //  wp-admin color
     remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
+    
+    add_action( 'init', array( $this, 'remove_hooks') );
     
   }
   
@@ -425,6 +423,18 @@ class BusinessPress {
   
   
   
+  function disable_xmlrpc() {
+    if( $this->get_setting('disable-xml-rpc') ) {
+      add_filter('xmlrpc_enabled', '__return_false');
+      remove_action( 'wp_head', 'rsd_link' );
+      remove_action( 'wp_head', 'wlwmanifest_link' );
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
+    }    
+  }
+  
+  
+  
+  
   function fail2ban_404( $username ) {
     if( preg_match( '~\.(jpg|png|gif|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
 
@@ -644,6 +654,7 @@ class BusinessPress {
       $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
       $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
+      $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -859,6 +870,16 @@ JSH;
       
     }
     
+  }
+  
+  
+  
+  
+  function remove_hooks() {
+    if( $this->get_setting('remove-generator') ) {
+      remove_action( 'wp_head', 'edd_version_in_header' );
+      remove_action( 'wp_head', 'wp_generator' );      
+    }       
   }
   
   
@@ -1144,6 +1165,13 @@ JSR;
                     '',
                     __('REST API', 'businesspress' ) );
       ?>
+      
+      <?php $this->admin_show_checkbox(
+                    'businesspress-remove-generator',
+                    'remove-generator',
+                    '',
+                    __('Generator Tag (WP, EDD)', 'businesspress' ) );
+      ?>      
     </table>           
     <?php
   }
