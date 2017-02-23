@@ -61,21 +61,14 @@ class BusinessPress {
     
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
     
+    
     if( $this->get_setting('disable-xml-rpc') ) {
       add_filter('xmlrpc_enabled', '__return_false');
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
-    }
-    
-    if( $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
-    
-    if( $this->get_setting('disable-oembed') ) {
-      include( dirname(__FILE__).'/plugins/disable-embeds.php' );
-      add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
-    }
-    
-    if( $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+    }    
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );    
+    
     
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
     
@@ -129,7 +122,7 @@ class BusinessPress {
     
     add_action( 'admin_enqueue_scripts', array( $this, 'admin_style' ) );
     
-    add_action( 'plugins_loaded', array( $this, 'load_login_logo', ) );
+    add_action( 'plugins_loaded', array( $this, 'load_extensions', ) );
     
   }
   
@@ -767,10 +760,19 @@ JSH;
   
   
   
-  function load_login_logo() {
+  function load_extensions() {
     if( !class_exists('CWS_Login_Logo_Plugin') ) {
       include( dirname(__FILE__).'/plugins/login-logo.php' );
     }
+    
+    if( !function_exists('disable_emojis') && $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
+    
+    if( !function_exists('disable_embeds_init') && $this->get_setting('disable-oembed') ) {
+      include( dirname(__FILE__).'/plugins/disable-embeds.php' );
+      add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
+    }
+    
+    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );    
   }
   
   
