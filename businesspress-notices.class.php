@@ -23,6 +23,19 @@ class BusinessPress_Notices {
   
   
   
+  function get_count() {
+    $aStored = get_option( 'businesspress_notices', array() );
+    foreach( $aStored AS $aNotice ) {
+      if( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) {
+        $this->iNoticesAvoided++;
+      }
+    }
+    return $this->iNoticesAvoided;
+  }
+  
+  
+  
+  
   function prepare_compare( $html ) {
     $html = preg_replace( '~nonce=[0-9a-z_-]+~', '', $html);
     $html = preg_replace( '~[^A-Za-z0-9]~', '', strip_tags($html) );
@@ -97,13 +110,7 @@ class BusinessPress_Notices {
   
   
   function show_count() {
-    $aStored = get_option( 'businesspress_notices', array() );
-    foreach( $aStored AS $aNotice ) {
-      if( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) {
-        $this->iNoticesAvoided++;
-      }
-    }
-    
+    $this->get_count();
     
     if( $this->iNoticesAvoided == 0 ) return;
     ?>
@@ -244,4 +251,5 @@ class BusinessPress_Notices {
   
 }
 
+global $BusinessPress_Notices;
 $BusinessPress_Notices = new BusinessPress_Notices;

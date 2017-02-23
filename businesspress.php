@@ -67,7 +67,9 @@ class BusinessPress {
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
     }    
     
-    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );    
+    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
+    
+    if( $this->get_setting('hide-notices') ) include( dirname(__FILE__).'/businesspress-notices.class.php' );
     
     
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
@@ -641,6 +643,7 @@ class BusinessPress {
       $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
       $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
+      $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -903,7 +906,7 @@ JSH;
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_search', __('Search Results', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_search', __('Other', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           ?>
@@ -1101,6 +1104,23 @@ JSR;
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
       ?>
+      <?php $this->admin_show_checkbox(
+                    'businesspress-hide-notices',
+                    'hide-notices',
+                    'Hide Admin Notices',
+                    __('Moves them all to a new screen.', 'businesspress' ) );
+      ?>
+      
+      <?php if( $this->get_setting('hide-notices') ) :
+        global $BusinessPress_Notices;
+        $iCount = $BusinessPress_Notices->get_count();
+        ?>
+        <tr>
+          <th></th>
+          <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
+        </tr>
+      <?php endif; ?>
+      
     </table>           
     <?php
   }
