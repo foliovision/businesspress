@@ -4,6 +4,6 @@ filter = wordpress
 logpath = /var/log/auth.log
 port = http,https
 
-maxretry = 8
-findtime = 1800
-bantime = 1800
+maxretry = 12
+findtime = 1200
+bantime = 1200

@@ -1,0 +1,124 @@
+#postbox-container-1 {width: 100% !important;}
+
+/* Nav Tabs */
+.businesspress-header {
+    background: #fff none repeat scroll 0 0;
+    margin-left: -20px;
+    overflow: hidden;
+    padding: 0 20px;
+    position: relative;
+}
+.businesspress-header::before {
+    background: #dfdfdf none repeat scroll 0 0;
+    bottom: 0;
+    content: "";
+    display: block;
+    height: 1px;
+    left: 0;
+    position: absolute;
+    right: 0;
+}
+#businesspress-header-nav {
+    border: 0 none;
+    font-size: 1.5em;
+    margin: 0;
+    padding: 0;
+}
+#businesspress-header-nav .nav-tab {
+    background: transparent none repeat scroll 0 0;
+    border: 0 none;
+    color: inherit;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 0.68em;
+    font-weight: normal;
+    line-height: 3.4em;
+    margin-right: 0;
+    padding: 0.35em 1em 0;
+}
+#businesspress-header-nav .nav-tab-active {
+    background: #f1f1f1 none repeat scroll 0 0;
+    position: relative;
+}
+#businesspress-header-nav a.nav-tab-license {
+    float: right;
+}
+#businesspress-header-nav .nav-tab-active::before,
+#businesspress-header-nav .nav-tab-active::after {
+    background: #dfdfdf none repeat scroll 0 0;
+    bottom: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 1px;
+}
+#businesspress-header-nav .nav-tab-active::before {
+    left: 0;
+}
+#businesspress-header-nav .nav-tab-active::after {
+    right: 0;
+}
+#businesspress-header-nav .nav-tab-right {
+    float: right;
+}
+#businesspress-header-nav .nav-tab-access {
+    background: #F1F1F1 url(businesspress-logo.png) no-repeat center center;
+    min-width: 48px;
+}
+#businesspress-header-nav .nav-tab-access span {
+    text-indent: -9999px;
+    overflow: hidden;
+    display: block;
+}
+#dashboard-widgets .meta-box-sortables {
+    margin: 0 !important;
+}
+.form-table p, .form-wrap p, p.description, p.help, span.description {
+    font-style: normal !important;
+    margin: 0 0 18px !important;
+}
+.form-table tr > th:first-child label,
+.form-table2 tr > th:first-child label {
+    display: block;
+    text-align: right;
+    min-width: 240px;
+    font-weight: 700;
+    line-height: 1;
+}
+.one-half {
+    float: left;
+    width: 48%;
+    margin-left: 4%;
+}
+.one-half.first {
+    margin-left: 0;
+}
+.settings_page_businesspress .postbox {
+    border-radius: 4px;
+    box-shadow: none;
+}
+.settings_page_businesspress .postbox .hndle,
+.settings_page_businesspress.stuffbox .hndle {
+    border-bottom: 0;
+    font-size: 15px;
+}
+.form-table,
+.form-table td,
+.form-table td p,
+.form-table th {
+    font-size: 13px !important;
+}
+.settings_page_businesspress .form-table tr th,
+.settings_page_businesspress .form-table tr td {
+    vertical-align: top;
+}
+.settings_page_businesspress .form-table td {
+    padding: 16px 10px;
+}
+.settings_page_businesspress tr th {
+    text-align: right;
+}
+input[type="radio"] + label {
+    vertical-align: top;
+}        

@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 4.5
+Tested up to: 4.6.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -27,8 +27,6 @@ This plugin also allows you to prevent your client from installing new plugins (
 
 Plugin also supports fail2ban, see install instructions.
 
-Plugin also removes annoying plugin notices from WP Admin Dashboard. See changelog for what's supported.
-
 ###Coming soon
 
 * Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
@@ -39,7 +37,9 @@ Plugin also removes annoying plugin notices from WP Admin Dashboard. See changel
 
 == Installation ==
 
-Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
+### Basic install
+
+If you are using WordPress Multisite, make sure you Network Activate the plugin. Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
 
 Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
 
@@ -66,9 +66,38 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.6.7 =
+
+* New settings screen with tabs!
+* New function - Disable XML-RPC
+* New function - Disable REST  API
+* New function - Disable Emojis
+* New function - Disable oEmbed
+* New function - Impose Admin Color Scheme to all users
+* New function - Enable Google style results - gives you similar layout and keyword highlight
+* New function - Login logo (with image upload)
+* Improving the notice for password reset link to also say "Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes."
+* Setting "Hide WP Admin Bar for subscribers" now also removes all screen except for Profile for them
+* WP logo in Admin Bar is now removed
+
+= 0.6.6 =
+
+* Added setting to Allow other admins to -> Export site content
+* Disabling "WordPress x.y.z is available. Please update!" emails
+* Disabling "Your site has updated to WordPress x.y.z" emails
+
+= 0.6.5 =
+
+* Fail2ban - added support for MaxCDN - matching IPs are treated as proxy servers to detect the real user IP reliably
+
+= 0.6.4 =
+
+* Bugfix - users able to deactivate the plugin in some cases
+* DoS protection - 404 requests are now reported to fail2ban. Make sure you update your fail2ban filter a jail settings. Our settings are 12 retries (login or 404) in 20 minutes
+
 = 0.6.3 =
 
-* Removing annoying plugin notices - WooThemes Updater (WooCommerce - activation/renewal notices), Gravity Forms (new update notice)
+* Fix for WordPress Multisite
 
 = 0.6.2 =
 
