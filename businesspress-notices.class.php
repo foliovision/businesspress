@@ -177,6 +177,8 @@ class BusinessPress_Notices {
     echo "<!--BusinessPress_Notices::store()-->\n";
     //echo "<p>BusinessPress_Notices::store()</p>";
     
+    if( !$junk ) return;
+    
     $dom = new DOMDocument();
     $dom->loadHTML( $junk );
     
