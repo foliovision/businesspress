@@ -180,7 +180,7 @@ class BusinessPress {
   
   
   
-  function admin_show_checkbox( $name, $option_key, $title, $help ) {
+  function admin_show_setting( $name, $option_key, $title, $help, $type = 'checkbox' ) {
     $name = esc_attr($name);    
     ?>
       <tr>
@@ -188,7 +188,12 @@ class BusinessPress {
           <label for="<?php echo $name; ?>"><?php _e($title, 'businesspress' ); ?></label>
         </th>
         <td>
-          <p class="description"><input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $this->get_setting($option_key) ) echo 'checked="checked"'; ?> />
+          <p class="description">
+            <?php if( $type == 'text' ) : ?>
+              <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $this->get_setting($option_key) ); ?>" />
+            <?php else : ?>
+              <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $this->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
+            <?php endif; ?>
             <label for="<?php echo $name; ?>"><?php echo $help; ?></p>
         </td>
       </tr>
@@ -529,6 +534,12 @@ class BusinessPress {
   
   
   function get_remote_addr() {
+    if( isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
+      return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
+              ? $_SERVER['HTTP_X_FORWARDED_FOR']
+              : substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+    }
+    
     $aProxies = array();
     $aMaxCDN = array( '108.161.176.0/20', '94.46.144.0/20', '146.88.128.0/20', '198.232.124.0/22', '23.111.8.0/22', '217.22.28.0/22', '64.125.76.64/27', '64.125.76.96/27', '64.125.78.96/27', '64.125.78.192/27', '64.125.78.224/27', '64.125.102.32/27', '64.125.102.64/27', '64.125.102.96/27', '94.31.27.64/27', '94.31.33.128/27', '94.31.33.160/27', '94.31.33.192/27', '94.31.56.160/27', '177.54.148.0/24', '185.18.207.64/26', '50.31.249.224/27', '50.31.251.32/28', '119.81.42.192/27', '119.81.104.96/28', '119.81.67.8/29', '119.81.0.104/30', '119.81.1.144/30', '27.50.77.226/32', '27.50.79.130/32', '119.81.131.130/32', '119.81.131.131/32', '216.12.211.59/32', '216.12.211.60/32', '37.58.110.67/32', '37.58.110.68/32', '158.85.206.228/32', '158.85.206.231/32', '174.36.204.195/32', '174.36.204.196/32', '151.139.0.0/19', '94.46.144.0/21', '103.66.28.0/22', '103.228.104.0/22' );
       
@@ -655,6 +666,7 @@ class BusinessPress {
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
       $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
       $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
+      $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -1065,7 +1077,7 @@ JSR;
   function settings_box_branding() {
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'wp_admin_bar_subscribers',
                     'wp_admin_bar_subscribers',
                     'Hide WP Admin Bar for subscribers',
@@ -1096,14 +1108,14 @@ JSR;
   function settings_box_performance() {    
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-emojis',
                     'disable-emojis',
                     'Disable',
                     __('Emojis', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-oembed',
                     'disable-oembed',
                     '',
@@ -1119,13 +1131,13 @@ JSR;
   function settings_box_search() {
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-search-results',
                     'search-results',
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
       ?>
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-hide-notices',
                     'hide-notices',
                     'Hide Admin Notices',
@@ -1152,26 +1164,34 @@ JSR;
   function settings_box_security() {    
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-xml-rpc',
                     'disable-xml-rpc',
                     'Disable',
                     __('XML-RPC', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-rest-api',
                     'disable-rest-api',
                     '',
                     __('REST API', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-remove-generator',
                     'remove-generator',
                     '',
                     __('Generator Tag (WP, EDD)', 'businesspress' ) );
-      ?>      
+      ?>
+      
+      <?php $this->admin_show_setting(
+                    'businesspress-xpull-key',
+                    'xpull-key',
+                    'Login Protection',
+                    __('X-Pull Key (KeyCDN) - requests with matching X-Pull HTTP header will be considered as behind a proxy.', 'businesspress' ),
+                    'text' );
+      ?>         
     </table>           
     <?php
   }
