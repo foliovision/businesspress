@@ -437,6 +437,8 @@ class BusinessPress {
     }
     
     if( $this->get_setting('xml-rpc-key') ) {
+      remove_action( 'wp_head', 'rsd_link' );
+      remove_action( 'wp_head', 'wlwmanifest_link' );
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
     }      
   }
