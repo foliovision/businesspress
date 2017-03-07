@@ -437,7 +437,7 @@ class BusinessPress {
     }
     
     if( $this->get_setting('xml-rpc-key') ) {
-      //if( stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
     }      
   }
   
