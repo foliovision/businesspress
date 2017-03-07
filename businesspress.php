@@ -1768,7 +1768,7 @@ JSR;
     ?>
     <script>
     jQuery(function($){
-      $('form').submit( function(e) {
+      $('form[name=upgrade]').submit( function(e) {
         var form = $(this);
         
         if( form.find('.check-1').prop('checked') && form.find('.check-2').prop('checked') && form.find('.check-3').prop('checked') ) {
