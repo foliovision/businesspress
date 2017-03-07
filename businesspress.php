@@ -434,7 +434,11 @@ class BusinessPress {
       remove_action( 'wp_head', 'rsd_link' );
       remove_action( 'wp_head', 'wlwmanifest_link' );
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
-    }    
+    }
+    
+    if( $this->get_setting('xml-rpc-key') ) {
+      //if( stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
+    }      
   }
   
   
@@ -667,6 +671,7 @@ class BusinessPress {
       $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
       $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
       $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
+      $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -1191,7 +1196,15 @@ JSR;
                     'Login Protection',
                     __('X-Pull Key (KeyCDN) - requests with matching X-Pull HTTP header will be considered as behind a proxy.', 'businesspress' ),
                     'text' );
-      ?>         
+      ?>
+      
+      <?php $this->admin_show_setting(
+                    'businesspress-xml-rpc-key',
+                    'xml-rpc-key',
+                    'XML-RPC Protection',
+                    __('Put in something like <code>?secret=nb9u2394u90</code> and then access the XML-RPC for your site as https://foliovision.com/xmlrpc.php?secret=nb9u2394u90. Other requests will be blocked', 'businesspress' ),
+                    'text' );
+      ?>           
     </table>           
     <?php
   }
