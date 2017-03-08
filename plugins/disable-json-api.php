@@ -26,6 +26,8 @@ if ( version_compare( $dra_current_WP_version, '4.7', '>=' ) ) {
  * Forcibly raise an authentication error to the REST API if the user is not logged in
  */
 function DRA_Force_Auth_Error() {
+    /// Addition by Foliovision
+    remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
     add_filter( 'rest_authentication_errors', 'DRA_only_allow_logged_in_rest_access' );
 }
 

@@ -73,11 +73,13 @@ class CWS_Login_Logo_Plugin {
     global $businesspress;
     if( isset($businesspress) && method_exists($businesspress,'get_setting' ) ) {
       $aImg = wp_get_attachment_image_src( $businesspress->get_setting('login-logo'), 'medium' );
-      $this->logo_locations['global'] =  array(
-        'path' => -1,
-        'attachment_id' => $businesspress->get_setting('login-logo'),
-        'url' => $this->maybe_ssl( $aImg[0] )
-        );
+      if( $aImg ) {
+        $this->logo_locations['global'] =  array(
+          'path' => -1,
+          'attachment_id' => $businesspress->get_setting('login-logo'),
+          'url' => $this->maybe_ssl( $aImg[0] )
+          );
+      }
     }
 	}
 

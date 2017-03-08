@@ -76,6 +76,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 * New function - Impose Admin Color Scheme to all users
 * New function - Enable Google style results - gives you similar layout and keyword highlight
 * New function - Login logo (with image upload)
+* New function - Hide Admin Notices option moves all the notices to a new screen!
 * Improving the notice for password reset link to also say "Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes."
 * Setting "Hide WP Admin Bar for subscribers" now also removes all screen except for Profile for them
 * WP logo in Admin Bar is now removed

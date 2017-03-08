@@ -61,13 +61,11 @@ class BusinessPress {
     
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
     
+    $this->disable_xmlrpc();
     
-    if( $this->get_setting('disable-xml-rpc') ) {
-      add_filter('xmlrpc_enabled', '__return_false');
-      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
-    }    
+    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
     
-    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );    
+    if( $this->get_setting('hide-notices') ) include( dirname(__FILE__).'/businesspress-notices.class.php' );
     
     
     add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
@@ -128,6 +126,8 @@ class BusinessPress {
     remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
     
+    add_action( 'init', array( $this, 'remove_hooks') );
+    
   }
   
   
@@ -180,7 +180,7 @@ class BusinessPress {
   
   
   
-  function admin_show_checkbox( $name, $option_key, $title, $help ) {
+  function admin_show_setting( $name, $option_key, $title, $help, $type = 'checkbox' ) {
     $name = esc_attr($name);    
     ?>
       <tr>
@@ -188,7 +188,12 @@ class BusinessPress {
           <label for="<?php echo $name; ?>"><?php _e($title, 'businesspress' ); ?></label>
         </th>
         <td>
-          <p class="description"><input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $this->get_setting($option_key) ) echo 'checked="checked"'; ?> />
+          <p class="description">
+            <?php if( $type == 'text' ) : ?>
+              <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $this->get_setting($option_key) ); ?>" />
+            <?php else : ?>
+              <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $this->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
+            <?php endif; ?>
             <label for="<?php echo $name; ?>"><?php echo $help; ?></p>
         </td>
       </tr>
@@ -423,6 +428,24 @@ class BusinessPress {
   
   
   
+  function disable_xmlrpc() {
+    if( $this->get_setting('disable-xml-rpc') ) {
+      add_filter('xmlrpc_enabled', '__return_false');
+      remove_action( 'wp_head', 'rsd_link' );
+      remove_action( 'wp_head', 'wlwmanifest_link' );
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
+    }
+    
+    if( $this->get_setting('xml-rpc-key') ) {
+      remove_action( 'wp_head', 'rsd_link' );
+      remove_action( 'wp_head', 'wlwmanifest_link' );
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
+    }      
+  }
+  
+  
+  
+  
   function fail2ban_404( $username ) {
     if( preg_match( '~\.(jpg|png|gif|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
 
@@ -517,6 +540,12 @@ class BusinessPress {
   
   
   function get_remote_addr() {
+    if( isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
+      return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
+              ? $_SERVER['HTTP_X_FORWARDED_FOR']
+              : substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+    }
+    
     $aProxies = array();
     $aMaxCDN = array( '108.161.176.0/20', '94.46.144.0/20', '146.88.128.0/20', '198.232.124.0/22', '23.111.8.0/22', '217.22.28.0/22', '64.125.76.64/27', '64.125.76.96/27', '64.125.78.96/27', '64.125.78.192/27', '64.125.78.224/27', '64.125.102.32/27', '64.125.102.64/27', '64.125.102.96/27', '94.31.27.64/27', '94.31.33.128/27', '94.31.33.160/27', '94.31.33.192/27', '94.31.56.160/27', '177.54.148.0/24', '185.18.207.64/26', '50.31.249.224/27', '50.31.251.32/28', '119.81.42.192/27', '119.81.104.96/28', '119.81.67.8/29', '119.81.0.104/30', '119.81.1.144/30', '27.50.77.226/32', '27.50.79.130/32', '119.81.131.130/32', '119.81.131.131/32', '216.12.211.59/32', '216.12.211.60/32', '37.58.110.67/32', '37.58.110.68/32', '158.85.206.228/32', '158.85.206.231/32', '174.36.204.195/32', '174.36.204.196/32', '151.139.0.0/19', '94.46.144.0/21', '103.66.28.0/22', '103.228.104.0/22' );
       
@@ -641,6 +670,10 @@ class BusinessPress {
       $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
       $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
+      $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
+      $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
+      $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
+      $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -861,6 +894,16 @@ JSH;
   
   
   
+  function remove_hooks() {
+    if( $this->get_setting('remove-generator') ) {
+      remove_action( 'wp_head', 'edd_version_in_header' );
+      remove_action( 'wp_head', 'wp_generator' );      
+    }       
+  }
+  
+  
+  
+  
   function remove_wp_logo() {
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');
@@ -903,7 +946,7 @@ JSH;
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_search', __('Search Results', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_search', __('Other', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           ?>
@@ -1041,7 +1084,7 @@ JSR;
   function settings_box_branding() {
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'wp_admin_bar_subscribers',
                     'wp_admin_bar_subscribers',
                     'Hide WP Admin Bar for subscribers',
@@ -1072,14 +1115,14 @@ JSR;
   function settings_box_performance() {    
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-emojis',
                     'disable-emojis',
                     'Disable',
                     __('Emojis', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-oembed',
                     'disable-oembed',
                     '',
@@ -1095,12 +1138,29 @@ JSR;
   function settings_box_search() {
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-search-results',
                     'search-results',
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
       ?>
+      <?php $this->admin_show_setting(
+                    'businesspress-hide-notices',
+                    'hide-notices',
+                    'Hide Admin Notices',
+                    __('Moves them all to a new screen.', 'businesspress' ) );
+      ?>
+      
+      <?php if( $this->get_setting('hide-notices') ) :
+        global $BusinessPress_Notices;
+        $iCount = $BusinessPress_Notices->get_count();
+        ?>
+        <tr>
+          <th></th>
+          <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
+        </tr>
+      <?php endif; ?>
+      
     </table>           
     <?php
   }
@@ -1111,19 +1171,42 @@ JSR;
   function settings_box_security() {    
     ?>
     <table class="form-table">
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-xml-rpc',
                     'disable-xml-rpc',
                     'Disable',
                     __('XML-RPC', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_checkbox(
+      <?php $this->admin_show_setting(
                     'businesspress-disable-rest-api',
                     'disable-rest-api',
                     '',
                     __('REST API', 'businesspress' ) );
       ?>
+      
+      <?php $this->admin_show_setting(
+                    'businesspress-remove-generator',
+                    'remove-generator',
+                    '',
+                    __('Generator Tag (WP, EDD)', 'businesspress' ) );
+      ?>
+      
+      <?php $this->admin_show_setting(
+                    'businesspress-xpull-key',
+                    'xpull-key',
+                    'Login Protection',
+                    __('X-Pull Key (KeyCDN) - requests with matching X-Pull HTTP header will be considered as behind a proxy.', 'businesspress' ),
+                    'text' );
+      ?>
+      
+      <?php $this->admin_show_setting(
+                    'businesspress-xml-rpc-key',
+                    'xml-rpc-key',
+                    'XML-RPC Protection',
+                    __('Put in something like <code>?secret=nb9u2394u90</code> and then access the XML-RPC for your site as https://foliovision.com/xmlrpc.php?secret=nb9u2394u90. Other requests will be blocked', 'businesspress' ),
+                    'text' );
+      ?>           
     </table>           
     <?php
   }
@@ -1687,7 +1770,7 @@ JSR;
     ?>
     <script>
     jQuery(function($){
-      $('form').submit( function(e) {
+      $('form[name=upgrade]').submit( function(e) {
         var form = $(this);
         
         if( form.find('.check-1').prop('checked') && form.find('.check-2').prop('checked') && form.find('.check-3').prop('checked') ) {
