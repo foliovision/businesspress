@@ -175,12 +175,11 @@ class BusinessPress_Notices {
     }
     
     echo "<!--BusinessPress_Notices::store()-->\n";
-    //echo "<p>BusinessPress_Notices::store()</p>";
     
-    if( !$junk ) return;
+    if( !$junk ) return;    
     
     $dom = new DOMDocument();
-    $dom->loadHTML( $junk );
+    @$dom->loadHTML( $junk );
     
     $aMatches = array();
     foreach( $dom->getElementsByTagName('div') as $objDiv ) {

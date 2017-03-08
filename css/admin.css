@@ -63,6 +63,10 @@
     float: right;
 }
 #businesspress-header-nav .nav-tab-access {
+    background: #FFFFFF url(businesspress-logo.png) no-repeat center center;
+    min-width: 48px;
+}
+#businesspress-header-nav .nav-tab-access.nav-tab-active {
     background: #F1F1F1 url(businesspress-logo.png) no-repeat center center;
     min-width: 48px;
 }

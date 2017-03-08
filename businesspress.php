@@ -128,6 +128,8 @@ class BusinessPress {
     
     add_action( 'init', array( $this, 'remove_hooks') );
     
+    add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
+    
   }
   
   
@@ -320,6 +322,15 @@ class BusinessPress {
     }
     
     return false;
+  }
+  
+  
+  
+  
+  function contact_admin() {
+    $current_user = wp_get_current_user();
+    wp_mail( $this->get_contact_email(), 'BusinessPress contact form submission', $_POST['message'], array( 'replyTo' => $current_user->user_email ) );    
+    die('1');
   }
 
   
@@ -579,6 +590,23 @@ class BusinessPress {
   
   
   
+  function get_contact_email() {
+    if( $this->get_setting('contact_admin') ) {
+      return $this->get_setting('contact_admin');
+    }
+        
+    $current_user = wp_get_current_user();
+    $domain = $this->get_whitelist_domain();
+    if( stripos(get_option('admin_email'),'@'.$domain) !== false ) {
+      return get_option('admin_email');
+    }
+    
+    return -1;
+  }
+  
+  
+  
+  
   function get_whitelist_domain() {
     return !empty($this->aOptions['domain']) ? $this->aOptions['domain'] : false;
   }  
@@ -674,6 +702,8 @@ class BusinessPress {
       $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
       $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
       $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
+      
+      $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -823,17 +853,12 @@ JSH;
   
   
   
-  // DONE + TODO DOCU
   function menu() {
-    $current_user = wp_get_current_user();    
-    if( !$this->check_user_permission() ) {
-      return;
-    }
-    
     if( is_multisite() && is_super_admin() ) {
       add_submenu_page( 'settings.php', 'BusinessPress', 'BusinessPress','manage_network_options', 'businesspress', array( $this, 'screen') );
     } else if (!is_multisite()) {
-      if( $current_user->user_level >= '8' ) {
+      $current_user = wp_get_current_user();    
+      if( $current_user && $current_user->user_level >= '8' ) {
         add_options_page('BusinessPress', 'BusinessPress', 'manage_options', 'businesspress', array( $this, 'screen') );
       }
     }
@@ -926,15 +951,6 @@ JSH;
     
     <div class="wrap">
     <h2>BusinessPress</h2>
-    
-      <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
-        <p>You must configure the plugin before it becomes operational.</p>
-        <input id="businesspress-enable" class="button button-primary" type="submit" value="Enable Restriction Mode" />
-        <script>
-          jQuery('#businesspress-enable').click( function() { jQuery('.options-hidden').slideToggle() } );
-        </script>
-        <div class="options-hidden" style="display: none; ">
-      <?php endif; ?>
       
       <form id="businesspress-form" method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
         <div id="dashboard-widgets" class="metabox-holder columns-1">
@@ -950,20 +966,39 @@ JSH;
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           ?>
-          <div id='welcome' class='postbox-container'><?php do_meta_boxes('businesspress_settings_welcome', 'normal', false ); ?></div>
-          <div id='updates' class='postbox-container'><?php do_meta_boxes('businesspress_settings_updates', 'normal', false ); ?></div>
-          <div id='preferences' class='postbox-container'><?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?></div>
-          <div id='branding' class='postbox-container'><?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?></div>
+          <div id='welcome' class='postbox-container'>
+            <?php do_meta_boxes('businesspress_settings_welcome', 'normal', false ); ?>     
+          </div>
           
-          <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+          <div id='updates' class='postbox-container'>
+            <?php do_meta_boxes('businesspress_settings_updates', 'normal', false ); ?>
+            <?php if( $this->check_user_permission() ) : ?>
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+            <?php endif; ?>
+          </div>
+          
+          <div id='preferences' class='postbox-container'>
+            <?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?>
+            <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+              <?php $this->settings_activation_notice(); ?>
+            <?php elseif( $this->check_user_permission() ) : ?>
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+            <?php endif; ?>
+          </div>
+          
+          <div id='branding' class='postbox-container'>
+            <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>
+            <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+              <?php $this->settings_activation_notice(); ?>
+            <?php elseif( $this->check_user_permission() ) : ?>
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+            <?php endif; ?>              
+          </div>
           
         </div>
-        <?php wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
+        <?php if( $this->check_user_permission() || !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
       </form>
-      
-      <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
-        </div>
-      <?php endif; ?>      
+        
     </div>
     
     
@@ -971,7 +1006,7 @@ JSH;
   (function($) {
     
     /*  Tabs */      
-    function tab_switch(anchor) {
+    function tab_switch(anchor) {      
       $('#businesspress-header-nav .nav-tab').removeClass('nav-tab-active');
       $('[href=#'+anchor+']').addClass('nav-tab-active');
       $('#dashboard-widgets .postbox-container').hide();
@@ -1054,6 +1089,49 @@ JSH;
   });     
   </script>
 
+  
+  <?php if( !$this->check_user_permission() || !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) :
+    $sSelector1 = '#preferences input, #branding input';
+    $sSelector2 = '#preferences td, #preferences th, #preferences h2, #branding td, #branding th, #branding h2';
+    if( !$this->check_user_permission() ) {
+      $sSelector1 .= ', #updates input';
+      $sSelector2 .= ', #updates td, #updates th, #updates h2';
+    }
+    ?>
+    <script>
+    (function($) {
+      $('<?php echo $sSelector1; ?>').prop('disabled','true');
+      $('<?php echo $sSelector2; ?>').css('color','gray');
+      $('.businesspress-enable').prop('disabled','');
+      
+      $('.businesspress-enable').click( function() { jQuery('.nav-tab-updates').click() } );
+      $('.contact-admin').click( function() { jQuery('.form-admin-contact').slideDown() } );
+      
+      $('.form-admin-contact input').click( function(e) {
+        var button = $(this);
+        button.prop('disabled','true');
+        e.preventDefault();
+        var message = $('.form-admin-contact textarea').val();
+        if( message ) {
+          $.post('<?php echo site_url('wp-admin/admin-ajax.php'); ?>', {
+            'action' : 'businesspress_contact_admin',
+            'message' : message 
+            },
+            function( response ) {
+              var result = '<p>Error sending your message.</p>';
+              if ( response == 1 ) {
+                var result = '<p>Sent!</p>';
+                button.prop('disabled','');
+              }
+              $('.form-admin-contact').append(result);
+            });
+        }
+      });
+      
+    })(jQuery);      
+    </script>
+  <?php endif; ?>
+  
     <?php
   }  
   
@@ -1078,6 +1156,16 @@ window.location.href = goto;
 JSR;
 
   }
+  
+  
+  
+  function settings_activation_notice() {
+    ?>
+      <p><?php _e('You must configure the plugin before it becomes operational.','businesspress'); ?></p>
+      <input id="businesspress-enable" class="button button-primary businesspress-enable" type="button" value="Enable Restriction Mode" />
+    <?php  
+  }
+  
   
   
   
@@ -1153,13 +1241,15 @@ JSR;
       
       <?php if( $this->get_setting('hide-notices') ) :
         global $BusinessPress_Notices;
+        if( $BusinessPress_Notices ) :
         $iCount = $BusinessPress_Notices->get_count();
         ?>
         <tr>
           <th></th>
           <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
         </tr>
-      <?php endif; ?>
+        <?php endif;
+      endif; ?>
       
     </table>           
     <?php
@@ -1232,6 +1322,7 @@ JSR;
     
     $current_user = wp_get_current_user();
     $domain = $this->get_whitelist_domain() ? $this->get_whitelist_domain() : $this->get_email_domain($current_user->user_email);
+    $contact_email = $this->get_setting('contact_email');
     $email = $this->get_whitelist_email() ? $this->get_whitelist_email() : $current_user->user_email;
     ?>       
     <table class="form-table">
@@ -1248,11 +1339,15 @@ JSR;
         </td>
       </tr>
       <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
-        <th><label for="email">Domain</label></th>
+        <th><label for="domain"><?php _e('Domain','businesspress'); ?></label></th>
         <td><input class="regular-text" type="text" id="domain" name="domain" class="text" value="<?php echo esc_attr($domain); ?>" readonly /></td>
-      </tr>      
+      </tr>
+      <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
+        <th><label for="contact_email"><?php _e('Contact Email','businesspress'); ?></label></th>
+        <td><input class="regular-text" type="text" id="contact_email" name="contact_email" class="text" value="<?php echo esc_attr($contact_email); ?>" placeholder="<?php _e('Defaults to admin email if matching or first matching user','businesspress'); ?>" /></td>
+      </tr>        
       <tr class="whitelist-email"<?php echo $styleEmail; ?>>
-        <th><label for="email">Email</label></th>
+        <th><label for="email"><?php _e('Email','businesspress'); ?></label></th>
         <td><input class="regular-text" type="text" id="email" name="email" class="text" value="<?php echo esc_attr($email); ?>" readonly /></td>
       </tr>
       <tr>
@@ -1390,17 +1485,41 @@ JSR;
     <td></td>
     <td>
       <div class="one-half first">
-        <p class="description"><?php _e('Short introduction text about plugin features. <br />Our plugin notices should be also included here.', 'businesspress' ); ?></p>
+        <p class="description"><?php _e("BusinessPress makes sure you get the essential features required to run your site for business use - without constant core WordPress upgrades and various WordPress enhancemens which you don't need - reducing the security vulnerabilities and speeding up the site.", 'businesspress' ); ?></p>
+        <ol>
+          <li><?php _e("Major core auto-updates disabled.", 'businesspress' ); ?></li>
+          <li><?php _e("Minor core auto-updates delayed to make sure they are stable.", 'businesspress' ); ?></li>
+          <li><?php _e("Login protection (if you have fail2ban installed).", 'businesspress' ); ?></li>
+          <li><?php _e("Disable REST API and XML-RPC for security.", 'businesspress' ); ?></li>
+          <li><?php _e("Disable oEmbed and Emojis for performance.", 'businesspress' ); ?></li>
+          <li><?php _e("Hide admin notices to keep your wp-admin focused.", 'businesspress' ); ?></li>
+        </ol>
       </div>
       <div class="one-half">
-        <p class="description">
-          <?php if( $domain = $this->get_whitelist_domain() ) {
-            printf( __('Access to this screen is limited to users with email address on %s.'), $domain );
-          } elseif( $email = $this->get_whitelist_email() ) {
-            printf( __('Access to this screen is limited to user with email address equal to %s.'), $email );
-          } ?>        
-        </p>
-        <p class="description"><a href="#" class="button-primary"><?php _e('Contact the admin', 'businesspress' ); ?></a> <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
+        
+        <?php if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+          <?php $this->settings_activation_notice(); ?>
+          
+        <?php else : ?>  
+          <p class="description">
+            <?php if( $domain = $this->get_whitelist_domain() ) {
+              printf( __('Access to this screen is limited to users with email address on %s.'), $domain );
+            } elseif( $email = $this->get_whitelist_email() ) {
+              printf( __('Access to this screen is limited to user with email address equal to %s.'), $email );
+            } ?>        
+          </p>
+          <?php if( !$this->check_user_permission() ) : ?>          
+            <p class="description"><a href="#" class="button-primary contact-admin"><?php _e('Contact the admin', 'businesspress' ); ?></a> <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
+            <div class="form-admin-contact" style="display: none">
+              <textarea class="large-text" name="message" rows="3"></textarea>
+              <input type="submit" class="button-primary" value="Send" />
+            </div>
+
+          <?php endif; ?>
+          
+        <?php endif; ?>
+          
+
       </div>            
     </td>
   </tr>
