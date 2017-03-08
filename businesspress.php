@@ -303,6 +303,8 @@ class BusinessPress {
   
   function contact_admin() {
     $current_user = wp_get_current_user();
+    if( $this->get_contact_email() == -1 ) die();
+    
     wp_mail( $this->get_contact_email(), 'BusinessPress contact form submission', $_POST['message'], array( 'Reply-To: '.$current_user->display_name.' <'.$current_user->user_email.'>' ) );    
     die('1');
   }
@@ -565,14 +567,23 @@ class BusinessPress {
   
   
   function get_contact_email() {
-    if( $this->get_setting('contact_admin') ) {
-      return $this->get_setting('contact_admin');
+    if( $this->get_setting('contact_email') ) {
+      return $this->get_setting('contact_email');
     }
         
     $current_user = wp_get_current_user();
     $domain = $this->get_whitelist_domain();
     if( stripos(get_option('admin_email'),'@'.$domain) !== false ) {
       return get_option('admin_email');
+    }
+    
+    $aUsers = get_users( 'role=administrator' );
+    if( $aUsers ) {
+      foreach( $aUsers AS $objUser ) {
+         if( stripos($objUser->user_email,'@'.$domain) !== false ) {
+            return $objUser->user_email;
+         }
+      }
     }
     
     return -1;
