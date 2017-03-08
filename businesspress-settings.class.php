@@ -77,6 +77,7 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_search', __('Other', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_login', __('Login protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           ?>
@@ -294,6 +295,25 @@ class BusinessPress_Settings {
   
   
   
+  function settings_box_login() {
+    global $businesspress;
+    ?>
+    <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
+    <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-xpull-key',
+                    'xpull-key',
+                    'X-Pull Key',
+                    __('Requests with matching X-Pull HTTP header will be considered as behind a proxy. Works well with KeyCDN.', 'businesspress' ),
+                    'text' );
+      ?>        
+    </table>           
+    <?php
+  }  
+  
+  
+  
+  
   function settings_box_performance() {
     global $businesspress;
     ?>
@@ -379,21 +399,15 @@ class BusinessPress_Settings {
                     __('Generator Tag (WP, EDD)', 'businesspress' ) );
       ?>
       
-      <?php $this->admin_show_setting(
-                    'businesspress-xpull-key',
-                    'xpull-key',
-                    'Login Protection',
-                    __('X-Pull Key (KeyCDN) - requests with matching X-Pull HTTP header will be considered as behind a proxy.', 'businesspress' ),
-                    'text' );
-      ?>
-      
       <?php
       $token = rand();
       $this->admin_show_setting(
                     'businesspress-xml-rpc-key',
                     'xml-rpc-key',
                     'XML-RPC Protection',
-                    sprintf( __( 'Put in something like <code>?secret=%s</code> and then access the XML-RPC for your site as %s. Other requests will be blocked', 'businesspress' ), $token, site_url('xmlrpc.php?secret='.$token)  ),
+                    $businesspress->get_setting('xml-rpc-key') ?
+                      sprintf( __( 'Use <code>%s</code> to connect to XML-RPC on your site.', 'businesspress' ), site_url('xmlrpc.php?'.$businesspress->get_setting('xml-rpc-key'))  )
+                      : sprintf( __( 'Put in something like <code>secret=%s</code> and then access the XML-RPC for your site as <code>%s</code>. Other requests will be blocked.', 'businesspress' ), $token, site_url('xmlrpc.php?secret='.$token)  ),
                     'text' );
       ?>           
     </table>           
