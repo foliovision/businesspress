@@ -933,6 +933,10 @@ JSR;
   
   
   function subscriber__dashboard_redirect() {
+    if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+      return;
+    }    
+    
 		global $pagenow;
 		if ( 'profile.php' != $pagenow ) {
 			wp_redirect( site_url('wp-admin/profile.php') );
