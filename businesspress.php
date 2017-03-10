@@ -534,6 +534,8 @@ class BusinessPress {
     }
     
     $aProxies = array();
+    
+    //  https://www.maxcdn.com/one/tutorial/ip-blocks/
     $aMaxCDN = array( '108.161.176.0/20', '94.46.144.0/20', '146.88.128.0/20', '198.232.124.0/22', '23.111.8.0/22', '217.22.28.0/22', '64.125.76.64/27', '64.125.76.96/27', '64.125.78.96/27', '64.125.78.192/27', '64.125.78.224/27', '64.125.102.32/27', '64.125.102.64/27', '64.125.102.96/27', '94.31.27.64/27', '94.31.33.128/27', '94.31.33.160/27', '94.31.33.192/27', '94.31.56.160/27', '177.54.148.0/24', '185.18.207.64/26', '50.31.249.224/27', '50.31.251.32/28', '119.81.42.192/27', '119.81.104.96/28', '119.81.67.8/29', '119.81.0.104/30', '119.81.1.144/30', '27.50.77.226/32', '27.50.79.130/32', '119.81.131.130/32', '119.81.131.131/32', '216.12.211.59/32', '216.12.211.60/32', '37.58.110.67/32', '37.58.110.68/32', '158.85.206.228/32', '158.85.206.231/32', '174.36.204.195/32', '174.36.204.196/32', '151.139.0.0/19', '94.46.144.0/21', '103.66.28.0/22', '103.228.104.0/22' );
       
     $aProxies = array_merge( $aProxies, $aMaxCDN );
@@ -571,20 +573,20 @@ class BusinessPress {
       return $this->get_setting('contact_email');
     }
         
-    $current_user = wp_get_current_user();
+    /*$current_user = wp_get_current_user();  //  gets admin email if it matches the domain
     $domain = $this->get_whitelist_domain();
     if( stripos(get_option('admin_email'),'@'.$domain) !== false ) {
       return get_option('admin_email');
     }
     
-    $aUsers = get_users( 'role=administrator' );
+    $aUsers = get_users( 'role=administrator' );  //  gets first admin user if his email matches domain
     if( $aUsers ) {
       foreach( $aUsers AS $objUser ) {
          if( stripos($objUser->user_email,'@'.$domain) !== false ) {
             return $objUser->user_email;
          }
       }
-    }
+    }*/
     
     return -1;
   }
@@ -625,6 +627,19 @@ class BusinessPress {
   
   function get_setting_db($key) {
     return is_multisite() ? get_site_option($key) : get_option($key);
+  }
+  
+  
+  
+  
+  function get_settings_url() {
+    $sURL = site_url('wp-admin/options-general.php?page=businesspress');      
+    if( is_multisite() && $aSitewidePlugins = get_site_option( 'active_sitewide_plugins') ) {
+      if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
+        $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
+      }
+    }
+    return $sURL;
   }
   
   
@@ -827,7 +842,14 @@ JSH;
       include( dirname(__FILE__).'/plugins/login-logo.php' );
     }
     
-    if( !function_exists('disable_emojis') && $this->get_setting('disable-emojis') ) include( dirname(__FILE__).'/plugins/disable-emojis.php' );
+    if( !function_exists('disable_emojis') && $this->get_setting('disable-emojis') ) {
+      include( dirname(__FILE__).'/plugins/disable-emojis.php' );
+      
+      remove_filer( 'the_content', 'convert_smilies', 20 );
+      remove_filter( 'the_excerpt', 'convert_smilies' );
+      remove_filter( 'the_post_thumbnail_caption', 'convert_smilies' );
+      remove_filter( 'comment_text', 'convert_smilies', 20 );
+    }
     
     if( !function_exists('disable_embeds_init') && $this->get_setting('disable-oembed') ) {
       include( dirname(__FILE__).'/plugins/disable-embeds.php' );
@@ -843,14 +865,8 @@ JSH;
   function notice_configure() {
     if( !empty($_GET['page']) && $_GET['page'] == 'businesspress' ) return;
     
-    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) :
-      $sURL = site_url('wp-admin/options-general.php?page=businesspress');      
-      if( $aSitewidePlugins = get_site_option( 'active_sitewide_plugins') ) {
-        if( is_array($aSitewidePlugins) && stripos( ','.implode( ',', array_keys($aSitewidePlugins) ), ',businesspress' ) !== false ) {
-          $sURL = site_url('wp-admin/network/settings.php?page=businesspress');
-        }
-      } ?>
-      <div class="updated"><p><a href="<?php echo esc_attr($sURL); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
+    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
+      <div class="updated"><p><a href="<?php echo $this->get_settings_url(); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
     <?php endif;
   }
   
@@ -933,10 +949,6 @@ JSR;
   
   
   function subscriber__dashboard_redirect() {
-    if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-      return;
-    }    
-    
 		global $pagenow;
 		if ( 'profile.php' != $pagenow ) {
 			wp_redirect( site_url('wp-admin/profile.php') );
@@ -1007,10 +1019,11 @@ JSR;
   
   
   function talk_no_permissions( $what ) {
+    $contact_form = ' <a href="'.$this->get_settings_url().'&contact_form">'.__("Contact form",'businesspress').'</a>';
     if( $this->get_whitelist_domain() ) {
-      return "Please contact your site admin or your partners at ".$this->get_whitelist_domain()." to ".$what.".";
+      return sprintf( __("Please contact your site admin or your partners at %s to %s.",'businesspress'), $this->get_whitelist_domain(), $what ).$contact_form;
     } else if( $this->get_whitelist_email() ) {
-      return "Please contact ".$this->get_whitelist_email()." to ".$what.".";
+      return sprintf( __("Please contact %s to %s.",'businesspress'), $this->get_whitelist_email(), $what ).$contact_form;
     }
     return false;
   }
@@ -1135,7 +1148,7 @@ JSR;
         $new_html .= "<li><a href='https://codex.wordpress.org/Version_".$key."' target='_blank'>".$key."</a> ".human_time_diff(time(),$value)." ago</li>\n";
       }
       $new_html .= "</ul>\n";
-      $new_html .= "<p><a href='".site_url('wp-admin/options-general.php?page=businesspress')."'>BusinessPress</a> delays these updates 5 days to make sure you are not affected by any bugs in them.</p>";
+      $new_html .= "<p><a href='".$this->get_settings_url()."'>BusinessPress</a> delays these updates 5 days to make sure you are not affected by any bugs in them.</p>";
       
     } else {
       //$new_html .= "<p>No recent actions, be careful with your upgrades!</p>";

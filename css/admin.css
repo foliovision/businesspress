@@ -142,6 +142,9 @@ input[type="radio"] + label {
     margin-left: 18px;
 }
 
-#screen-meta-links {
+#businesspress-form button.handlediv {
   display: none;
+}
+#businesspress-form .hndle {
+  cursor: auto;
 }

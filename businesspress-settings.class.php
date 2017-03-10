@@ -12,11 +12,11 @@ class BusinessPress_Settings {
   
   
   
-  function admin_show_setting( $name, $option_key, $title, $help, $type = 'checkbox' ) {
+  function admin_show_setting( $name, $option_key, $title, $help, $type = 'checkbox', $class = false ) {
     global $businesspress;
     $name = esc_attr($name);    
     ?>
-      <tr>
+      <tr<?php if( $class ) echo ' class="'.$class.'"'; ?>>
         <th>
           <label for="<?php echo $name; ?>"><?php _e($title, 'businesspress' ); ?></label>
         </th>
@@ -59,7 +59,8 @@ class BusinessPress_Settings {
         <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
-        <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Help', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Docs', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-help nav-tab-right" href="#credits"><span><?php _e('Credits', 'businesspress' ); ?></span></a>        
       </h2>
 		</div>    
     
@@ -71,15 +72,19 @@ class BusinessPress_Settings {
           <?php
           add_meta_box( 'businesspress_welcome', __('Welcome', 'businesspress'), array( $this, 'settings_box_welcome' ), 'businesspress_settings_welcome', 'normal' );
           
-          add_meta_box( 'businesspress_updates', __('Updates', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
+          add_meta_box( 'businesspress_updates', __('Restrictions', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
           
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_search', __('Other', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_login', __('Login protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
+          
+          add_meta_box( 'businesspress_search', __('Search', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_cdn', __('CDN', 'businesspress'), array( $this, 'settings_box_cdn' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
+          add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_branding', 'normal' );
+          
+          add_meta_box( 'businesspress_credits', __('Credits', 'businesspress'), array( $this, 'settings_box_credits' ), 'businesspress_settings_credits', 'normal' );
           ?>
           <div id='welcome' class='postbox-container'>
             <?php do_meta_boxes('businesspress_settings_welcome', 'normal', false ); ?>     
@@ -102,13 +107,17 @@ class BusinessPress_Settings {
           </div>
           
           <div id='branding' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>
+            <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
             <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
               <?php $this->settings_activation_notice(); ?>
             <?php elseif( $businesspress->check_user_permission() ) : ?>
               <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
             <?php endif; ?>              
           </div>
+          
+          <div id='credits' class='postbox-container'>
+            <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
+          </div>          
           
         </div>
         <?php if( $businesspress->check_user_permission() || !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
@@ -147,11 +156,23 @@ class BusinessPress_Settings {
     });
     
     /* Color scheme */
-    $('.color-palette').click( function() {
-      $(this).siblings('input[name=admin_color]').click();
+    $('.color-option').click( function(e) {      
+      $('input[name=admin_color]').prop('checked','');
+      $(this).find('input[name=admin_color]').prop('checked','true');
       $('.color-option').removeClass('selected');
-      $(this).parents('.color-option').addClass('selected');
+      $(this).addClass('selected');
     });
+    
+    $('.color-option').click( function(e) {      
+      $('input[name=admin_color]').prop('checked','');
+      $(this).find('input[name=admin_color]').prop('checked','true');
+      $('.color-option').removeClass('selected');
+      $(this).addClass('selected');
+    });
+    
+    $('.xml-rpc-obscure').click( function(e) {
+      $('.xml-rpc-obscured').show();
+    } );
     
   })(jQuery);
     
@@ -196,10 +217,16 @@ class BusinessPress_Settings {
             }
             $('.fv_flowplayer_target').after('<img src="'+url+'" class="businesspress-login-logo" />');
             $('.fv_flowplayer_target').removeClass('fv_flowplayer_target' );
+            $('.remove_image_button').show();
         });
         //Open the uploader dialog
         fv_flowplayer_uploader.open();
-    });    
+    });
+    
+    $(document).on( 'click', '.remove_image_button', function(e) {
+      $(this).parents('tr').find('img').remove();
+      $(this).parents('tr').find('input[type=hidden]').val(0);
+    });
    
   });     
   </script>
@@ -271,7 +298,7 @@ class BusinessPress_Settings {
                     'wp_admin_bar_subscribers',
                     'wp_admin_bar_subscribers',
                     'Hide WP Admin Bar for subscribers',
-                    __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen", 'businesspress' ) );
+                    __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.", 'businesspress' ) );
       ?>
       <tr>
         <th>
@@ -280,11 +307,14 @@ class BusinessPress_Settings {
         <td>
           <p class="description"><input type="hidden" id="login-logo" name="businesspress-login-logo" value="<?php echo esc_attr($businesspress->get_setting('login-logo') ); ?>" class="regular-text code" />
             <?php
+            $sRemoveButtonStyle = ' style="display: none; "';
             if( $businesspress->get_setting('login-logo') > 0 ) {
               echo wp_get_attachment_image($businesspress->get_setting('login-logo'),'medium', false, array( 'class' => 'businesspress-login-logo' ) );
+              $sRemoveButtonStyle = '';
             }
             ?>
-            <input id="upload_image_button" class="upload_image_button button no-margin small" type="button" value="<?php _e('Upload Image', 'fv-wordpress-flowplayer'); ?>" alt="Select Logo" />
+            <input id="upload_image_button" class="upload_image_button button no-margin small" type="button" value="<?php _e('Upload Image', 'businesspress'); ?>" />
+            <input id="upload_image_button" class="remove_image_button button" type="button" value="<?php _e('Remove', 'businesspress'); ?>"<?php echo $sRemoveButtonStyle; ?> />
             <label for="login-logo"><?php _e('This will the default Wordpress logo on the login screen to the one you chose. The uploaded logo will also be used on the search results page template.', 'businesspress' ); ?></p>
         </td>
       </tr>
@@ -295,10 +325,10 @@ class BusinessPress_Settings {
   
   
   
-  function settings_box_login() {
+  function settings_box_cdn() {
     global $businesspress;
     ?>
-    <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
+    <p><?php _e("These settings are required to make sure BusinessPress Login Protection won't ban your CDN server. MaxCDN IP ranges are already part of the plugin code.",'businesspress'); ?></p>
     <table class="form-table">
       <?php $this->admin_show_setting(
                     'businesspress-xpull-key',
@@ -308,6 +338,34 @@ class BusinessPress_Settings {
                     'text' );
       ?>        
     </table>           
+    <?php
+  }
+  
+  
+  
+  
+  function settings_box_credits() {
+    global $businesspress;
+    ?>
+      <p>This plugin integrates some of the amazing WordPress plugins which keep it lean and removed the unnecessary features:</p>
+      <ul>
+        <li><a href="https://wordpress.org/plugins/disable-embeds/" target="_blank">Disable Embeds</a> by <a href="https://pascalbirchler.com/" target="_blank">Pascal Birchler </a> with our own improvements</li>
+        <li><a href="https://wordpress.org/plugins/disable-emojis/" target="_blank">Disable Emojis</a> by <a href="https://geek.hellyer.kiwi/" target="_blank">Ryan Hellyer</a></li>
+        <li><a href="https://wordpress.org/plugins/disable-json-api/" target="_blank">Disable REST API</a> by <a href="http://www.binarytemplar.com/" target="_blank">Dave McHale</a></li>
+        <li><a href="https://wordpress.org/plugins/login-logo/" target="_blank">Login Logo</a> by <a href="http://coveredwebservices.com/" target="_blank">Mark Jaquith </a> with our own improvements</li>
+        
+      </ul>        
+    <?php
+  }    
+  
+  
+  
+  
+  function settings_box_login() {
+    global $businesspress;
+    ?>
+    <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
+    <p><?php _e("If you don't have fail2ban available, we recommend <a href='https://wordpress.org/plugins/login-lockdown/' target='_blank'>Login LockDown</a>.", 'businesspress' ); ?></p>
     <?php
   }  
   
@@ -378,11 +436,12 @@ class BusinessPress_Settings {
     global $businesspress;
     ?>
     <table class="form-table">
+      
       <?php $this->admin_show_setting(
-                    'businesspress-disable-xml-rpc',
-                    'disable-xml-rpc',
-                    'Disable',
-                    __('XML-RPC', 'businesspress' ) );
+                    'businesspress-remove-generator',
+                    'remove-generator',
+                    __('Disable'),
+                    __('Generator Tag (WP, EDD)', 'businesspress' ) );
       ?>
       
       <?php $this->admin_show_setting(
@@ -390,13 +449,13 @@ class BusinessPress_Settings {
                     'disable-rest-api',
                     '',
                     __('REST API', 'businesspress' ) );
-      ?>
+      ?>      
       
       <?php $this->admin_show_setting(
-                    'businesspress-remove-generator',
-                    'remove-generator',
+                    'businesspress-disable-xml-rpc',
+                    'disable-xml-rpc',
                     '',
-                    __('Generator Tag (WP, EDD)', 'businesspress' ) );
+                    __('XML-RPC', 'businesspress').' (<a href="#" class="xml-rpc-obscure">'.__('obscure', 'businesspress').'</a>)' );
       ?>
       
       <?php
@@ -404,12 +463,18 @@ class BusinessPress_Settings {
       $this->admin_show_setting(
                     'businesspress-xml-rpc-key',
                     'xml-rpc-key',
-                    'XML-RPC Protection',
-                    $businesspress->get_setting('xml-rpc-key') ?
+                    __('XML-RPC Protection'),
+                    ( $businesspress->get_setting('xml-rpc-key') ?
                       sprintf( __( 'Use <code>%s</code> to connect to XML-RPC on your site.', 'businesspress' ), site_url('xmlrpc.php?'.$businesspress->get_setting('xml-rpc-key'))  )
-                      : sprintf( __( 'Put in something like <code>secret=%s</code> and then access the XML-RPC for your site as <code>%s</code>. Other requests will be blocked.', 'businesspress' ), $token, site_url('xmlrpc.php?secret='.$token)  ),
-                    'text' );
-      ?>           
+                      : sprintf( __( 'Put in something like <code>secret=%s</code> and then access the XML-RPC for your site as <code>%s</code>. Other requests will be blocked.', 'businesspress' ), $token, site_url('xmlrpc.php?secret='.$token)  ) ),
+                    'text',
+                    $businesspress->get_setting('xml-rpc-key') ? '' : 'hidden xml-rpc-obscured' );
+      ?>         
+      
+
+      
+
+        
     </table>           
     <?php
   }
@@ -428,6 +493,7 @@ class BusinessPress_Settings {
     }
     
     $checkedDomain = $businesspress->get_whitelist_domain() ? 'checked="checked"' : '';
+    $requiredEmail = $businesspress->get_whitelist_domain() ? 'required' : '';
     $checkedEmail = $businesspress->get_whitelist_email() ? 'checked="checked"' : '';    
     
     if( !$checkedDomain && !$checkedEmail ) {
@@ -458,7 +524,7 @@ class BusinessPress_Settings {
       </tr>
       <tr class="whitelist-domain"<?php echo $styleDomain; ?>>
         <th><label for="contact_email"><?php _e('Contact Email','businesspress'); ?></label></th>
-        <td><input class="regular-text" type="text" id="contact_email" name="contact_email" class="text" value="<?php echo esc_attr($contact_email); ?>" placeholder="<?php _e('Defaults to admin email if matching or first matching user','businesspress'); ?>" /></td>
+        <td><input class="regular-text" type="email" id="contact_email" name="contact_email" class="text" value="<?php echo esc_attr($contact_email); ?>" <?php $requiredEmail; ?> /></td>
       </tr>        
       <tr class="whitelist-email"<?php echo $styleEmail; ?>>
         <th><label for="email"><?php _e('Email','businesspress'); ?></label></th>
@@ -500,13 +566,15 @@ class BusinessPress_Settings {
         jQuery('tr.whitelist-domain').show();
       }
       
-      jQuery('#whitelist-domain').change( function() {
+      jQuery('#whitelist-domain').change( function() {console.log('wtf 1');
         jQuery('tr.whitelist-email').hide();
         jQuery('tr.whitelist-domain').show();
+        jQuery('#contact_email').attr('required','true');
       });
-      jQuery('#whitelist-email').change( function() {
+      jQuery('#whitelist-email').change( function() {console.log('wtf 2');
         jQuery('tr.whitelist-email').show();
         jQuery('tr.whitelist-domain').hide();
+        jQuery('#contact_email').removeAttr('required');
       });
       
       if( jQuery('#cap_update:checked').length ) {
@@ -624,9 +692,15 @@ class BusinessPress_Settings {
               printf( __('Access to this screen is limited to user with email address equal to %s.'), $email );
             } ?>        
           </p>
-          <?php if( !$businesspress->check_user_permission() ) : ?>          
-            <p class="description"><a href="#" class="button-primary contact-admin"><?php _e('Contact the admin', 'businesspress' ); ?></a> <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
-            <div class="form-admin-contact" style="display: none">
+          <?php if( !$businesspress->check_user_permission() ) :
+            $sFormStyle = isset($_GET['contact_form']) ? '' : ' style="display: none"';
+            ?>          
+            <p class="description">
+              <?php if( !isset($_GET['contact_form']) ) : ?><a href="#" class="button-primary contact-admin"><?php endif; ?>
+                <?php _e('Contact the admin', 'businesspress' ); ?>
+              <?php if( !isset($_GET['contact_form']) ) : ?></a><?php endif; ?>
+              <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
+            <div class="form-admin-contact"<?php echo $sFormStyle; ?>>
               <textarea class="large-text" name="message" rows="3"></textarea>
               <input type="submit" class="button-primary" value="Send" />
             </div>
