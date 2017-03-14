@@ -845,7 +845,7 @@ JSH;
     if( !function_exists('disable_emojis') && $this->get_setting('disable-emojis') ) {
       include( dirname(__FILE__).'/plugins/disable-emojis.php' );
       
-      remove_filer( 'the_content', 'convert_smilies', 20 );
+      remove_filter( 'the_content', 'convert_smilies', 20 );
       remove_filter( 'the_excerpt', 'convert_smilies' );
       remove_filter( 'the_post_thumbnail_caption', 'convert_smilies' );
       remove_filter( 'comment_text', 'convert_smilies', 20 );
