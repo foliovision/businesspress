@@ -104,6 +104,7 @@ class BusinessPress {
     add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
     add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
+    add_filter( 'admin_footer_text', array( $this, 'remove_wp_footer' ) );
     
     add_action( 'admin_enqueue_scripts', array( $this, 'admin_style' ) );
     
@@ -916,6 +917,15 @@ JSH;
       remove_action( 'wp_head', 'wp_generator' );      
     }       
   }
+  
+  
+  
+  
+  function remove_wp_footer($html) {
+    $text = sprintf( __( 'Thank you for creating with <a href="%s">WordPress</a>.' ), __( 'https://wordpress.org/' ) );
+    $html = str_replace( $text, '', $html );
+    return $html;
+  }  
   
   
   

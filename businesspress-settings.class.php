@@ -89,7 +89,7 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_branding', 'normal' );
           
-          add_meta_box( 'businesspress_extra_multisite', __('Extra Site-wide settings', 'businesspress'), array( $this, 'settings_box_extra_multisite' ), 'businesspress_settings_multisite', 'normal' );
+          add_meta_box( 'businesspress_extra_multisite', __('Extra Site-Wide Settings', 'businesspress'), array( $this, 'settings_box_extra_multisite' ), 'businesspress_settings_multisite', 'normal' );
           
           add_meta_box( 'businesspress_credits', __('Credits', 'businesspress'), array( $this, 'settings_box_credits' ), 'businesspress_settings_credits', 'normal' );
           ?>
