@@ -3,25 +3,15 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.6.6.1
+Version: 0.6.6.2
 Author: Foliovision
 Author URI: http://foliovision.com
 */
 
 class BusinessPress {
-
-  /* DB records
-  * ( timestamp ) fvsb_capsDisabled - if true, capabilities are disabled
-  * ( serialized hash map) fvsb_capsArray - contains capabilities to restrict
-  * ( string {none | minor | major}) fvsb_upgrades - autoupdates 
-  * ( string ) fvsb_adminMail - email adress where adress to be sent - default is programming@foliovision.com
-  * (hash_map) fvsb_genSettings // contains (capsDisabled, upgradesType, adminMail, version) 
-  */
   
-  /* constants */
-  const VERSION = '0.6.6.1';
-  const FVSB_LOCK_FILE = 'fv-disallow.php';
-  const FVSB_CRON_ENABLED = 1;
+  
+  const VERSION = '0.6.6.2';
   
   
   private $disallowed_caps_default = array( 
@@ -126,6 +116,8 @@ class BusinessPress {
     add_action( 'init', array( $this, 'remove_hooks') );
     
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
+    
+    add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
     
   }
   
@@ -704,6 +696,7 @@ class BusinessPress {
       $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
       $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
+      $this->aOptions['multisite-tracking'] = !empty($_POST['businesspress-multisite-tracking']) ? stripslashes($_POST['businesspress-multisite-tracking']) : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -857,6 +850,15 @@ JSH;
     }
     
     if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );    
+  }
+  
+  
+  
+  
+  function multisite_footer() {
+    if( !is_multisite() ) return;
+    
+    if( $this->aOptions['multisite-tracking'] ) echo $this->aOptions['multisite-tracking'];
   }
   
   

@@ -72,6 +72,11 @@ class CWS_Login_Logo_Plugin {
     /// Addition by Foliovision
     global $businesspress;
     if( isset($businesspress) && method_exists($businesspress,'get_setting' ) ) {
+      
+      global $blog_id;
+      $original_blog_id = $blog_id;
+      if( is_multisite() ) switch_to_blog(1);
+      
       $aImg = wp_get_attachment_image_src( $businesspress->get_setting('login-logo'), 'medium' );
       if( $aImg ) {
         $this->logo_locations['global'] =  array(
@@ -80,6 +85,8 @@ class CWS_Login_Logo_Plugin {
           'url' => $this->maybe_ssl( $aImg[0] )
           );
       }
+      
+      if( is_multisite() ) switch_to_blog($original_blog_id);
     }
 	}
 
@@ -155,7 +162,15 @@ class CWS_Login_Logo_Plugin {
 		if ( !$this->logo_size ) {
       /// Modification by Foliovision
       if( $this->get_location( 'path' ) == -1 ) {
+        
+        global $blog_id;
+        $original_blog_id = $blog_id;
+        if( is_multisite() ) switch_to_blog(1);
+        
         $aImg = wp_get_attachment_image_src( $this->get_location( 'attachment_id' ), 'medium' );
+        
+        if( is_multisite() ) switch_to_blog($original_blog_id);
+        
         $sizes[0] = $aImg[1];
         $sizes[1] = $aImg[2];
       } else {

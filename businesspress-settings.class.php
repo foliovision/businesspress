@@ -22,7 +22,9 @@ class BusinessPress_Settings {
         </th>
         <td>
           <p class="description">
-            <?php if( $type == 'text' ) : ?>
+            <?php if( $type == 'textarea' ) : ?>
+              <textarea id="<?php echo $name; ?>" name="<?php echo $name; ?>" class="large-text code" rows="8"><?php echo esc_textarea( $businesspress->get_setting($option_key) ); ?></textarea><br />
+            <?php elseif( $type == 'text' ) : ?>
               <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $businesspress->get_setting($option_key) ); ?>" />
             <?php else : ?>
               <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $businesspress->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
@@ -59,6 +61,9 @@ class BusinessPress_Settings {
         <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
+        <?php if( is_multisite() ) : ?>
+          <a class="nav-tab nav-tab-multisite" href="#multisite"><span><?php _e('Multisite', 'businesspress' ); ?></span></a>
+        <?php endif; ?>
         <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Docs', 'businesspress' ); ?></span></a>
         <a class="nav-tab nav-tab-help nav-tab-right" href="#credits"><span><?php _e('Credits', 'businesspress' ); ?></span></a>        
       </h2>
@@ -84,6 +89,8 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_branding', 'normal' );
           
+          add_meta_box( 'businesspress_extra_multisite', __('Extra Site-wide settings', 'businesspress'), array( $this, 'settings_box_extra_multisite' ), 'businesspress_settings_multisite', 'normal' );
+          
           add_meta_box( 'businesspress_credits', __('Credits', 'businesspress'), array( $this, 'settings_box_credits' ), 'businesspress_settings_credits', 'normal' );
           ?>
           <div id='welcome' class='postbox-container'>
@@ -107,13 +114,24 @@ class BusinessPress_Settings {
           </div>
           
           <div id='branding' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
+            <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>
             <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
               <?php $this->settings_activation_notice(); ?>
             <?php elseif( $businesspress->check_user_permission() ) : ?>
               <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
             <?php endif; ?>              
           </div>
+          
+          <?php if( is_multisite() ) : ?>
+            <div id='multisite' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_multisite', 'normal', false ); ?>
+              <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
+                <?php $this->settings_activation_notice(); ?>
+              <?php elseif( $businesspress->check_user_permission() ) : ?>
+                <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
+              <?php endif; ?>              
+            </div>          
+          <?php endif; ?>
           
           <div id='credits' class='postbox-container'>
             <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
@@ -361,6 +379,25 @@ class BusinessPress_Settings {
   
   
   
+  function settings_box_extra_multisite() {
+    global $businesspress;
+    ?>
+    <table class="form-table">
+      <p><?php _e('All BusinessPress settings are site-wide, but here are few extras.', 'businesspress'); ?></p>
+      <?php $this->admin_show_setting(
+                    'businesspress-multisite-tracking',
+                    'multisite-tracking',
+                    'Tracking Scripts',
+                    __('The above will be added into footer of each site.', 'businesspress' ),
+                    'textarea' );
+      ?>
+    </table>           
+    <?php
+  }  
+  
+  
+  
+  
   function settings_box_login() {
     global $businesspress;
     ?>
@@ -478,7 +515,7 @@ class BusinessPress_Settings {
     </table>           
     <?php
   }
-  
+
   
   
   
