@@ -71,8 +71,8 @@ class BusinessPress {
       //add_action( 'admin_notices', array( $this, 'show_disallow_not_defined') );
     }
     
-    add_action( 'admin_notices', array( $this, 'notice_configure') );
-    add_action( 'network_admin_notices', array( $this, 'notice_configure') );
+    add_action( 'admin_notices', array( $this, 'notice_defaults') );
+    add_action( 'network_admin_notices', array( $this, 'notice_defaults') );
     
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
@@ -612,6 +612,12 @@ class BusinessPress {
       return trim($this->aOptions[$key]);
     }
     
+    if( $key == 'disable-rest-api' ) return true;
+    if( $key == 'disable-emojis' ) return true;
+    if( $key == 'remove-generator' ) return true;
+    if( $key == 'hide-notices' ) return true;
+    
+    
     return false;
   }
   
@@ -865,12 +871,10 @@ JSH;
   
   
   
-  function notice_configure() {
-    if( !empty($_GET['page']) && $_GET['page'] == 'businesspress' ) return;
-    
-    if( !$this->get_whitelist_domain() && !$this->get_whitelist_email() ) : ?>
-      <div class="updated"><p><a href="<?php echo $this->get_settings_url(); ?>">BusinessPress</a> must be configured before it becomes operational.</p></div>
-    <?php endif;
+  function notice_defaults() {
+    ?>
+      <div class="updated"><p><a href="<?php echo $this->get_settings_url(); ?>">BusinessPress</a> just disabled your REST API and Emojis, removed the WordPress Generator Tag and is hiding the Admin Notices.</p></div>
+    <?php
   }
   
   
