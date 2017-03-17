@@ -250,7 +250,7 @@ class BusinessPress_Settings {
   </script>
 
   
-  <?php if( !$businesspress->check_user_permission() || !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) :
+  <?php if( !$businesspress->check_user_permission()/* || !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() */) :
     $sSelector1 = '#preferences input, #branding input';
     $sSelector2 = '#preferences td, #preferences th, #preferences h2, #branding td, #branding th, #branding h2';
     if( !$businesspress->check_user_permission() ) {

@@ -71,8 +71,8 @@ class BusinessPress {
       //add_action( 'admin_notices', array( $this, 'show_disallow_not_defined') );
     }
     
-    add_action( 'admin_notices', array( $this, 'notice_defaults') );
-    add_action( 'network_admin_notices', array( $this, 'notice_defaults') );
+    add_action( 'admin_notices', array( $this, 'notice_defaults'), -1 );
+    add_action( 'network_admin_notices', array( $this, 'notice_defaults'), -1 );
     
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
