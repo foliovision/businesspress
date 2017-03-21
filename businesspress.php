@@ -278,15 +278,13 @@ class BusinessPress {
   
   function check_user_permission() {
     global $current_user;
-    if( !empty($this->aOptions['email']) && $this->aOptions['email'] == $current_user->user_email ) {
-      return true;
-    } else if( !empty($this->aOptions['domain']) && $this->aOptions['domain'] == $this->get_email_domain($current_user->user_email) ) {
-      return true;
-    }
+    if( !$this->get_setting('restrictions_enabled') ) return true;
     
-    if( empty($this->aOptions['email']) && empty($this->aOptions['domain']) ) {
+    if( $this->get_setting('email') == $current_user->user_email ) {
       return true;
-    }
+    } else if( $this->get_setting('domain') == $this->get_email_domain($current_user->user_email) ) {
+      return true;
+    }    
     
     return false;
   }
@@ -666,6 +664,9 @@ class BusinessPress {
   function handle_post() {    
     if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
       $this->aOptions = array();
+      
+      $this->aOptions['restrictions_enabled'] = !empty($_POST['restrictions_enabled']) ? true : false;
+      
       if( !empty($_POST['whitelist']) && $_POST['whitelist'] == 'domain' ) {
         $this->aOptions['domain'] = trim($_POST['domain']);
         $this->aOptions['email'] = '';

@@ -12,7 +12,7 @@ class BusinessPress_Settings {
   
   
   
-  function admin_show_setting( $name, $option_key, $title, $help, $type = 'checkbox', $class = false ) {
+  function admin_show_setting( $name, $option_key, $title, $help = false, $type = 'checkbox', $class = false ) {
     global $businesspress;
     $name = esc_attr($name);    
     ?>
@@ -29,7 +29,9 @@ class BusinessPress_Settings {
             <?php else : ?>
               <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $businesspress->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
             <?php endif; ?>
-            <label for="<?php echo $name; ?>"><?php echo $help; ?></p>
+            <?php if( $help ) : ?>
+              <label for="<?php echo $name; ?>"><?php echo $help; ?></p>
+            <?php endif; ?>
         </td>
       </tr>
     <?php
@@ -57,15 +59,17 @@ class BusinessPress_Settings {
     ?>        
     <div class="businesspress-header">
       <h2 class="nav-tab-wrapper businesspress-header-nav" id="businesspress-header-nav">
-        <a class="nav-tab nav-tab-access" href="#welcome"><span>BusinessPress</span></a>    
-        <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
-        <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
-        <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
-        <?php if( is_multisite() ) : ?>
-          <a class="nav-tab nav-tab-multisite" href="#multisite"><span><?php _e('Multisite', 'businesspress' ); ?></span></a>
+        <a class="nav-tab nav-tab-access" href="#welcome"><span>BusinessPress</span></a>
+        <?php if( $businesspress->check_user_permission() ) : ?>
+          <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
+          <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
+          <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
+          <?php if( is_multisite() ) : ?>
+            <a class="nav-tab nav-tab-multisite" href="#multisite"><span><?php _e('Multisite', 'businesspress' ); ?></span></a>
+          <?php endif; ?>
+          <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Docs', 'businesspress' ); ?></span></a>
+          <a class="nav-tab nav-tab-help nav-tab-right" href="#credits"><span><?php _e('Credits', 'businesspress' ); ?></span></a>
         <?php endif; ?>
-        <a class="nav-tab nav-tab-help nav-tab-right" href="#" target="_blank" title="<?php _e('Go to foliovision.com Docs page', 'businesspress' ); ?>"><span><?php _e('Docs', 'businesspress' ); ?></span></a>
-        <a class="nav-tab nav-tab-help nav-tab-right" href="#credits"><span><?php _e('Credits', 'businesspress' ); ?></span></a>        
       </h2>
 		</div>    
     
@@ -97,48 +101,41 @@ class BusinessPress_Settings {
             <?php do_meta_boxes('businesspress_settings_welcome', 'normal', false ); ?>     
           </div>
           
-          <div id='updates' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_updates', 'normal', false ); ?>
-            <?php if( $businesspress->check_user_permission() ) : ?>
-              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-            <?php endif; ?>
-          </div>
+          <?php if( $businesspress->check_user_permission() ) : ?>
           
-          <div id='preferences' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?>
-            <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
-              <?php $this->settings_activation_notice(); ?>
-            <?php elseif( $businesspress->check_user_permission() ) : ?>
-              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-            <?php endif; ?>
-          </div>
-          
-          <div id='branding' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>
-            <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
-              <?php $this->settings_activation_notice(); ?>
-            <?php elseif( $businesspress->check_user_permission() ) : ?>
-              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-            <?php endif; ?>              
-          </div>
-          
-          <?php if( is_multisite() ) : ?>
-            <div id='multisite' class='postbox-container'>
-              <?php do_meta_boxes('businesspress_settings_multisite', 'normal', false ); ?>
-              <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
-                <?php $this->settings_activation_notice(); ?>
-              <?php elseif( $businesspress->check_user_permission() ) : ?>
+            <div id='updates' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_updates', 'normal', false ); ?>
+              <?php if( $businesspress->check_user_permission() ) : ?>
                 <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />
-              <?php endif; ?>              
-            </div>          
+              <?php endif; ?>
+            </div>
+            
+            <div id='preferences' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?>            
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />            
+            </div>
+            
+            <div id='branding' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>            
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />            
+            </div>
+            
+            <?php if( is_multisite() ) : ?>
+              <div id='multisite' class='postbox-container'>
+                <?php do_meta_boxes('businesspress_settings_multisite', 'normal', false ); ?>
+                <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />              
+              </div>
+            <?php endif; ?>
+            
+            <div id='credits' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
+            </div>
+            
           <?php endif; ?>
-          
-          <div id='credits' class='postbox-container'>
-            <?php do_meta_boxes('businesspress_settings_credits', 'normal', false ); ?>
-          </div>          
           
         </div>
         <?php if( $businesspress->check_user_permission() || !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) wp_nonce_field( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ); ?>
+        
       </form>
         
     </div>
@@ -246,6 +243,7 @@ class BusinessPress_Settings {
       $(this).parents('tr').find('input[type=hidden]').val(0);
     });
    
+    $('.businesspress-enable').click( function() { jQuery('.nav-tab-updates').click() } );
   });     
   </script>
 
@@ -262,9 +260,8 @@ class BusinessPress_Settings {
     (function($) {
       $('<?php echo $sSelector1; ?>').prop('disabled','true');
       $('<?php echo $sSelector2; ?>').css('color','gray');
-      $('.businesspress-enable').prop('disabled','');
+      //$('.businesspress-enable').prop('disabled','');
       
-      $('.businesspress-enable').click( function() { jQuery('.nav-tab-updates').click() } );
       $('.contact-admin').click( function() { jQuery('.form-admin-contact').slideDown() } );
       
       $('.form-admin-contact input').click( function(e) {
@@ -300,7 +297,7 @@ class BusinessPress_Settings {
   
   function settings_activation_notice() {
     ?>
-      <p><?php _e('You must configure the plugin before it becomes operational.','businesspress'); ?></p>
+      <p><?php _e('Update restrictions are not currently activated.','businesspress'); ?></p>
       <input id="businesspress-enable" class="button button-primary businesspress-enable" type="button" value="Enable Restriction Mode" />
     <?php  
   }
@@ -543,6 +540,11 @@ class BusinessPress_Settings {
     $email = $businesspress->get_whitelist_email() ? $businesspress->get_whitelist_email() : $current_user->user_email;
     ?>       
     <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'restrictions_enabled',
+                    'restrictions_enabled',
+                    'Enable' ); ?>
+      
       <tr>
         <th><label><?php _e('Please enter the', 'businesspress' ); ?></label></th>
         <td>
