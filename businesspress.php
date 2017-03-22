@@ -8,7 +8,9 @@ Author: Foliovision
 Author URI: http://foliovision.com
 */
 
-class BusinessPress {
+require_once( dirname(__FILE__) . '/fp-api.php' );
+
+class BusinessPress extends BusinessPress_Plugin {
   
   
   const VERSION = '0.6.6.2';
@@ -71,8 +73,7 @@ class BusinessPress {
       //add_action( 'admin_notices', array( $this, 'show_disallow_not_defined') );
     }
     
-    add_action( 'admin_notices', array( $this, 'notice_defaults'), -1 );
-    add_action( 'network_admin_notices', array( $this, 'notice_defaults'), -1 );
+    add_action( 'admin_init', array( $this, 'pointer_defaults') );    
     
     
     add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
@@ -119,6 +120,8 @@ class BusinessPress {
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
     
     add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
+    
+    parent::__construct();
     
   }
   
@@ -872,15 +875,6 @@ JSH;
   
   
   
-  function notice_defaults() {
-    ?>
-      <div class="updated"><p><a href="<?php echo $this->get_settings_url(); ?>">BusinessPress</a> just disabled your REST API and Emojis, removed the WordPress Generator Tag and is hiding the Admin Notices.</p></div>
-    <?php
-  }
-  
-  
-  
-  
   function oembed_template() {
     if( get_query_var('embed') ) {
       add_filter( 'template_include', '__return_false' );
@@ -911,6 +905,63 @@ JSH;
       
     }
     
+  }
+  
+  
+  
+  
+  function pointer_ajax() {
+    if( isset($_POST['key']) && $_POST['key'] == 'businesspress_default_settings' && isset($_POST['value']) ) {
+      check_ajax_referer('businesspress_default_settings');
+
+      $this->aOptions['pointer_defaults'] = true;
+      if( is_multisite() ){
+        update_site_option( 'businesspress', $this->aOptions );
+      } else {
+        update_option( 'businesspress', $this->aOptions );
+      }
+      die();
+    }
+  }
+  
+  
+  
+  
+  function pointer_defaults() {
+    if( !$this->get_setting('pointer_defaults') ) {
+      $this->pointer_boxes['businesspress_default_settings'] = array(
+            'id' => '#wp-admin-bar-new-content',
+            'pointerClass' => 'businesspress_default_settings',
+            'heading' => __('BusinessPress', 'fv-wordpress-flowplayer'),
+            'content' => sprintf( __('<p>To improve your site security and performance BusinessPress had disabled your REST API, WordPress Generator Tag and Emojis.</p><p>The plugin is also moving all the Admin Notices into the Dashboard -> Notices screen to keep your WP Admin Dashboard clean.</p>', 'businesspress'), $this->get_settings_url() ),
+            'position' => array( 'edge' => 'top', 'align' => 'center' ),
+            'button1' => __('Open Settings', 'businesspress'),
+            'button2' => __('Dismiss', 'businesspress')
+          );
+      
+      add_action( 'admin_print_footer_scripts', array($this,'pointer_scripts'), 999 );
+    }
+    
+    add_action( 'wp_ajax_fv_foliopress_ajax_pointers', array($this,'pointer_ajax') );
+  }
+  
+  
+  
+  
+  function pointer_scripts() {
+    ?>
+    <script>
+      (function ($) {
+        $(document).ready( function() {
+          $('.businesspress_default_settings .button-primary').click( function(e) {
+            $(document).ajaxComplete( function() {
+              window.location = '<?php echo $this->get_settings_url(); ?>#preferences';
+            });
+          });
+        });
+			})(jQuery);        
+    </script>
+    <?php 
   }
   
   
