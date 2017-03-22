@@ -489,7 +489,7 @@ class BusinessPress_Settings {
                     'businesspress-disable-xml-rpc',
                     'disable-xml-rpc',
                     '',
-                    __('XML-RPC', 'businesspress').' (<a href="#" class="xml-rpc-obscure">'.__('obscure', 'businesspress').'</a>)' );
+                    __('XML-RPC', 'businesspress').' (<a href="#" class="xml-rpc-obscure">'.__('Protect', 'businesspress').'</a>)' );
       ?>
       
       <?php

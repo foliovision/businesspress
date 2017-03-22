@@ -665,9 +665,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
 
   function handle_post() {    
-    if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
-      $this->aOptions = array();
-      
+    if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) { 
       $this->aOptions['restrictions_enabled'] = !empty($_POST['restrictions_enabled']) ? true : false;
       
       if( !empty($_POST['whitelist']) && $_POST['whitelist'] == 'domain' ) {
