@@ -14,9 +14,10 @@ class BusinessPress_Settings {
   
   function admin_show_setting( $name, $option_key, $title, $help = false, $type = 'checkbox', $class = false ) {
     global $businesspress;
-    $name = esc_attr($name);    
+    $name = esc_attr($name);
+    $class = 'businesspress-setting-'.$name.' ' .$class;
     ?>
-      <tr<?php if( $class ) echo ' class="'.$class.'"'; ?>>
+      <tr class="<?php echo $class; ?>">
         <th>
           <label for="<?php echo $name; ?>"><?php _e($title, 'businesspress' ); ?></label>
         </th>
@@ -543,7 +544,8 @@ class BusinessPress_Settings {
       <?php $this->admin_show_setting(
                     'restrictions_enabled',
                     'restrictions_enabled',
-                    'Enable' ); ?>
+                    'Enable',
+                    __('Until you check this box the restrictions are not active.','businesspress') ); ?>
       
       <tr>
         <th><label><?php _e('Please enter the', 'businesspress' ); ?></label></th>
@@ -600,17 +602,29 @@ class BusinessPress_Settings {
       </tr>        
     </table>
     <script>
+      if( jQuery('#restrictions_enabled:checked').length ) {
+        jQuery('.businesspress-setting-restrictions_enabled td label').hide();
+      }
+      
+      jQuery('#restrictions_enabled').click( function() {;
+        if( jQuery('#restrictions_enabled:checked').length ) {
+          jQuery('.businesspress-setting-restrictions_enabled td label').hide();
+        } else {
+          jQuery('.businesspress-setting-restrictions_enabled td label').show();
+        }
+      });
+      
       if( jQuery('#whitelist-domain:checked').length ) {
         jQuery('tr.whitelist-email').hide();
         jQuery('tr.whitelist-domain').show();
       }
       
-      jQuery('#whitelist-domain').change( function() {console.log('wtf 1');
+      jQuery('#whitelist-domain').change( function() {
         jQuery('tr.whitelist-email').hide();
         jQuery('tr.whitelist-domain').show();
         jQuery('#contact_email').attr('required','true');
       });
-      jQuery('#whitelist-email').change( function() {console.log('wtf 2');
+      jQuery('#whitelist-email').change( function() {
         jQuery('tr.whitelist-email').show();
         jQuery('tr.whitelist-domain').hide();
         jQuery('#contact_email').removeAttr('required');
@@ -720,7 +734,7 @@ class BusinessPress_Settings {
       </div>
       <div class="one-half">
         
-        <?php if( !$businesspress->get_whitelist_domain() && !$businesspress->get_whitelist_email() ) : ?>
+        <?php if( $businesspress->check_user_permission() ) : ?>
           <?php $this->settings_activation_notice(); ?>
           
         <?php else : ?>  
@@ -740,7 +754,7 @@ class BusinessPress_Settings {
               <?php if( !isset($_GET['contact_form']) ) : ?></a><?php endif; ?>
               <?php _e('if you need to make any changes, that are not available to you.', 'businesspress' ); ?></p>
             <div class="form-admin-contact"<?php echo $sFormStyle; ?>>
-              <textarea class="large-text" name="message" rows="3"></textarea>
+              <textarea class="large-text" name="message" rows="5"></textarea>
               <input type="submit" class="button-primary" value="Send" />
             </div>
 

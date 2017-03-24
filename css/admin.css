@@ -148,3 +148,7 @@ input[type="radio"] + label {
 #businesspress-form .hndle {
   cursor: auto;
 }
+
+.businesspress-setting-restrictions_enabled td label {
+  color: red;
+}
