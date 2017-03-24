@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 4.6.1
+Tested up to: 4.7.3
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -11,6 +11,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 BusinessPress lets you control the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.
 
 == Description ==
+
+Here are the plugin features:
+
+**WordPress Updates**
 
 WordPress has a major release three times per year, each time with a risk of breaking the way your website works. This plugin removes most of the messages to update (button from dashboard, the admin footer link and admin notice), while adding more information about versions to the updates page. You will see which version you are running and which versions which are available to you and given a choice about your updates.
 
@@ -25,13 +29,30 @@ This plugin also allows you to prevent your client from installing new plugins (
 * Update WordPress core
 * Install, Edit and delete plugns and themes
 
+**Unnecessary WordPress features**
+
+Plugin by default disables the generator tag, REST API and Emojis to keep your site secure and fast. However you can enable these features back on if you prefer, just like the XML-RPC or oEmbed.
+
+**Login Logo**
+
+You can set your login logo and wp-admin color.
+
+**Admin Notices**
+
+Plugin by default moves the admin notices into Dashboard -> Notices screen where you can dismiss each notice. More and more plugins show their notices (some more important, some less) so BusinessPress cleans that up to keep you focused.
+
+**Login Protection**
+
 Plugin also supports fail2ban, see install instructions.
 
-###Coming soon
+**Credits**
 
-* Checkboxes to disable all the new WordPress features one by one. A lot of them are not needed and only make the site more fragile or slower.
-* Protecting your site privacy from WordPress.org API services
-* Switch help and news links to your own support and news channels.
+This plugin integrates some of the amazing WordPress plugins which keep it lean and removed the unnecessary features:
+
+Disable Embeds by Pascal Birchler with our own improvements
+Disable Emojis by Ryan Hellyer
+Disable REST API by Dave McHale
+Login Logo by Mark Jaquith with our own improvements
 
 [Support](http://foliovision.com/support/)
 
@@ -39,9 +60,11 @@ Plugin also supports fail2ban, see install instructions.
 
 ### Basic install
 
-If you are using WordPress Multisite, make sure you Network Activate the plugin. Once the plugin is installed, you will be prompted to configure it, otherwise it won't do anything.
+If you are using WordPress Multisite, make sure you Network Activate the plugin.
 
-Simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
+Plugin will disabled your admin notices, generator tag, REST API and Emojis out of the box - see plugin description.
+
+To lock down your site permissions simply click the notice or go to Settings -> BusinessPress. There you will be allowed to lock down the admin privileges to your own email address or your email domain (in case you want to keep admin access for your entire company).
 
 From that point forward, you will have to elevated admin privileges over the website.
 
@@ -66,7 +89,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.6.7 =
+= 0.7 =
 
 * New settings screen with tabs!
 * New function - Disable XML-RPC
@@ -139,6 +162,12 @@ An answer to that question.
 
 == Screenshots ==
 
-1. The plugin settings screen
+1. The plugin welcome screen - if user privileges are restricted, there is a contact form to contact the site admin
 
-2. The improved Updates screen
+2. The WordPress Updates settings tab
+
+3. Various things you can tweak
+
+4. Branding options
+
+5. The improved Updates screen
