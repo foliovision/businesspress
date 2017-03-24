@@ -88,6 +88,8 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_search', __('Search', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
+          
           add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_cdn', __('CDN', 'businesspress'), array( $this, 'settings_box_cdn' ), 'businesspress_settings_preferences', 'normal' );
           
@@ -402,6 +404,35 @@ class BusinessPress_Settings {
     <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
     <p><?php _e("If you don't have fail2ban available, we recommend <a href='https://wordpress.org/plugins/login-lockdown/' target='_blank'>Login LockDown</a>.", 'businesspress' ); ?></p>
     <?php
+  }
+  
+  
+  
+  
+  function settings_box_notices() {
+    global $businesspress;
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-hide-notices',
+                    'hide-notices',
+                    'Hide Admin Notices',
+                    __('Moves them all to a new screen.', 'businesspress' ) );
+      ?>
+      
+      <?php if( $businesspress->get_setting('hide-notices') ) :
+        global $BusinessPress_Notices;
+        if( $BusinessPress_Notices ) :
+        $iCount = $BusinessPress_Notices->get_count();
+        ?>
+        <tr>
+          <th></th>
+          <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
+        </tr>
+        <?php endif;
+      endif; ?>
+    </table>           
+    <?php
   }  
   
   
@@ -441,25 +472,6 @@ class BusinessPress_Settings {
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
       ?>
-      <?php $this->admin_show_setting(
-                    'businesspress-hide-notices',
-                    'hide-notices',
-                    'Hide Admin Notices',
-                    __('Moves them all to a new screen.', 'businesspress' ) );
-      ?>
-      
-      <?php if( $businesspress->get_setting('hide-notices') ) :
-        global $BusinessPress_Notices;
-        if( $BusinessPress_Notices ) :
-        $iCount = $BusinessPress_Notices->get_count();
-        ?>
-        <tr>
-          <th></th>
-          <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
-        </tr>
-        <?php endif;
-      endif; ?>
-      
     </table>           
     <?php
   }

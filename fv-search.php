@@ -100,8 +100,8 @@ class FV_Search {
                 
                 <h2><a href="'.get_permalink().'">'.$sTitle.'</a></h2>
                 '.str_replace( '<img', '<img style="width: 100px"', get_the_post_thumbnail( get_the_id(), 'thumbnail', array( 'class' => 'alignleft' ) ) ).'
-                <span>'.$sDate.'</span> <span><a href="'.get_permalink().'">'.$sLink.'</a></span>
-                <p>'.$sExcerpt .'</p>
+                <span><a href="'.get_permalink().'">'.$sLink.'</a></span>
+                <p><em>'.$sDate.'</em> '.$sExcerpt .'</p>
             </div>
             <div style="clear:both"></div>
             ';          
