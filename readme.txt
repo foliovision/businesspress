@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.7.1 =
+
+* Bugfix - "Hide Admin Notices" breaking WP admin menu with Newsletter plugin
+
 = 0.7 =
 
 * New settings screen with tabs!

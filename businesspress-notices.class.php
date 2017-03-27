@@ -5,8 +5,7 @@ class BusinessPress_Notices {
   var $iNoticesAvoided = 0;
   
   public function __construct() {    
-    add_action( 'admin_notices', array( $this, 'trap'), 0 );
-    add_action( 'all_admin_notices', array( $this, 'store'), 999999 );
+    add_action( 'admin_notices', array( $this, 'trap'), 0 );    
     add_action( 'admin_footer', array( $this, 'show_count'), 0 );
       
      /*else {
@@ -245,6 +244,7 @@ class BusinessPress_Notices {
     //echo "<p>BusinessPress_Notices::trap()</p>";
     
     ob_start();
+    add_action( 'all_admin_notices', array( $this, 'store'), 999999 );
   }
   
 
