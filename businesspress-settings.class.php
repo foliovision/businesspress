@@ -746,7 +746,7 @@ class BusinessPress_Settings {
       </div>
       <div class="one-half">
         
-        <?php if( $businesspress->check_user_permission() ) : ?>
+        <?php if( !$businesspress->get_setting('email') && !$businesspress->get_setting('domain') ) : ?>
           <?php $this->settings_activation_notice(); ?>
           
         <?php else : ?>  
