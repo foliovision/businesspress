@@ -92,6 +92,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 = 0.7.1 =
 
 * Bugfix - "Hide Admin Notices" breaking WP admin menu with Newsletter plugin
+* Bugfix - making sure the admin restrictions remain enabled after upgrading
 
 = 0.7 =
 

@@ -55,71 +55,72 @@ class BusinessPress extends BusinessPress_Plugin {
     
     $this->disable_xmlrpc();
     
-    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
-    
     if( $this->get_setting('hide-notices') ) include( dirname(__FILE__).'/businesspress-notices.class.php' );
     
-    
-    add_action( 'in_plugin_update_message-fv-disallow-mods/fv-disallow-mods.php', array( &$this, 'plugin_update_message' ) );
+    add_action( 'in_plugin_update_message-businesspress/businesspress.php', array( &$this, 'plugin_update_message' ) );
     
     register_activation_hook( __FILE__, array( $this , 'activate') );
     register_deactivation_hook( __FILE__, array( $this, 'deactivate') );
     
+    add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
-        
-    if( is_multisite() ) {
-      //add_action( 'network_admin_notices', array( $this, 'show_disallow_not_defined') );  //  todo: what about this?
-    } else {
-      //add_action( 'admin_notices', array( $this, 'show_disallow_not_defined') );
-    }
-    
-    add_action( 'admin_init', array( $this, 'pointer_defaults') );    
-    
-    
-    add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
+    add_action( 'admin_init', array( $this, 'apply_restrictions') );
+    add_action( 'plugins_loaded', array( $this, 'load_extensions' ) );    
     
     //add_filter( 'dashboard_glance_items', array( $this, 'core_updates_discard' ) );  // show only the current branch update for dashboard
     
-    add_action( 'admin_init', array( $this, 'admin_screen_cleanup') );
-    add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
+    /*
+     *  WordPress Upgrade tweaks
+     */
     
-    add_action( 'admin_init', array( $this, 'handle_post') );
-    
+    add_filter( 'auto_update_core', array( $this, 'delay_core_updates' ), 999, 2 );
     add_action( 'admin_init', array( $this, 'stop_disable_wordpress_core_updates') );
-    
-    add_action( 'init', array( $this, 'apply_restrictions') );
-    add_action( 'admin_init', array( $this, 'apply_restrictions') );
-    
-    add_action( 'load-update-core.php', array( $this, 'upgrade_screen_start') );
     add_action( 'core_upgrade_preamble', array( $this, 'upgrade_screen') );
-    
-    add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
-    add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
-    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
-
-    add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
+    add_action( 'load-update-core.php', array( $this, 'upgrade_screen_start') );
     
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
     add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
-
-    add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
-    add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
-    add_filter( 'admin_footer_text', array( $this, 'remove_wp_footer' ) );
+    /*
+     *  Admin screen
+     */
     
     add_action( 'admin_enqueue_scripts', array( $this, 'admin_style' ) );
+    add_action( 'admin_init', array( $this, 'handle_post') );
+    add_filter( 'plugin_action_links', array( $this, 'admin_plugin_action_links' ), 10, 2);
+    add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
     
-    add_action( 'plugins_loaded', array( $this, 'load_extensions', ) );
+    /*
+     *  Visual WP-Admin tweaks
+     */
     
-    //  wp-admin color
+    add_filter( 'admin_footer_text', array( $this, 'remove_wp_footer' ) );
+    add_action( 'admin_init', array( $this, 'admin_screen_cleanup') );
+    add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
+    add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
+    
     remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
     
-    add_action( 'init', array( $this, 'remove_hooks') );
+    /*
+     *  Frontend
+     */
     
-    add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
-    
+    add_action( 'init', array( $this, 'apply_restrictions') );
+    add_action( 'init', array( $this, 'remove_generator_tag') );  //  Generator tags
     add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
+    add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
+    
+    if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
+    
+    /*
+     *  Login protection
+     */
+    
+    add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
+    add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
+    add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
+    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );  
     
     parent::__construct();
     
@@ -140,6 +141,18 @@ class BusinessPress extends BusinessPress_Plugin {
   function admin_color_force() {
     return $this->get_setting('admin-color');
   }
+  
+  
+  
+  
+  function admin_plugin_action_links($links, $file) {
+  	$plugin_file = basename(__FILE__);
+  	if( basename($file) == $plugin_file ) {
+      $settings_link =  '<a href="'.site_url('wp-admin/options-general.php?page=businesspress').'">'.__('Settings', 'businesspress').'</a>';
+  		array_unshift($links, $settings_link);
+  	}
+  	return $links;
+  }  
   
   
   
@@ -901,13 +914,22 @@ JSH;
   
   
   function plugin_update_hook() {
-    if( empty($this->aOptions['version']) ) {
+    
+    $bStore = false;
+    if( !isset($this->aOptions['version']) || version_compare($this->aOptions['version'], '0.6.6') < 1 ) {
+      if( $this->get_whitelist_domain() || $this->get_whitelist_email() ) {
+        $this->aOptions['restrictions_enabled'] = true;
+        $bStore = true;
+      }
+    }    
+    
+    if( $bStore || empty($this->aOptions['version']) ) {
       $this->aOptions['version'] = BusinessPress::VERSION;
-      update_option( 'businesspress', $this->aOptions );
-    }
-
-    if( version_compare( $this->aOptions['version'], BusinessPress::VERSION, '<' ) ) { 
-      
+      if( is_multisite() ){
+        update_site_option( 'businesspress', $this->aOptions );
+      } else {
+        update_option( 'businesspress', $this->aOptions );
+      }
     }
     
   }
@@ -972,7 +994,7 @@ JSH;
   
   
   
-  function remove_hooks() {
+  function remove_generator_tag() {
     if( $this->get_setting('remove-generator') ) {
       remove_action( 'wp_head', 'edd_version_in_header' );
       remove_action( 'wp_head', 'wp_generator' );      
