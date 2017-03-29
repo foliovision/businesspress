@@ -29,12 +29,12 @@
     border: 0 none;
     color: inherit;
     cursor: pointer;
-    display: inline-block;
+    float: left;
     font-size: 0.68em;
     font-weight: normal;
     line-height: 3.4em;
     margin-right: 0;
-    padding: 0.35em 1em 0;
+    padding: 0.75em 1em 0;
 }
 #businesspress-header-nav .nav-tab-active {
     background: #f1f1f1 none repeat scroll 0 0;
@@ -62,13 +62,13 @@
 #businesspress-header-nav .nav-tab-right {
     float: right;
 }
-#businesspress-header-nav .nav-tab-access {
+#businesspress-header-nav .nav-tab-access,
+#businesspress-header-nav .nav-tab-access.nav-tab-active {
     background: #FFFFFF url(businesspress-logo.png) no-repeat center center;
     min-width: 48px;
 }
 #businesspress-header-nav .nav-tab-access.nav-tab-active {
-    background: #F1F1F1 url(businesspress-logo.png) no-repeat center center;
-    min-width: 48px;
+    background-color: #F1F1F1;
 }
 #businesspress-header-nav .nav-tab-access span {
     text-indent: -9999px;
