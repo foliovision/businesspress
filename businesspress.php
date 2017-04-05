@@ -1045,7 +1045,7 @@ JSR;
   
   function subscriber__dashboard_redirect() {
 		global $pagenow;
-		if ( 'profile.php' != $pagenow ) {
+		if ( !defined('DOING_AJAX') && 'profile.php' != $pagenow ) {
 			wp_redirect( site_url('wp-admin/profile.php') );
 			exit;
 		}

@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.7.2 =
+
+* Bugfix - "Hide WP Admin Bar for subscribers" was breaking WP Ajax for logged in logged in subscribers
+
 = 0.7.1 =
 
 * Bugfix - "Hide Admin Notices" breaking WP admin menu with Newsletter plugin
@@ -106,7 +110,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 * New function - Login logo (with image upload)
 * New function - Hide Admin Notices option moves all the notices to a new screen!
 * Improving the notice for password reset link to also say "Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes."
-* Setting "Hide WP Admin Bar for subscribers" now also removes all screen except for Profile for them
+* Setting "Hide WP Admin Bar for subscribers" now also removes all screens except for Profile
 * WP logo in Admin Bar is now removed
 
 = 0.6.6 =
