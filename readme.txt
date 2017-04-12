@@ -91,6 +91,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 = 0.7.3 - 2017/04/?? =
 
+* Feature - "Hide Admin Notices" - groups notices to "New" and "Viewed"
 * Bugfix - "Hide Admin Notices" - Notices screen missing in WP Multisite
 
 = 0.7.2 - 2017/04/05 =

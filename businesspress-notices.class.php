@@ -240,53 +240,61 @@ class BusinessPress_Notices {
       if( !$objDiv->hasAttribute('class')) {
         continue;
       }
+      
+      $sHTML = $this->outerHTML($objDiv);
+      if( stripos($sHTML,'poll ') !== false ) { //  whitelist for "Polldaddy Polls & Ratings"
+        echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
+        continue;
+      }
   
       $aClass = explode(' ', $objDiv->getAttribute('class'));
       if( in_array('notice', $aClass) ) {
-        $aMatches[] = $this->outerHTML($objDiv);
+        $aMatches[] = $sHTML;
       }
       if( in_array('error', $aClass) ) {
-        $aMatches[] = $this->outerHTML($objDiv);
+        $aMatches[] = $sHTML;
       }      
       if( in_array('updated', $aClass) ) {
-        $aMatches[] = $this->outerHTML($objDiv);
+        $aMatches[] = $sHTML;
       }
       if( in_array('update-nag', $aClass) ) {
-        $aMatches[] = $this->outerHTML($objDiv);
+        $aMatches[] = $sHTML;
       }
   
     }
     
     $aStored = $this->get();
     $aNew = $aStored;
-    foreach( $aMatches AS $sNotice ) {
-      
-      $check_one = $this->prepare_compare($sNotice);
-      //echo "<!--compare ".$check_one." against :\n";
-      
-      $bSkip = false;
-      foreach( $aStored AS $key => $aNotice ) {
-        $check_two = $this->prepare_compare($aNotice['html']);
+    if( count($aMatches) > 0 ) {
+      foreach( $aMatches AS $sNotice ) {
         
-        if( $check_one == $check_two ) {  //  if the notice is already recorded
-          if( isset($aNotice['dismissed']) && $aNotice['dismissed'] ) { //  and it's dismissed, then record it again
-            unset($aNew[$key]);
-          } else {  //  if it's already recorded and not dismissed, do nothing
-            $bSkip = true;
-            break;
+        $check_one = $this->prepare_compare($sNotice);
+        //echo "<!--compare ".$check_one." against :\n";
+        
+        $bSkip = false;
+        foreach( $aStored AS $key => $aNotice ) {
+          $check_two = $this->prepare_compare($aNotice['html']);
+          
+          if( $check_one == $check_two ) {  //  if the notice is already recorded
+            if( isset($aNotice['dismissed']) && $aNotice['dismissed'] ) { //  and it's dismissed, then record it again
+              unset($aNew[$key]);
+            } else {  //  if it's already recorded and not dismissed, do nothing
+              $bSkip = true;
+              break;
+            }
           }
         }
+        
+        if( !$bSkip ) {
+          $aNew[] = array( 'time' => time(), 'html' => $sNotice );
+        }
+        
+        //echo "-->\n";
+        
       }
       
-      if( !$bSkip ) {
-        $aNew[] = array( 'time' => time(), 'html' => $sNotice );
-      }
-      
-      //echo "-->\n";
-      
+      $this->save($aNew);
     }
-    
-    $this->save($aNew);
     
     //$html->find('div.updated');
     //$html->find('div.notice');
