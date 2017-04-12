@@ -152,7 +152,7 @@ class BusinessPress_Notices {
         $aStored = $this->get();
         $aStored[intval($_GET['dismiss'])]['dismissed'] = true;
         $this->save($aStored);
-        echo "<div class='updated'><p>Notice marked as dismissed.</p></div>";
+        echo "<div class='updated'><p>Notice marked as dismissed. If it keeps coming back, we recommend that you fix the issue that is causing it or <a href='https://foliovision.com/support/businesspress/requests-and-feedback' target='_blank'>let us know about it</a>.</p></div>";
       }
     }
     
@@ -265,14 +265,16 @@ class BusinessPress_Notices {
       //echo "<!--compare ".$check_one." against :\n";
       
       $bSkip = false;
-      foreach( $aStored AS $aNotice ) {
+      foreach( $aStored AS $key => $aNotice ) {
         $check_two = $this->prepare_compare($aNotice['html']);
         
-        //echo $check_two."\n";
-        
-        if( $check_one == $check_two ) {
-          $bSkip = true;
-          break;
+        if( $check_one == $check_two ) {  //  if the notice is already recorded
+          if( isset($aNotice['dismissed']) && $aNotice['dismissed'] ) { //  and it's dismissed, then record it again
+            unset($aNew[$key]);
+          } else {  //  if it's already recorded and not dismissed, do nothing
+            $bSkip = true;
+            break;
+          }
         }
       }
       
