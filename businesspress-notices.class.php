@@ -24,7 +24,9 @@ class BusinessPress_Notices {
   
   
   function get() {
-    return is_multisite() ? get_site_option('businesspress_notices', array() ) : get_option( 'businesspress_notices', array() );
+    $aNotices = is_network_admin() ? get_site_option('businesspress_notices', array() ) : get_option( 'businesspress_notices', array() );
+    usort($aNotices, array( $this, 'sort_notices' ) );
+    return $aNotices;
   }
   
   
@@ -117,7 +119,7 @@ class BusinessPress_Notices {
   
   
   function save( $aNotices ) {
-    if( is_multisite() ) {
+    if( is_network_admin() ) {
       update_site_option('businesspress_notices', $aNotices );
     } else {
       update_option( 'businesspress_notices', $aNotices );
@@ -163,8 +165,15 @@ class BusinessPress_Notices {
       <?php
       $aStored = $this->get();
       
-      $sAdminURL = site_url('wp-admin/index.php?page=businesspress-notices');
-      foreach( $aStored AS $key => $aNotice ) {
+      $sAdminURL = is_network_admin() ? site_url('wp-admin/network/index.php?page=businesspress-notices') : site_url('wp-admin/index.php?page=businesspress-notices');
+      ?>
+      <h3>New</h3>
+      <?php
+      $iNew = 0;      
+      foreach( $aStored AS $key => $aNotice ) {        
+        if( isset($aNotice['dismissed']) && $aNotice['dismissed'] ) continue;
+        
+        $iNew++;
         $sDismiss = ( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) ? " - <a href='".wp_nonce_url($sAdminURL,'businesspress_notice_dismiss')."&dismiss=".$key."'>Dismiss</a>" : false;
         ?>
         <p>
@@ -175,9 +184,37 @@ class BusinessPress_Notices {
         </p>
         <?php echo $aNotice['html'];
       }
+      
+      if( $iNew == 0) _e('No new notices.', 'businesspress' )
+      
+      ?>
+      <h3>Viewed</h3>
+      <?php
+      
+      $iViewed = 0;
+      foreach( $aStored AS $key => $aNotice ) {        
+        if( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) continue;
+        
+        $iViewed++;
+        ?>
+        <p>
+          <?php echo date('Y-m-d h:m:s',$aNotice['time']); ?>
+        </p>
+        <?php echo $aNotice['html'];
+      }
+      
+      if( $iViewed == 0) _e('No dismissed notices.', 'businesspress' )
       ?>
     </div>
     <?php
+  }
+  
+  
+  
+  
+  function sort_notices( $a, $b ) {
+    if( isset($a['time']) && isset($b['time']) && $a['time'] > $b['time'] ) return false; 
+    return true;
   }
   
   

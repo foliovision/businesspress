@@ -411,13 +411,15 @@ class BusinessPress_Settings {
   
   function settings_box_notices() {
     global $businesspress;
+    
+    $extra_note = is_multisite() ? ' '. __('Each blog in your Multisite gets one.', 'businesspress' ) : '';    
     ?>
     <table class="form-table">
       <?php $this->admin_show_setting(
                     'businesspress-hide-notices',
                     'hide-notices',
                     'Hide Admin Notices',
-                    __('Moves them all to a new screen.', 'businesspress' ) );
+                    __('Moves them all to a new screen in Dashboard -> Notices.', 'businesspress' ).$extra_note );
       ?>
       
       <?php if( $businesspress->get_setting('hide-notices') ) :
@@ -427,7 +429,7 @@ class BusinessPress_Settings {
         ?>
         <tr>
           <th></th>
-          <td>Currently <?php echo $iCount; ?> notice<?php if( $iCount > 1) echo 's'; ?> avoided, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
+          <td>There <?php if( $iCount == 1) echo 'is'; else echo 'are'; ?> <?php echo $iCount; ?> new notice<?php if( $iCount != 1 ) echo 's'; ?>, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
         </tr>
         <?php endif;
       endif; ?>
