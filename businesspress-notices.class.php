@@ -137,7 +137,8 @@ class BusinessPress_Notices {
     <script>
     (function( $ ) {
       var count = <?php echo $this->iNoticesAvoided; ?>;
-      $('[href="index.php?page=businesspress-notices"]').append('<span class="update-plugins count-'+count+'"><span class="update-count">'+count+'</span></span>');    
+      $('[href="index.php?page=businesspress-notices"]').append('<span class="update-plugins count-'+count+'"><span class="update-count">'+count+'</span></span>');
+      document.getElementById('menu-dashboard').className = document.getElementById('menu-dashboard').className.replace(/wp-not-current-submenu/,'wp-has-current-submenu wp-menu-open');
     })( jQuery );
     </script>
     <?php
