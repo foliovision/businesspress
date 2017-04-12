@@ -89,16 +89,20 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.7.2 =
+= 0.7.3 - 2017/04/?? =
+
+* Bugfix - "Hide Admin Notices" - Notices screen missing in WP Multisite
+
+= 0.7.2 - 2017/04/05 =
 
 * Bugfix - "Hide WP Admin Bar for subscribers" was breaking WP Ajax for logged in logged in subscribers
 
-= 0.7.1 =
+= 0.7.1 - 2017/03/27 =
 
 * Bugfix - "Hide Admin Notices" breaking WP admin menu with Newsletter plugin
 * Bugfix - making sure the admin restrictions remain enabled after upgrading
 
-= 0.7 =
+= 0.7 - 2017/03/24 =
 
 * New settings screen with tabs!
 * New function - Disable XML-RPC
@@ -113,45 +117,45 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 * Setting "Hide WP Admin Bar for subscribers" now also removes all screens except for Profile
 * WP logo in Admin Bar is now removed
 
-= 0.6.6 =
+= 0.6.6 - 2017/01/17 =
 
 * Added setting to Allow other admins to -> Export site content
 * Disabling "WordPress x.y.z is available. Please update!" emails
 * Disabling "Your site has updated to WordPress x.y.z" emails
 
-= 0.6.5 =
+= 0.6.5 - 2017/01/03 =
 
 * Fail2ban - added support for MaxCDN - matching IPs are treated as proxy servers to detect the real user IP reliably
 
-= 0.6.4 =
+= 0.6.4 - 2016/11/08 =
 
 * Bugfix - users able to deactivate the plugin in some cases
 * DoS protection - 404 requests are now reported to fail2ban. Make sure you update your fail2ban filter a jail settings. Our settings are 12 retries (login or 404) in 20 minutes
 
-= 0.6.3 =
+= 0.6.3 - 2016/07/18 =
 
 * Fix for WordPress Multisite
 
-= 0.6.2 =
+= 0.6.2 -2016/06/16 =
 
 * Fail2ban - moving checks for bad XML-RPC pingbacks to a different keyword for a different filter
 
-= 0.6 =
+= 0.6 - 2016/06/07 =
 
 * Fail2ban support added, check install instructions
 
-= 0.5.3 =
+= 0.5.3 - 2016/05/06 =
 
 * Added new permission to control - "Update WordPress core" - as not every admin should be able to do that
 * Allowing access to Dashboard -> Updates for everybody, but if the upgrade permissions in BusinesPress settings are not allowed, users will only see "Please contact {email for which the permissions are whitelised} to upgrade WordPress, plugins or themes." or "Please contact your site admin or your partners at {domain for which the permissions are whitelised} to upgrade WordPress, plugins or themes." note and a list of updates available.
 * Core Updates control - If you are not using latest WordPress, plugin gives you a chance to upgrade to the latest WordPress version in your current branch. That means you can safely upgrade 4.1.7 to 4.1.10 without having to go to 4.5.1 directly
 * Fixed compatibility with WordPress 3.7
 
-= 0.5.2 =
+= 0.5.2 - 2016/04/27 =
 
 * Changing Dashboard -> Updates screen - added extra security to the upgrade button - warning user about the risks of upgrading WordPress in a more comprehensive way
 
-= 0.5.1 =
+= 0.5.1 - 2016/04/12 =
 
 * Fix for the "BusinessPress must be configured before it becomes operational." link when network activated
 

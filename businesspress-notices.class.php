@@ -16,14 +16,22 @@ class BusinessPress_Notices {
       
     }*/
     
-    add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',  array( $this, 'menu' ) );
+    if( is_multisite() ) add_action( 'network_admin_menu',  array( $this, 'menu' ) );
+    add_action( 'admin_menu',  array( $this, 'menu' ) );
+  }
+  
+  
+  
+  
+  function get() {
+    return is_multisite() ? get_site_option('businesspress_notices', array() ) : get_option( 'businesspress_notices', array() );
   }
   
   
   
   
   function get_count() {
-    $aStored = get_option( 'businesspress_notices', array() );
+    $aStored = $this->get();
     foreach( $aStored AS $aNotice ) {
       if( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) {
         $this->iNoticesAvoided++;
@@ -103,6 +111,17 @@ class BusinessPress_Notices {
     $version_info = GFCommon::get_version_info();
     $value = array( $version_info['version'] );
     return $value;
+  }
+  
+  
+  
+  
+  function save( $aNotices ) {
+    if( is_multisite() ) {
+      update_site_option('businesspress_notices', $aNotices );
+    } else {
+      update_option( 'businesspress_notices', $aNotices );
+    }
   }  
   
   
@@ -128,10 +147,9 @@ class BusinessPress_Notices {
   function screen() {
     if( isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'businesspress_notice_dismiss') ) {
       if( isset($_GET['dismiss']) ) {
-        $aStored = get_option( 'businesspress_notices', array() );
+        $aStored = $this->get();
         $aStored[intval($_GET['dismiss'])]['dismissed'] = true;
-        update_option( 'businesspress_notices', $aStored );
-        
+        $this->save($aStored);
         echo "<div class='updated'><p>Notice marked as dismissed.</p></div>";
       }
     }
@@ -143,7 +161,7 @@ class BusinessPress_Notices {
     </style>
     <div class="businesspress_notices">
       <?php
-      $aStored = get_option( 'businesspress_notices', array() );
+      $aStored = $this->get();
       
       $sAdminURL = site_url('wp-admin/index.php?page=businesspress-notices');
       foreach( $aStored AS $key => $aNotice ) {
@@ -160,7 +178,7 @@ class BusinessPress_Notices {
       ?>
     </div>
     <?php
-  }  
+  }
   
   
   
@@ -202,7 +220,7 @@ class BusinessPress_Notices {
   
     }
     
-    $aStored = get_option( 'businesspress_notices', array() );
+    $aStored = $this->get();
     $aNew = $aStored;
     foreach( $aMatches AS $sNotice ) {
       
@@ -229,7 +247,7 @@ class BusinessPress_Notices {
       
     }
     
-    update_option( 'businesspress_notices', $aNew );
+    $this->save($aNew);
     
     //$html->find('div.updated');
     //$html->find('div.notice');
