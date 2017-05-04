@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.7.2
+Version: 0.7.3
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.7.2';
+  const VERSION = '0.7.3';
   
   
   private $disallowed_caps_default = array( 
@@ -441,7 +441,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   function fail2ban_404( $username ) {
-    if( preg_match( '~\.(jpg|png|gif|css|js)~', $_SERVER['REQUEST_URI'] ) ) return;
+    if( preg_match( '~\.(jpg|jpeg|png|gif|css|js)~i', $_SERVER['REQUEST_URI'] ) ) return;
 
     if( stripos($_SERVER['REQUEST_URI'], 'fv-gravatar-cache' ) !== false ) return;
 

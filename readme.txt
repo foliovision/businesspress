@@ -93,6 +93,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 * Feature - "Hide Admin Notices" - groups notices to "New" and "Viewed"
 * Bugfix - "Hide Admin Notices" - Notices screen missing in WP Multisite
+* Bugfix - exlcluding jpeg images from fail2ban logs, making extensions check case-insensitive
 
 = 0.7.2 - 2017/04/05 =
 
