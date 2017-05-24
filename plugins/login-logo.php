@@ -119,21 +119,28 @@ class CWS_Login_Logo_Plugin {
 	}
 
 	private function get_location( $what = '' ) {
+    $aOutput = false;
 		if ( $this->logo_file_exists() ) {
 			if ( 'path' == $what )
-				return $this->logo_location[$what];
+				$aOutput = $this->logo_location[$what];
 			elseif ( 'url' == $what ) {
         /// Addition by Foliovision
-        if( $this->logo_location['path'] == -1 ) return $this->logo_location[$what];
-				return $this->logo_location[$what] . '?v=' . filemtime( $this->logo_location['path'] );
+        if( $this->logo_location['path'] == -1 ) {
+          $aOutput = $this->logo_location[$what];
+        } else {
+          $aOutput = $this->logo_location[$what] . '?v=' . filemtime( $this->logo_location['path'] );
+        }
       }
       /// Addition by Foliovision
       elseif ( 'attachment_id' == $what )
-				return $this->logo_location[$what];
+				$aOutput = $this->logo_location[$what];
 			else
-				return $this->logo_location;
+				$aOutput = $this->logo_location;
 		}
-		return false;
+    
+    if( function_exists('domain_mapping_post_content') ) $aOutput = domain_mapping_post_content($aOutput);
+    
+		return $aOutput;
 	}
 
 	private function get_width() {
