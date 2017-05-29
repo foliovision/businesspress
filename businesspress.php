@@ -94,7 +94,7 @@ class BusinessPress extends BusinessPress_Plugin {
      *  Visual WP-Admin tweaks
      */
     
-    add_filter( 'heartbeat_settings', array( $this, 'heartbeat_frequency' ), 999, 2 );
+    add_filter( 'heartbeat_settings', array( $this, 'heartbeat_frequency' ), 999);
     add_filter( 'admin_footer_text', array( $this, 'remove_wp_footer' ) );
     add_action( 'admin_init', array( $this, 'admin_screen_cleanup') );
     add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
