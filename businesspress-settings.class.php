@@ -3,9 +3,6 @@
 class BusinessPress_Settings {
   
   public function __construct() {
-    global $businesspress;
-    $this->aOptions = $businesspress->aOptions;
-    
     add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',  array( $this, 'menu' ) );
   }
 
@@ -28,6 +25,7 @@ class BusinessPress_Settings {
             <?php elseif( $type == 'text' ) : ?>
               <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $businesspress->get_setting($option_key) ); ?>" />
             <?php else : ?>
+              <input type="hidden" name="<?php echo $name; ?>" value="0" /> 
               <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $businesspress->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
             <?php endif; ?>
             <?php if( $help ) : ?>
@@ -41,7 +39,7 @@ class BusinessPress_Settings {
   
   
   
-  function menu() {
+  function menu() {  
     if( is_multisite() && is_super_admin() ) {
       add_submenu_page( 'settings.php', 'BusinessPress', 'BusinessPress','manage_network_options', 'businesspress', array( $this, 'screen') );
     } else if (!is_multisite()) {
@@ -57,6 +55,8 @@ class BusinessPress_Settings {
   
   function screen() {
     global $businesspress;
+    $this->aOptions = $businesspress->aOptions;
+    
     ?>        
     <div class="businesspress-header">
       <h2 class="nav-tab-wrapper businesspress-header-nav" id="businesspress-header-nav">
@@ -590,16 +590,31 @@ class BusinessPress_Settings {
           <p><label>Allow other admins to</label></p>
         </th>
         <td>
-          <p><input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
-            <label for="cap_activate">Activate and deactivate plugins and themes</label></p>
-          <p><input type="checkbox" id="cap_update" name="cap_update" value="1" <?php if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] ) echo 'checked'; ?> />
-            <label for="cap_update">Update plugins and themes</label><br /></p>
-          <p><input type="checkbox" id="cap_core" name="cap_core" value="1" <?php if( !empty($this->aOptions['cap_core']) && $this->aOptions['cap_core'] ) echo 'checked'; ?> disabled="true" />
-            <label for="cap_core">Update WordPress core</label><br /></p>          
-          <p><input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
-            <label for="cap_install">Install, edit and delete plugins and themes </label></p>
-          <p><input type="checkbox" id="cap_export" name="cap_export" value="1" <?php if( !empty($this->aOptions['cap_export']) && $this->aOptions['cap_export'] ) echo 'checked'; ?> />
-            <label for="cap_export">Export site content</label></p>
+          <p>
+            <input type="hidden" name="cap_activate" value="0" />
+            <input type="checkbox" id="cap_activate" name="cap_activate" value="1" <?php if( !empty($this->aOptions['cap_activate']) && $this->aOptions['cap_activate'] ) echo 'checked'; ?> />
+            <label for="cap_activate">Activate and deactivate plugins and themes</label>
+          </p>
+          <p>
+            <input type="hidden" name="cap_update" value="0" />
+            <input type="checkbox" id="cap_update" name="cap_update" value="1" <?php if( !empty($this->aOptions['cap_update']) && $this->aOptions['cap_update'] ) echo 'checked'; ?> />
+            <label for="cap_update">Update plugins and themes</label><br />
+          </p>
+          <p>
+            <input type="hidden" name="cap_core" value="0" />
+            <input type="checkbox" id="cap_core" name="cap_core" value="1" <?php if( !empty($this->aOptions['cap_core']) && $this->aOptions['cap_core'] ) echo 'checked'; ?> disabled="true" />
+            <label for="cap_core">Update WordPress core</label><br />
+          </p>          
+          <p>
+            <input type="hidden" name="cap_install" value="0" />
+            <input type="checkbox" id="cap_install" name="cap_install" value="1" <?php if( !empty($this->aOptions['cap_install']) && $this->aOptions['cap_install'] ) echo 'checked'; ?> />
+            <label for="cap_install">Install, edit and delete plugins and themes </label>
+          </p>
+          <p>
+            <input type="hidden" name="cap_export" value="0" />
+            <input type="checkbox" id="cap_export" name="cap_export" value="1" <?php if( !empty($this->aOptions['cap_export']) && $this->aOptions['cap_export'] ) echo 'checked'; ?> />
+            <label for="cap_export">Export site content</label>
+          </p>
         </td>
       </tr>
       <tr>

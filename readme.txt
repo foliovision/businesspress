@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 4.7.3
+Tested up to: 4.8
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -89,12 +89,13 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.7.3 - 2017/04/?? =
+= 0.7.3 - 2017/06/08 =
 
 * Feature - "Hide Admin Notices" - groups notices to "New" and "Viewed"
 * Login logo - using domain mapped domain when WordPres MU Domain Mapping is present
 * Bugfix - "Hide Admin Notices" - Notices screen missing in WP Multisite
 * Bugfix - exlcluding jpeg images from fail2ban logs, making extensions check case-insensitive
+* Bugfix - settings saving
 
 = 0.7.2 - 2017/04/05 =
 

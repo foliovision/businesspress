@@ -636,7 +636,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'disable-rest-api' ) return true;
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
-    if( $key == 'hide-notices' ) return true;
+    if( $key == 'hide-notices' ) return false;
     
     
     return false;
@@ -685,8 +685,8 @@ class BusinessPress extends BusinessPress_Plugin {
   
 
   function handle_post() {    
-    if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) { 
-      $this->aOptions['restrictions_enabled'] = !empty($_POST['restrictions_enabled']) ? true : false;
+    if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
+      $this->aOptions['restrictions_enabled'] = isset($_POST['restrictions_enabled']) && $_POST['restrictions_enabled'] == 1 ? true : false;
       
       if( !empty($_POST['whitelist']) && $_POST['whitelist'] == 'domain' ) {
         $this->aOptions['domain'] = trim($_POST['domain']);
@@ -698,30 +698,29 @@ class BusinessPress extends BusinessPress_Plugin {
       
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
-      if( isset($_POST['wp_admin_bar_subscribers']) ) {
-        $this->aOptions['wp_admin_bar_subscribers'] = trim($_POST['wp_admin_bar_subscribers']);
-      }
+      $this->aOptions['wp_admin_bar_subscribers'] = isset($_POST['wp_admin_bar_subscribers']) && $_POST['wp_admin_bar_subscribers'] == 1 ? true : false;
       
-      if( !empty($_POST['cap_activate']) ) $this->aOptions['cap_activate'] = true;
-      if( !empty($_POST['cap_core']) ) $this->aOptions['cap_core'] = true;
-      if( !empty($_POST['cap_update']) ) $this->aOptions['cap_update'] = true;
-      if( !empty($_POST['cap_install']) ) $this->aOptions['cap_install'] = true;
-      if( !empty($_POST['cap_export']) ) $this->aOptions['cap_export'] = true;
+      $this->aOptions['cap_activate'] = isset($_POST['cap_activate']) && $_POST['cap_activate'] == 1 ? true : false;
+      $this->aOptions['cap_core'] = isset($_POST['cap_core']) && $_POST['cap_core'] == 1 ? true : false;
+      $this->aOptions['cap_update'] = isset($_POST['cap_update']) && $_POST['cap_update'] == 1 ? true : false;
+      $this->aOptions['cap_install'] = isset($_POST['cap_install']) && $_POST['cap_install'] == 1 ? true : false;
+      $this->aOptions['cap_export'] = isset($_POST['cap_export']) && $_POST['cap_export'] == 1 ? true : false;
       
       if( empty($this->aOptions['cap_update']) ) {
         unset($this->aOptions['cap_core']);
       }
       
-      $this->aOptions['search-results'] = !empty($_POST['businesspress-search-results']) ? true : false;
-      $this->aOptions['disable-emojis'] = !empty($_POST['businesspress-disable-emojis']) ? true : false;
-      $this->aOptions['disable-oembed'] = !empty($_POST['businesspress-disable-oembed']) ? true : false;
-      $this->aOptions['disable-rest-api'] = !empty($_POST['businesspress-disable-rest-api']) ? true : false;
-      $this->aOptions['disable-xml-rpc'] = !empty($_POST['businesspress-disable-xml-rpc']) ? true : false;
-      $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
+      $this->aOptions['search-results'] = isset($_POST['businesspress-search-results']) && $_POST['businesspress-search-results'] == 1 ? true : false;
+      $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;
+      $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
+      $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
+      $this->aOptions['disable-xml-rpc'] = isset($_POST['businesspress-disable-xml-rpc']) && $_POST['businesspress-disable-xml-rpc'] == 1 ? true : false;
+
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
-      $this->aOptions['hide-notices'] = !empty($_POST['businesspress-hide-notices']) ? true : false;
-      $this->aOptions['remove-generator'] = !empty($_POST['businesspress-remove-generator']) ? true : false;
-      $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
+      $this->aOptions['hide-notices'] = isset($_POST['hide-notices']) && $_POST['hide-notices'] == 1 ? true : false;
+      $this->aOptions['remove-generator'] = isset($_POST['businesspress-remove-generator']) && $_POST['businesspress-remove-generator'] == 1 ? true : false;
+      $this->aOptions['xpull-key'] = isset($_POST['businesspress-xpull-key']) && $_POST['businesspress-xpull-key'] == 1 ? true : false;
+      
       $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
       $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
@@ -960,7 +959,7 @@ JSH;
             'id' => '#wp-admin-bar-new-content',
             'pointerClass' => 'businesspress_default_settings',
             'heading' => __('BusinessPress', 'fv-wordpress-flowplayer'),
-            'content' => sprintf( __('<p>To improve your site security and performance BusinessPress had disabled your REST API, WordPress Generator Tag and Emojis.</p><p>The plugin is also moving all the Admin Notices into the Dashboard -> Notices screen to keep your WP Admin Dashboard clean.</p>', 'businesspress'), $this->get_settings_url() ),
+            'content' => sprintf( __('<p>To improve your site security and performance BusinessPress had disabled your REST API, WordPress Generator Tag and Emojis.</p><!--<p>The plugin is also moving all the Admin Notices into the Dashboard -> Notices screen to keep your WP Admin Dashboard clean.</p>-->', 'businesspress'), $this->get_settings_url() ),
             'position' => array( 'edge' => 'top', 'align' => 'center' ),
             'button1' => __('Open Settings', 'businesspress'),
             'button2' => __('Dismiss', 'businesspress')
