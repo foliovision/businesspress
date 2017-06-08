@@ -92,6 +92,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 = 0.7.3 - 2017/06/08 =
 
 * Feature - "Hide Admin Notices" - groups notices to "New" and "Viewed"
+* Feature - hearthbeat update frequency increased to 60 seconds
 * Login logo - using domain mapped domain when WordPres MU Domain Mapping is present
 * Bugfix - "Hide Admin Notices" - Notices screen missing in WP Multisite
 * Bugfix - exlcluding jpeg images from fail2ban logs, making extensions check case-insensitive
