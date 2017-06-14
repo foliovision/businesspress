@@ -44,39 +44,39 @@ class FV_Search {
     .businesspress-search-form search-submit:before {
         display: none;
     }
-    .businesspress-search-result {
-        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    .entry-content .businesspress-search-result {
+        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
         margin: 24px 0;
     }
-    .businesspress-search-result h2 {
-        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
+    .entry-content .businesspress-search-result h2 {
+        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
         font-size: 18px;
         margin-bottom: 0;
         font-weight: 400;
     }
-    .businesspress-search-result h2 a,
-    .businesspress-search-result .bpsr-link a {
+    .entry-content .businesspress-search-result h2 a,
+    .entry-content .businesspress-search-result .bpsr-link a {
         color: #1a0dab;
         text-decoration: none;
-        box-shadow: none !important;
-        border-bottom: none !important;
+        box-shadow: none;
+        border-bottom: none;
     }
-    .businesspress-search-result .bpsr-link a,
-    .businesspress-search-result span a{
+    .entry-content .businesspress-search-result .bpsr-link a,
+    .entry-content .businesspress-search-result span a{
         color: #006621;
     }
-    .businesspress-search-result h2 a:hover,
-    .businesspress-search-result .bpsr-link a:hover,
-    .businesspress-search-result span a:hover {
+    .entry-content .businesspress-search-result h2 a:hover,
+    .entry-content .businesspress-search-result .bpsr-link a:hover,
+    .entry-content .businesspress-search-result span a:hover {
         text-decoration: underline;
     }
-    .businesspress-search-result em,
-    .businesspress-search-result .bpsr-date {
+    .entry-content .businesspress-search-result em,
+    .entry-content .businesspress-search-result .bpsr-date {
         color: #808080;
         font-size: 14px;
         font-style: normal;
     }
-    .businesspress-search-result p {
+    .entry-content .businesspress-search-result p {
         line-height: 1.35;
         font-size: 14px;
     }
