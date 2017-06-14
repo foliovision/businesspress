@@ -13,6 +13,8 @@ class FV_Search {
     
     add_action( 'template_redirect', array($this,'template_redirect') );  //  this is where fake page is created, in the_posts it wasn't working so well, it was too late
     add_filter( 'the_content', array($this,'the_content') );  //  show the results here
+    
+    add_action( 'pre_get_posts', array($this,'posts_per_page') );
   }
   
   function css() {
@@ -27,6 +29,9 @@ class FV_Search {
       $wp_query->is_search_actually = true;
       
       $this->aSearchResults = $wp_query->posts;
+      $this->iSearch_post_count = $wp_query->post_count;
+      $this->iSearch_found_posts = $wp_query->found_posts;
+      $this->iSearch_max_num_pages = $wp_query->max_num_pages;
       
       $objPost = new stdClass;
       $objPost->ID = 999999999999;
@@ -148,6 +153,11 @@ class FV_Search {
             ';          
         
       }
+      
+      if( $this->iSearch_max_num_pages > 1 ) {
+        $html .= "<!--businesspress fv search paging-->";
+      }
+      
     } else {
       $html .= '<div class="businesspress-search-no-result"><p>'.__('Your search did not match any documents.','businesspress').'</p>';
       $html .= '<p>'.__('Suggestions:','businesspress').'</p>';
@@ -160,6 +170,13 @@ class FV_Search {
     $post = $tmp_post;
     return $html;
   }
+  
+  
+  function posts_per_page( $query ) {
+    if( $query->is_main_query() && !empty($query->query_vars['s']) ) {
+      $query->set( 'posts_per_page', 100 );
+    }
+  }  
   
 }
 
