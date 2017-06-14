@@ -22,6 +22,7 @@
     background-color: transparent;
     width: 11%;
     height: auto;
+    min-height: 34px;
     position: relative;
     float: right;
     display: block;
