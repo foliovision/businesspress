@@ -61,11 +61,13 @@ class FV_Search {
     $aSearchKeywords = array_merge( array( trim($search_query) ), $aSearchKeywords ); //  make sure full query is highlighted first
     $aSearchKeywords = array_unique($aSearchKeywords);
     
-    $html = '<form role="search" method="get" class="search-form businesspress-search-form" action="' . esc_url( home_url( '/' ) ) . '">
+    $search_form = apply_filters('businesspress_search_form', '<form role="search" method="get" class="search-form businesspress-search-form" action="' . esc_url( home_url( '/' ) ) . '">
                 <input type="search" class="search-field" placeholder="' . esc_attr_x( 'Search &hellip;', 'placeholder' ) . '" value="' . $search_query . '" name="s" />                
                 <input type="submit" class="search-submit" value="'. esc_attr_x( 'Search', 'submit button' ) .'" />
             </form>
-            ';
+            ' );
+            
+    $html = $search_form;
     
     if( $this->aSearchResults && count($this->aSearchResults) > 0 ) {
       foreach( $this->aSearchResults AS $post ) {

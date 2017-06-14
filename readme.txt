@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.7.4 - 2017/06/14 =
+
+* Google style results - greatly improved the search excerpts
+
 = 0.7.3 - 2017/06/08 =
 
 * Feature - "Hide Admin Notices" - groups notices to "New" and "Viewed"
