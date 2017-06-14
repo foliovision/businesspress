@@ -37,11 +37,14 @@ class FV_Search {
         background: url('<?php echo esc_url( plugins_url( 'css/search-icon.png', __FILE__ ) ); ?>') no-repeat right center;
         background-color: transparent;
         width: 11%;
+	height: auto;
         float: right;
         display: block;
-        border-bottom: 0;
+        border: 0;
+	border-bottom: 0;
 	margin: 0;
         padding: 7px;
+	position: relative;
     }
     .businesspress-search-form search-submit:before {
         display: none;
