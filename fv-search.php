@@ -29,6 +29,7 @@ class FV_Search {
         border: none;
         background-color: transparent;
         width: 88%;
+	margin: 0;
         padding: 7px;
 	}
     .businesspress-search-form .search-submit {
@@ -39,6 +40,7 @@ class FV_Search {
         float: right;
         display: block;
         border-bottom: 0;
+	margin: 0;
         padding: 7px;
     }
     .businesspress-search-form search-submit:before {
