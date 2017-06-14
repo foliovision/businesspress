@@ -16,94 +16,8 @@ class FV_Search {
   }
   
   function css() {
-    ?>
-    <style>
-    /* Custom search results */
-    .businesspress-search-form {
-        max-width: 500px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        box-shadow: 0 1px 3px #ccc;
-    }
-    .businesspress-search-form input.search-field {
-        border: none;
-        background-color: transparent;
-        width: 88%;
-        margin: 0;
-        padding: 7px;
-    }
-    .businesspress-search-form input.search-field:focus {
-        border: none;
-        background-color: transparent;
-    }
-    .businesspress-search-form input.search-submit {
-        text-indent: -9999px;
-        background: url('<?php echo esc_url( plugins_url( 'css/search-icon.png', __FILE__ ) ); ?>') no-repeat right center;
-        background-color: transparent;
-        width: 11%;
-        height: auto;
-        position: relative;
-        float: right;
-        display: block;
-        border: 0;
-        margin: 0;
-        padding: 7px;
-    }
-    .businesspress-search-form input.search-submit:hover {
-        background: url('<?php echo esc_url( plugins_url( 'css/search-icon.png', __FILE__ ) ); ?>') no-repeat right center;
-        background-color: transparent;
-    }
-    .businesspress-search-form search-submit:before {
-        display: none;
-    }
-    .entry-content .businesspress-search-result {
-        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-        line-height: 1.25;
-        margin: 24px 0;
-    }
-    .entry-content .businesspress-search-result h2 {
-        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-        font-size: 18px;
-        font-weight: 400;
-        line-height: 1;
-        margin-bottom: 0;
-    }
-    .entry-content .businesspress-search-result h2 a,
-    .entry-content .businesspress-search-result .bpsr-link a {
-        color: #1a0dab;
-        text-decoration: none;
-        box-shadow: none;
-        border-bottom: none;
-    }
-    .entry-content .businesspress-search-result .bpsr-link a,
-    .entry-content .businesspress-search-result span a {
-        color: #006621;
-        font-size: 14px;
-        text-decoration: none;
-        box-shadow: none;
-        border-bottom: none;
-    }
-    .entry-content .businesspress-search-result h2 a:hover {
-        color: #1a0dab;
-        text-decoration: underline;
-    }
-    .entry-content .businesspress-search-result .bpsr-link a:hover,
-    .entry-content .businesspress-search-result span a:hover {
-        color: #006621;
-        text-decoration: underline;
-    }
-    .entry-content .businesspress-search-result em,
-    .entry-content .businesspress-search-result .bpsr-date {
-        color: #808080;
-        font-size: 14px;
-        font-style: normal;
-    }
-    .entry-content .businesspress-search-result p {
-        font-size: 14px;
-        line-height: 1.35;
-    }
-    </style>
-    <?php
+    $ver = class_exists('BusinessPress') ? BusinessPress::VERSION : false;
+    wp_enqueue_style('fv-search', plugins_url( '/css/fv-search.css', __FILE__ ), array(), $ver );
   }  
   
   function template_redirect($template) {
@@ -131,7 +45,7 @@ class FV_Search {
       $wp_query->posts = array($objPost);
       
       remove_action( 'genesis_before_loop', 'genesis_do_breadcrumbs' );
-      add_action( 'wp_head', array($this,'css') );
+      add_action( 'wp_enqueue_scripts', array($this,'css') );
     }
   }
   
