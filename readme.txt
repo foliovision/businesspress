@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.7.5 - 2017/06/19 =
+
+* Feature - "Clean Image Filenames" - cleans the filenames from special characters
+
 = 0.7.4 - 2017/06/14 =
 
 * Google style results - greatly improved the search excerpts
