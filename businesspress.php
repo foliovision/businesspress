@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.7.4
+Version: 0.7.5
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.7.4';
+  const VERSION = '0.7.5';
   
   
   private $disallowed_caps_default = array( 
@@ -638,6 +638,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
     if( $key == 'hide-notices' ) return false;
+    if( $key == 'clean_image_filenames' ) return true;
     
     
     return false;
@@ -718,9 +719,10 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['disable-xml-rpc'] = isset($_POST['businesspress-disable-xml-rpc']) && $_POST['businesspress-disable-xml-rpc'] == 1 ? true : false;
 
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
-      $this->aOptions['hide-notices'] = isset($_POST['hide-notices']) && $_POST['hide-notices'] == 1 ? true : false;
+      $this->aOptions['hide-notices'] = isset($_POST['businesspress-hide-notices']) && $_POST['businesspress-hide-notices'] == 1 ? true : false;
       $this->aOptions['remove-generator'] = isset($_POST['businesspress-remove-generator']) && $_POST['businesspress-remove-generator'] == 1 ? true : false;
       $this->aOptions['xpull-key'] = isset($_POST['businesspress-xpull-key']) && $_POST['businesspress-xpull-key'] == 1 ? true : false;
+      $this->aOptions['clean_image_filenames'] = isset($_POST['businesspress-clean_image_filenames']) && $_POST['businesspress-clean_image_filenames'] == 1 ? true : false;
       
       $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
@@ -886,7 +888,11 @@ JSH;
       add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
     }
     
-    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );    
+    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );  
+
+    if( !class_exists('CleanImageFilenames') && $this->get_setting('clean_image_filenames') ) {
+      include( dirname(__FILE__).'/plugins/clean-image-filenames.php' );
+    }      
   }
   
   

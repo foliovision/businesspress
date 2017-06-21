@@ -92,6 +92,8 @@ class BusinessPress_Settings {
           
           add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_cdn', __('CDN', 'businesspress'), array( $this, 'settings_box_cdn' ), 'businesspress_settings_preferences', 'normal' );
+
+          add_meta_box( 'businesspress_clean_image_filenames', __('Clean Image Filenames', 'businesspress'), array( $this, 'settings_box_clean_image_filenames' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_branding', 'normal' );
@@ -358,6 +360,21 @@ class BusinessPress_Settings {
     </table>           
     <?php
   }
+
+
+  function settings_box_clean_image_filenames() {
+    global $businesspress;
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-clean_image_filenames',
+                    'clean_image_filenames',
+                    'Enable',
+                    __('Cleans the filenames from special characters like exclamation marks, periods, commas and accent characters like Swedish and German umlauts. Special characters are removed, accent characters are converted to their non-accent equivalent, and blank spaces are converted into dashes.', 'businesspress' ) );
+      ?>
+    </table>
+    <?php
+  }
   
   
   
@@ -371,7 +388,7 @@ class BusinessPress_Settings {
         <li><a href="https://wordpress.org/plugins/disable-emojis/" target="_blank">Disable Emojis</a> by <a href="https://geek.hellyer.kiwi/" target="_blank">Ryan Hellyer</a></li>
         <li><a href="https://wordpress.org/plugins/disable-json-api/" target="_blank">Disable REST API</a> by <a href="http://www.binarytemplar.com/" target="_blank">Dave McHale</a></li>
         <li><a href="https://wordpress.org/plugins/login-logo/" target="_blank">Login Logo</a> by <a href="http://coveredwebservices.com/" target="_blank">Mark Jaquith </a> with our own improvements</li>
-        
+        <li><a href="https://wordpress.org/plugins/clean-image-filenames/" target="_blank">Clean Image Filenames</a> by <a href="https://upperdog.com/" target="_blank">Upperdog</a></li>
       </ul>        
     <?php
   }    
