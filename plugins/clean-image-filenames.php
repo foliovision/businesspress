@@ -62,10 +62,38 @@ class CleanImageFilenames {
 
 		$path = pathinfo($file['name']);
 		$new_filename = preg_replace('/.' . $path['extension'] . '$/', '', $file['name']);
+		$new_filename = $this->atl_sanitize_title($new_filename);
 		$file['name'] = sanitize_title($new_filename) . '.' . $path['extension'];
 
 		return $file;
 	}
+
+	/*
+	Following function is from plugin: ArabicToLat
+	Plugin URI: https://wordpress.org/plugins/arabic-to-lat/
+	Author: Husam Alfas <cf@5vlast.ru>
+	Author URI: http://www.5vlast.ru/
+	Function converts Arabic characters to Latin characters.
+	*/ 
+	function atl_sanitize_title($title) {
+		$iso8859 = array(
+			"ا"=> "a","أ"=> "a","إ"=> "ie","آ"=> "aa",
+			"ب"=> "b","ت"=> "t","ث"=> "th","ج"=> "j",
+			"ح"=> "h","خ"=> "kh","د"=> "d","ذ"=> "thz",
+			"ر"=> "r","ز"=> "z","س"=> "s","ش"=> "sh",
+			"ص"=> "ss","ض"=> "dt","ط"=> "td","ظ"=> "thz",
+			"ع"=> "a","غ"=> "gh","ف"=> "f","ق"=> "q",
+			"ك"=> "k","ل"=> "l","م"=> "m","ن"=> "n",
+			"ه"=> "h","و"=> "w","ي"=> "e","اي"=> "i",
+			"ة"=> "tt","ئ"=> "ae","ى"=> "a","ء"=> "aa",
+			"ؤ"=> "uo","َ"=> "a","ُ"=> "u","ِ"=> "e",
+			" ٌ"=> "on","ٍ"=> "en","ً"=> "an","تش"=> "tsch",
+		);
+		$title = strtr($title, apply_filters('atl_table', $iso8859));
+		//$title = preg_replace("/[^A-Za-z0-9`'_\-\.]/", '-', $title);
+		return $title;
+	}
+
 }
 
 $clean_image_filenames = new CleanImageFilenames();
