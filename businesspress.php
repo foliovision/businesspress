@@ -1302,10 +1302,12 @@ JSR;
       }  
     }
     
-    $updates = get_core_updates();
+    $updates = get_site_transient( 'update_core' );
+    $updates = !empty($updates->updates) ? $updates->updates : get_core_updates();
     
     $bMajorUpdate = false;
-    foreach ( (array) $updates as $update ) {        
+
+    foreach ( (array) $updates as $update ) {
       if( stripos($update->version,$this->get_version_branch()) === false ) {
         $bMajorUpdate = true;
       }
@@ -1354,11 +1356,16 @@ JSR;
   
     if( $bMajorUpdate && ( $this->check_user_permission() || $this->can_update_core() ) ) {
       echo '<ul class="core-updates-businespress">';
-
-      foreach ( (array) $updates as $update ) {        
+      
+      $aShowed = array();      
+      foreach ( (array) $updates as $update ) {
         if( stripos($update->version,$this->get_version_branch()) === 0 ) {
           continue; //  don't show the minor updates here!
         }
+        
+        if( isset($aShowed[$update->version]) ) continue;
+              
+        $aShowed[$update->version] = true;        
         
         echo '<li>';
         if( !isset($update->response) || 'latest' == $update->response ) {
