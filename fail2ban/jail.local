@@ -7,3 +7,5 @@ port = http,https
 maxretry = 12
 findtime = 1200
 bantime = 1200
+
+ignoreip = 127.0.0.1 ; enter your server IP here
