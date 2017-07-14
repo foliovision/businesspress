@@ -443,6 +443,8 @@ class BusinessPress extends BusinessPress_Plugin {
   
   function fail2ban_404( $username ) {
     if( preg_match( '~\.(jpg|jpeg|png|gif|css|js|vtt)~i', $_SERVER['REQUEST_URI'] ) ) return;
+    
+    if( $_SERVER['REQUEST_URI'] == '/apple-app-site-association' || $_SERVER['REQUEST_URI'] == '/.well-known/apple-app-site-association' ) return;
 
     if( stripos($_SERVER['REQUEST_URI'], 'fv-gravatar-cache' ) !== false ) return;
 
