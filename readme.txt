@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8 - 2017/07/19 =
+
+* You can now pick the WordPress major branch version to upgrade to
+
 = 0.7.5 - 2017/07/14 =
 
 * Bugfix - exlcluding vtt and apple-app-site-association from fail2ban logs
