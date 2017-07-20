@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.1 - 2017/07/20 =
+
+* Bugfix - X-Pull key saving
+
 = 0.8 - 2017/07/19 =
 
 * You can now pick the WordPress major branch version to upgrade to
