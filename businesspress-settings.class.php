@@ -429,7 +429,7 @@ class BusinessPress_Settings {
         ?>
         <tr>
           <th></th>
-          <td>There <?php if( $iCount == 1) echo 'is'; else echo 'are'; ?> <?php echo $iCount; ?> new notice<?php if( $iCount != 1 ) echo 's'; ?>, see them all <a href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
+          <td>There <?php if( $iCount == 1) echo 'is'; else echo 'are'; ?> <?php echo $iCount; ?> new notice<?php if( $iCount != 1 ) echo 's'; ?>, see them all <a target="_blank" href='<?php echo site_url('wp-admin/index.php?page=businesspress-notices'); ?>'>here</a>.</td>
         </tr>
         <?php endif;
       endif; ?>
