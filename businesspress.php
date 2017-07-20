@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8
+Version: 0.8.1
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8';
+  const VERSION = '0.8.1';
   
   
   private $disallowed_caps_default = array( 
@@ -689,6 +689,7 @@ class BusinessPress extends BusinessPress_Plugin {
 
   function handle_post() {    
     if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
+      
       $this->aOptions['restrictions_enabled'] = isset($_POST['restrictions_enabled']) && $_POST['restrictions_enabled'] == 1 ? true : false;
       
       if( !empty($_POST['whitelist']) && $_POST['whitelist'] == 'domain' ) {
@@ -722,7 +723,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
       $this->aOptions['hide-notices'] = isset($_POST['hide-notices']) && $_POST['hide-notices'] == 1 ? true : false;
       $this->aOptions['remove-generator'] = isset($_POST['businesspress-remove-generator']) && $_POST['businesspress-remove-generator'] == 1 ? true : false;
-      $this->aOptions['xpull-key'] = isset($_POST['businesspress-xpull-key']) && $_POST['businesspress-xpull-key'] == 1 ? true : false;
+      $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
       
       $this->aOptions['xml-rpc-key'] = !empty($_POST['businesspress-xml-rpc-key']) ? trim($_POST['businesspress-xml-rpc-key']) : false;
       
