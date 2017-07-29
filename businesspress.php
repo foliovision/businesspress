@@ -448,6 +448,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
     if( stripos($_SERVER['REQUEST_URI'], 'fv-gravatar-cache' ) !== false ) return;
 
+    if( stripos($_SERVER['REQUEST_URI'], 'null' ) !== false ) return;
+	  
     if( preg_match( '~(Mediapartners-Google|googlebot|bingbot)~i', $_SERVER['HTTP_USER_AGENT'] ) ) return;
 
     if( !is_404() ) return;
