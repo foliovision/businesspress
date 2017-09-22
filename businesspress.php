@@ -452,7 +452,7 @@ class BusinessPress extends BusinessPress_Plugin {
 	  
     if( preg_match( '~(Mediapartners-Google|googlebot|bingbot)~i', $_SERVER['HTTP_USER_AGENT'] ) ) return;
 
-    if( !is_404() ) return;
+    if( !is_404() || function_exists('bbp_is_single_user') && bbp_is_single_user() ) return;
 
     $this->fail2ban_openlog(LOG_AUTH);
     syslog( LOG_INFO,'BusinessPress fail2ban 404 error - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
