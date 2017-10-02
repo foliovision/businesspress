@@ -89,6 +89,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.2 - 2017/10/?? =
+
+* Hiding number of updates from admin bar
+* Adding option to bring back the legacy WordPress Link Manager
+
 = 0.8.1 - 2017/07/20 =
 
 * Bugfix - X-Pull key saving

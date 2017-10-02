@@ -87,7 +87,7 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           
-          add_meta_box( 'businesspress_search', __('Search', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_search', __('Tweaks', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
@@ -474,6 +474,12 @@ class BusinessPress_Settings {
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
       ?>
+      <?php $this->admin_show_setting(
+                    'businesspress-link-manager',
+                    'link-manager',
+                    'Enable Link Manager',
+                    __('Legacy feature of WordPress, hidden since version 3.5.', 'businesspress' ) );
+      ?>			
     </table>           
     <?php
   }

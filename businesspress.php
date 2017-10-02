@@ -98,7 +98,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'admin_footer_text', array( $this, 'remove_wp_footer' ) );
     add_action( 'admin_init', array( $this, 'admin_screen_cleanup') );
     add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
-    add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_logo' ) );
+    add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_admin_bar_items' ) );
     
     remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
@@ -202,6 +202,8 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   function apply_restrictions() {
+    if( $this->get_setting('link-manager') ) add_filter( 'pre_option_link_manager_enabled', '__return_true' );
+    
     if( !$this->check_user_permission() )  {
       add_action( 'admin_footer', array( $this, 'hide_plugin_controls' ), 1 );
       add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 999, 2 );
@@ -717,6 +719,7 @@ class BusinessPress extends BusinessPress_Plugin {
       }
       
       $this->aOptions['search-results'] = isset($_POST['businesspress-search-results']) && $_POST['businesspress-search-results'] == 1 ? true : false;
+      $this->aOptions['link-manager'] = isset($_POST['businesspress-link-manager']) && $_POST['businesspress-link-manager'] == 1 ? true : false;
       $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;
       $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
       $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
@@ -737,6 +740,9 @@ class BusinessPress extends BusinessPress_Plugin {
       } else {
         update_option( 'businesspress', $this->aOptions );
       }
+      
+      wp_redirect( $this->get_settings_url() );
+      die();
     }
     
     return;
@@ -1026,9 +1032,10 @@ JSH;
   
   
   
-  function remove_wp_logo() {
+  function remove_wp_admin_bar_items() {
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');
+    $wp_admin_bar->remove_menu('updates');
   }
   
   
