@@ -89,10 +89,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.8.2 - 2017/10/?? =
+= 0.8.2 - 2017/10/04 =
 
 * Hiding number of updates from admin bar
 * Adding option to bring back the legacy WordPress Link Manager
+* Google style results - fix for results being injected into any sidebar content that uses the_content filter
 
 = 0.8.1 - 2017/07/20 =
 

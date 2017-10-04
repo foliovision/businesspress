@@ -37,7 +37,7 @@ class FV_Search {
       $objPost->ID = 999999999999;
       $objPost->post_title = 'Search';
       $objPost->post_type = 'page';
-      $objPost->post_content = 'wtf';
+      $objPost->post_content = '<div>[fv_search]</div>';
       $objPost->post_status = 'publish';
       $objPost->comment_status = 'closed';
       $objPost->ping_status = 'closed';
@@ -56,7 +56,7 @@ class FV_Search {
   
   function the_content( $html ) {
     global $wp_query;
-    if( !$wp_query->is_search_actually ) return $html;
+    if( !is_main_query() || trim($html) != '<div>[fv_search]</div>' ) return $html;
     
     global $post;
     $tmp_post = $post;
