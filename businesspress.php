@@ -726,7 +726,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['disable-xml-rpc'] = isset($_POST['businesspress-disable-xml-rpc']) && $_POST['businesspress-disable-xml-rpc'] == 1 ? true : false;
 
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
-      $this->aOptions['hide-notices'] = isset($_POST['hide-notices']) && $_POST['hide-notices'] == 1 ? true : false;
+      $this->aOptions['hide-notices'] = isset($_POST['businesspress-hide-notices']) && $_POST['businesspress-hide-notices'] == 1 ? true : false;
       $this->aOptions['remove-generator'] = isset($_POST['businesspress-remove-generator']) && $_POST['businesspress-remove-generator'] == 1 ? true : false;
       $this->aOptions['xpull-key'] = !empty($_POST['businesspress-xpull-key']) ? trim($_POST['businesspress-xpull-key']) : false;
       
