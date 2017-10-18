@@ -97,6 +97,11 @@ function apt_publish_post($post_id)
         $result = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE guid = '".$matches[1][$key]."'");
         if($result){
           $thumb_id = $result[0]->ID;
+        } else {  //  another try to look for the image using the media library meta data
+          $aURL = parse_url($matches[1][$key]);
+          $aUploadsInfo = wp_upload_dir();
+          $aUploads = parse_url($aUploadsInfo['baseurl']);
+          $thumb_id = $wpdb->get_var("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_value = '".str_replace( trailingslashit($aUploads['path']),'', $aURL['path'] )."'");     
         }
       
       }
