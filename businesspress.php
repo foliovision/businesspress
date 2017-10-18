@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.2
+Version: 0.8.3
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.2';
+  const VERSION = '0.8.3';
   
   
   private $disallowed_caps_default = array( 
@@ -720,6 +720,7 @@ class BusinessPress extends BusinessPress_Plugin {
       
       $this->aOptions['search-results'] = isset($_POST['businesspress-search-results']) && $_POST['businesspress-search-results'] == 1 ? true : false;
       $this->aOptions['link-manager'] = isset($_POST['businesspress-link-manager']) && $_POST['businesspress-link-manager'] == 1 ? true : false;
+      $this->aOptions['auto-set-featured-image'] = isset($_POST['businesspress-auto-set-featured-image']) && $_POST['businesspress-auto-set-featured-image'] == 1 ? true : false;
       $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;
       $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
       $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
@@ -897,7 +898,11 @@ JSH;
       add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
     }
     
-    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );    
+    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+    
+    if( !function_exists('apt_publish_post') && $this->get_setting('auto-set-featured-image') ) {
+      include( dirname(__FILE__).'/plugins/auto-post-thumbnail.php' );
+    }
   }
   
   
@@ -942,7 +947,12 @@ JSH;
       }
     }    
     
-    if( $bStore || empty($this->aOptions['version']) ) {
+    if( $bStore || empty($this->aOptions['version']) || $this->aOptions['version'] != BusinessPress::VERSION ) {
+      
+      if( empty($this->aOptions['auto-set-featured-image']) ) {
+        $this->aOptions['auto-set-featured-image'] = true;
+      }
+      
       $this->aOptions['version'] = BusinessPress::VERSION;
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );

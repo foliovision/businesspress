@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.3 - 2017/10/18 =
+
+* New feature, on by default! - Set Featured Images Automatically - First image in the post becomes the featured image on save
+
 = 0.8.2 - 2017/10/09 =
 
 * Hiding number of updates from admin bar

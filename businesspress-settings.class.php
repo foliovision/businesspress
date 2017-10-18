@@ -479,7 +479,13 @@ class BusinessPress_Settings {
                     'link-manager',
                     'Enable Link Manager',
                     __('Legacy feature of WordPress, hidden since version 3.5.', 'businesspress' ) );
-      ?>			
+      ?>
+      <?php $this->admin_show_setting(
+                    'businesspress-auto-set-featured-image',
+                    'auto-set-featured-image',
+                    'Set Featured Images Automatically',
+                    __('First image in the post becomes the featured image on save.', 'businesspress' ) );
+      ?>	      
     </table>           
     <?php
   }
