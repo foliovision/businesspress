@@ -4,7 +4,9 @@ class BusinessPress_Notices {
   
   var $iNoticesAvoided = 0;
   
-  public function __construct() {    
+  public function __construct() {
+    if( !class_exists('DOMDocument') ) return;
+    
     add_action( 'admin_notices', array( $this, 'trap'), 0 );    
     add_action( 'admin_footer', array( $this, 'show_count'), 0 );
       

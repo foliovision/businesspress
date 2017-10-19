@@ -415,11 +415,21 @@ class BusinessPress_Settings {
     $extra_note = is_multisite() ? ' '. __('Each blog in your Multisite gets one.', 'businesspress' ) : '';    
     ?>
     <table class="form-table">
-      <?php $this->admin_show_setting(
-                    'businesspress-hide-notices',
-                    'hide-notices',
-                    'Hide Admin Notices',
-                    __('Moves them all to a new screen in Dashboard -> Notices.', 'businesspress' ).$extra_note );
+      <?php
+      if( class_exists('DOMDocument') ) {      
+        $this->admin_show_setting(
+                      'businesspress-hide-notices',
+                      'hide-notices',
+                      'Hide Admin Notices',
+                      __('Moves them all to a new screen in Dashboard -> Notices.', 'businesspress' ).$extra_note );
+      } else {
+        ?>
+        <tr>
+          <th><label for="businesspress-hide-notices">Hide Admin Notices</label></th>
+          <td>Error: PHP DOMDocument not available</td>
+        </tr>        
+        <?php
+      }
       ?>
       
       <?php if( $businesspress->get_setting('hide-notices') ) :
