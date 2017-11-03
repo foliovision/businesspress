@@ -726,6 +726,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
       $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
       $this->aOptions['disable-xml-rpc'] = isset($_POST['businesspress-disable-xml-rpc']) && $_POST['businesspress-disable-xml-rpc'] == 1 ? true : false;
+      $this->aOptions['login-logo'] = !empty($_POST['businesspress-login-logo']) ? trim($_POST['businesspress-login-logo']) : false;
 
       $this->aOptions['admin-color'] = !empty($_POST['admin_color']) ? trim($_POST['admin_color']) : false;
       $this->aOptions['hide-notices'] = isset($_POST['businesspress-hide-notices']) && $_POST['businesspress-hide-notices'] == 1 ? true : false;

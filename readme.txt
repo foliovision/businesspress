@@ -89,6 +89,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.4 - 2017/11/?? =
+
+* New setting - Redirect WP Admin for subscribers
+* Bugfix - login logo not saving
+
 = 0.8.3 - 2017/10/18 =
 
 * New feature, on by default! - Set Featured Images Automatically - First image in the post becomes the featured image on save
