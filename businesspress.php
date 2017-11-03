@@ -221,7 +221,7 @@ class BusinessPress extends BusinessPress_Plugin {
       }
     }
     
-    if( !empty($this->aOptions['wp_admin_bar_subscribers']) && $this->aOptions['wp_admin_bar_subscribers'] && get_current_user_id() > 0 ) {
+    if( ( $this->get_setting('wp_admin_bar_subscribers') || $this->get_setting('wp_admin_redirect_subscribers') ) && get_current_user_id() > 0 ) {
       $objUser = get_userdata( get_current_user_id() );
       
       if( $objUser && isset($objUser->roles) && (
@@ -232,7 +232,7 @@ class BusinessPress extends BusinessPress_Plugin {
         add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
         add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
       }
-    }
+    }  
     
   }
   
@@ -707,6 +707,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
       $this->aOptions['wp_admin_bar_subscribers'] = isset($_POST['wp_admin_bar_subscribers']) && $_POST['wp_admin_bar_subscribers'] == 1 ? true : false;
+      $this->aOptions['wp_admin_redirect_subscribers'] = isset($_POST['wp_admin_redirect_subscribers']) && $_POST['wp_admin_redirect_subscribers'] == 1 ? true : false;
       
       $this->aOptions['cap_activate'] = isset($_POST['cap_activate']) && $_POST['cap_activate'] == 1 ? true : false;
       $this->aOptions['cap_core'] = isset($_POST['cap_core']) && $_POST['cap_core'] == 1 ? true : false;
@@ -1075,7 +1076,17 @@ JSR;
   
   function subscriber__dashboard_redirect() {
 		global $pagenow;
-		if ( !defined('DOING_AJAX') && 'profile.php' != $pagenow ) {
+    
+    if( defined('DOING_AJAX') ) {
+      return;
+    }
+    
+    if( $this->get_setting('wp_admin_redirect_subscribers') ) {
+      wp_redirect( home_url() );
+      exit;
+    }
+    
+		if ( 'profile.php' != $pagenow ) {
 			wp_redirect( site_url('wp-admin/profile.php') );
 			exit;
 		}

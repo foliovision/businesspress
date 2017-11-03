@@ -318,6 +318,12 @@ class BusinessPress_Settings {
                     'Hide WP Admin Bar for subscribers',
                     __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.", 'businesspress' ) );
       ?>
+      <?php $this->admin_show_setting(
+                    'wp_admin_redirect_subscribers',
+                    'wp_admin_redirect_subscribers',
+                    'Redirect WP Admin for subscribers',
+                    __("Will redirect to homepage.", 'businesspress' ) );
+      ?>
       <tr>
         <th>
           <label for="login-logo"><?php _e('Login Logo', 'businesspress' ); ?></label>
