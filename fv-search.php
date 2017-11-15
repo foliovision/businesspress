@@ -128,9 +128,9 @@ class FV_Search {
           }
           
           foreach( $aSearchKeywords AS $sKeyword ) {                        
-            $sTitle = preg_replace("/".$sKeyword."/i", "<b>\$0</b>", $sTitle );
-            $sLink = preg_replace( '~https?://~', '', preg_replace("/".$sKeyword."/i", "<b>\$0</b>", $sLink ) );
-            $sExcerpt = preg_replace("/".$sKeyword."/i", "<b>\$0</b>", $sExcerpt );
+            $sTitle = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sTitle );
+            $sLink = preg_replace( '~https?://~', '', preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sLink ) );
+            $sExcerpt = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sExcerpt );
           }
           
           if( get_the_time('U') + 7*24*3600 > current_time('timestamp') ) {
