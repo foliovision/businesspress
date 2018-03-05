@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.3
+Version: 0.8.4
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.3';
+  const VERSION = '0.8.4';
   
   
   private $disallowed_caps_default = array( 
@@ -255,14 +255,19 @@ class BusinessPress extends BusinessPress_Plugin {
       $bSuccess = false;
       $aResponse = wp_remote_get( 'https://codex.wordpress.org/WordPress_Versions' );
       if( !is_wp_error($aResponse) ) {      
-        preg_match_all( '~<tr[^>]*?>[\s\S]*?([0-9.-]+)[\s\S]*?(\S+ \d+, 20\d\d)[\s\S]*?</tr>~', $aResponse['body'], $aMatches );
-               
-        $aVersions = array( 'data' => array() );
-        $aVersions['ttl'] = time() + 900;
-        if( count($aMatches[2]) > 0 ) {
-          $bSuccess = true;
-          foreach( $aMatches[2] AS $k => $v ) {          
-            $aVersions['data'][$aMatches[1][$k]] = $v;
+        if( preg_match_all( '~<tr[\s\S]*?</tr>~', $aResponse['body'], $aTableRows ) ) {
+          $aVersions = array( 'data' => array() );
+          $aVersions['ttl'] = time() + 900;
+          if( count($aTableRows) > 0 ) {
+            foreach( $aTableRows[0] as $sTableRow ) {
+              preg_match( '~Version_([0-9.-]+)~', $sTableRow, $aVersion );
+              preg_match( '~\S+ \d+, 20\d\d~', $sTableRow, $aDate );
+              if( $aVersion && $aDate ) {
+                $bSuccess = true;
+                $aVersions['data'][$aVersion[1]] = $aDate[0];
+              }
+            }
+            
           }
         }
         
@@ -1229,7 +1234,7 @@ JSR;
     if( $iRemaining > 0 ) {
       $new_html .= "Projected security updates: ".$iRemaining." months.";
     } else {
-      $new_html .= "Projected security updates: Negative ".abs($iRemaining)." months. Expired or expiration imminent.";
+      $new_html .= "Projected security updates: Negative ".abs($iRemaining)." months. Expired or expiration imminent - we expect there will be no more security updates to ".$this->get_version_branch().".";
     }
     $new_html .= "</h4>\n";
     

@@ -89,10 +89,12 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.8.4 - 2017/11/?? =
+= 0.8.4 - 2018/03/05 =
 
 * New setting - Redirect WP Admin for subscribers
+* Search hightlight - not using <b> anymore
 * Bugfix - login logo not saving
+* Bugfix - WordPress version release dates couldn't be parsed
 
 = 0.8.3 - 2017/10/18 =
 
