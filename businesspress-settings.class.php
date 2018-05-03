@@ -489,14 +489,20 @@ class BusinessPress_Settings {
                     'search-results',
                     'Enable Google style results',
                     sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
-      ?>
-      <?php $this->admin_show_setting(
+      
+      $this->admin_show_setting(
                     'businesspress-link-manager',
                     'link-manager',
                     'Enable Link Manager',
                     __('Legacy feature of WordPress, hidden since version 3.5.', 'businesspress' ) );
-      ?>
-      <?php $this->admin_show_setting(
+      
+      $this->admin_show_setting(
+                    'businesspress-author-dropdown',
+                    'author-dropdown',
+                    'Enhance Author Dropdown',
+                    __('Changes the old school HTML dropdown for post author to a modern select box with search functionality.', 'businesspress' ) );
+      
+      $this->admin_show_setting(
                     'businesspress-auto-set-featured-image',
                     'auto-set-featured-image',
                     'Set Featured Images Automatically',

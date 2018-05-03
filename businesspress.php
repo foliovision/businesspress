@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.4
+Version: 0.8.5
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.4';
+  const VERSION = '0.8.5';
   
   
   private $disallowed_caps_default = array( 
@@ -121,7 +121,15 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
-    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );  
+    add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
+    
+    if( $this->get_setting('author-dropdown') ) {
+      add_action( 'admin_print_footer_scripts-post.php', array( $this, 'script_author_select' ) );
+      add_action( 'admin_print_footer_scripts-post-new.php', array( $this, 'script_author_select' ) );
+      
+      add_action( 'admin_footer-post.php', array( $this, 'script_author_select_output' ) );
+      add_action( 'admin_footer-post-new.php', array( $this, 'script_author_select_output' ) );
+    }
     
     parent::__construct();
     
@@ -743,6 +751,8 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
       $this->aOptions['multisite-tracking'] = !empty($_POST['businesspress-multisite-tracking']) ? stripslashes($_POST['businesspress-multisite-tracking']) : false;
       
+      $this->aOptions['author-dropdown'] = isset($_POST['businesspress-author-dropdown']) && $_POST['businesspress-author-dropdown'] == 1 ? true : false;
+      
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
       } else {
@@ -960,6 +970,10 @@ JSH;
         $this->aOptions['auto-set-featured-image'] = true;
       }
       
+      if( empty($this->aOptions['author-dropdown']) ) {
+        $this->aOptions['author-dropdown'] = true;
+      }
+      
       $this->aOptions['version'] = BusinessPress::VERSION;
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -1053,6 +1067,28 @@ JSH;
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');
     $wp_admin_bar->remove_menu('updates');
+  }
+  
+  
+  
+  
+  function script_author_select($hook_suffix) {
+    wp_enqueue_script( 'select2', plugins_url('/js/select2.min.js',__FILE__), array( 'jquery' ), BusinessPress::VERSION, true );
+    wp_enqueue_style( 'select2', plugins_url('/css/select2.min.css',__FILE__), BusinessPress::VERSION );
+    
+  }
+  
+  
+  
+  
+  function script_author_select_output() {
+    ?>
+    <script>
+    jQuery(document).ready( function() {
+      jQuery('#post_author_override').select2();
+    });
+    </script>
+    <?php
   }
   
   

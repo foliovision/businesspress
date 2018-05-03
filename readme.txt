@@ -89,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.5 - 2018/05/03 =
+
+* New feature - Enhance Author Dropdown - Changes the old school HTML dropdown for post author to a modern select box with search functionality. On by default.
+
 = 0.8.4 - 2018/03/05 =
 
 * New setting - Redirect WP Admin for subscribers
