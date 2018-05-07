@@ -24,16 +24,15 @@ function wp_chosen_enqueue_assets() {
 	$handle = apply_filters( 'wp_chosen_enqueue_handle', 'jquery-chosen' );
 
 	// Vars
-	$url = wp_chosen_get_plugin_url();
-	$ver = wp_chosen_get_asset_version();
-
+	$url = trailingslashit( plugins_url('wp-chosen',dirname(dirname(__FILE__))) );
+	$ver = BusinessPress::VERSION;
 	// Styles
 	wp_enqueue_style( $handle,     $url . 'assets/css/chosen.min.css', array(),          $ver );
 	wp_enqueue_style( 'wp-chosen', $url . 'assets/css/wp-chosen.css',  array( $handle ), $ver );
 
 	// Scripts
-	wp_enqueue_script( $handle,     $url . 'assets/js/chosen.jquery.min.js', array( 'jquery' ), $ver );
-	wp_enqueue_script( 'wp-chosen', $url . 'assets/js/wp-chosen.js',         array( $handle  ), $ver );
+	wp_enqueue_script( $handle,     $url . 'assets/js/chosen.jquery.min.js', array( 'jquery' ), $ver, true );
+	wp_enqueue_script( 'wp-chosen', $url . 'assets/js/wp-chosen.js',         array( $handle  ), $ver, true );
 }
 
 /**

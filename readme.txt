@@ -53,6 +53,7 @@ Disable Embeds by Pascal Birchler with our own improvements
 Disable Emojis by Ryan Hellyer
 Disable REST API by Dave McHale
 Login Logo by Mark Jaquith with our own improvements
+WP Chosen by John James Jacoby with some small performance improvements
 
 [Support](http://foliovision.com/support/)
 
@@ -88,6 +89,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
 
 == Changelog ==
+
+= 0.8.6 - 2018/05/07 =
+
+* Enhance Author Dropdown - using WP Chosen instead, as it improves all the select boxes in wp-admin!
 
 = 0.8.5 - 2018/05/03 =
 

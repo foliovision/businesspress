@@ -497,10 +497,10 @@ class BusinessPress_Settings {
                     __('Legacy feature of WordPress, hidden since version 3.5.', 'businesspress' ) );
       
       $this->admin_show_setting(
-                    'businesspress-author-dropdown',
-                    'author-dropdown',
-                    'Enhance Author Dropdown',
-                    __('Changes the old school HTML dropdown for post author to a modern select box with search functionality.', 'businesspress' ) );
+                    'businesspress-admin-dropdown',
+                    'admin-dropdown',
+                    'Enhance wp-admin Dropdowns',
+                    __('Makes long, unwieldy select boxes much more user-friendly, including search functionality.', 'businesspress' ) );
       
       $this->admin_show_setting(
                     'businesspress-auto-set-featured-image',

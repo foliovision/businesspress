@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.5
+Version: 0.8.6
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.5';
+  const VERSION = '0.8.6';
   
   
   private $disallowed_caps_default = array( 
@@ -65,7 +65,8 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
-    add_action( 'plugins_loaded', array( $this, 'load_extensions' ) );    
+    add_action( 'plugins_loaded', array( $this, 'load_extensions' ) );
+    add_action( 'plugins_loaded', array( $this, 'load_extensions_later' ), 11 );    
     
     //add_filter( 'dashboard_glance_items', array( $this, 'core_updates_discard' ) );  // show only the current branch update for dashboard
     
@@ -122,14 +123,6 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
-    
-    if( $this->get_setting('author-dropdown') ) {
-      add_action( 'admin_print_footer_scripts-post.php', array( $this, 'script_author_select' ) );
-      add_action( 'admin_print_footer_scripts-post-new.php', array( $this, 'script_author_select' ) );
-      
-      add_action( 'admin_footer-post.php', array( $this, 'script_author_select_output' ) );
-      add_action( 'admin_footer-post-new.php', array( $this, 'script_author_select_output' ) );
-    }
     
     parent::__construct();
     
@@ -751,7 +744,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
       $this->aOptions['multisite-tracking'] = !empty($_POST['businesspress-multisite-tracking']) ? stripslashes($_POST['businesspress-multisite-tracking']) : false;
       
-      $this->aOptions['author-dropdown'] = isset($_POST['businesspress-author-dropdown']) && $_POST['businesspress-author-dropdown'] == 1 ? true : false;
+      $this->aOptions['admin-dropdown'] = isset($_POST['businesspress-admin-dropdown']) && $_POST['businesspress-admin-dropdown'] == 1 ? true : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -925,6 +918,16 @@ JSH;
   
   
   
+  function load_extensions_later() {
+    if( !function_exists('wp_chosen_enqueue_assets') && $this->get_setting('admin-dropdown') ) {
+      include( dirname(__FILE__).'/plugins/wp-chosen/includes/admin.php' );
+      include( dirname(__FILE__).'/plugins/wp-chosen/includes/hooks.php' );
+    }
+  }
+  
+  
+  
+  
   function multisite_footer() {
     if( !is_multisite() ) return;
     
@@ -970,8 +973,8 @@ JSH;
         $this->aOptions['auto-set-featured-image'] = true;
       }
       
-      if( empty($this->aOptions['author-dropdown']) ) {
-        $this->aOptions['author-dropdown'] = true;
+      if( empty($this->aOptions['admin-dropdown']) ) {
+        $this->aOptions['admin-dropdown'] = true;
       }
       
       $this->aOptions['version'] = BusinessPress::VERSION;
@@ -1067,28 +1070,6 @@ JSH;
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');
     $wp_admin_bar->remove_menu('updates');
-  }
-  
-  
-  
-  
-  function script_author_select($hook_suffix) {
-    wp_enqueue_script( 'select2', plugins_url('/js/select2.min.js',__FILE__), array( 'jquery' ), BusinessPress::VERSION, true );
-    wp_enqueue_style( 'select2', plugins_url('/css/select2.min.css',__FILE__), BusinessPress::VERSION );
-    
-  }
-  
-  
-  
-  
-  function script_author_select_output() {
-    ?>
-    <script>
-    jQuery(document).ready( function() {
-      jQuery('#post_author_override').select2();
-    });
-    </script>
-    <?php
   }
   
   
