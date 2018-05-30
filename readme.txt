@@ -90,6 +90,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.8 - 2018/05/30 =
+
+* Bugfix - number of plugin updates invisible, but red circle appearing in the menu
+
 = 0.8.7 - 2018/05/11 =
 
 * Enhance wp-admin Dropdowns - fixed to ignore select boxes which are initially not visible as it was causing these to disappear (appearing with almost zero width)
