@@ -90,6 +90,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.8.9 - 2018/06/?? =
+
+* Bugfix - search term highlight issues when using FV Swiftype
+
 = 0.8.8 - 2018/05/30 =
 
 * Bugfix - number of plugin updates invisible, but red circle appearing in the menu

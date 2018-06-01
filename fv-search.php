@@ -4,6 +4,8 @@
  *  Version 0.2
  */
 
+if( !class_exists('FV_Search') ) :
+
 class FV_Search {
   
   var $aSearchResults = false;
@@ -128,7 +130,7 @@ class FV_Search {
           }
           
           foreach( $aSearchKeywords AS $sKeyword ) {                        
-            $sTitle = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sTitle );
+            if( stripos($sTitle,'<strong') === false ) $sTitle = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sTitle );
             $sLink = preg_replace( '~https?://~', '', preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sLink ) );
             $sExcerpt = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sExcerpt );
           }
@@ -181,3 +183,5 @@ class FV_Search {
 }
 
 $FV_Search = new FV_Search;
+
+endif;
