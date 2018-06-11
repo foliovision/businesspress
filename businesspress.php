@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.8
+Version: 0.8.9
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.8';
+  const VERSION = '0.8.9';
   
   
   private $disallowed_caps_default = array( 
@@ -123,6 +123,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
+    add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
     
     parent::__construct();
     
@@ -477,6 +478,16 @@ class BusinessPress extends BusinessPress_Plugin {
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }
+  
+  
+  
+  
+  function fail2ban_lostpassword( $errors ) {
+    if( $errors && method_exists($errors,'get_error_codes') && $errors->get_error_codes() ) {
+      $this->fail2ban_openlog();
+      syslog( LOG_INFO,'BusinessPress fail2ban login lostpassword error - user '.( !empty($_POST['user_login']) ? $_POST['user_login'] : '?' ).' doesn\'t exists from '.$this->get_remote_addr() );      
+    }
+  }  
   
   
   

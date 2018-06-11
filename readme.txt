@@ -90,8 +90,9 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.8.9 - 2018/06/?? =
+= 0.8.9 - 2018/0611 =
 
+* Fail2ban protection for bad password reset attempts
 * Bugfix - search term highlight issues when using FV Swiftype
 
 = 0.8.8 - 2018/05/30 =
