@@ -93,7 +93,8 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 = 0.8.9 - 2018/0611 =
 
 * Fail2ban protection for bad password reset attempts
-* Bugfix - search term highlight issues when using FV Swiftype
+* Bugfix - Enhance wp-admin Dropdowns - excluding EDD variable prices
+* Bugfix - search term highlight issues when using FV Swiftyp
 
 = 0.8.8 - 2018/05/30 =
 

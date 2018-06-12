@@ -18,7 +18,7 @@ jQuery( document ).ready( function ( $ ) {
 		+ ', .customize-pane-parent select';
 
 	/* Attach */
-	$( chosen_targets ).filter(":visible").not("[size]").chosen( chosen_options );
+	$( chosen_targets ).filter(":visible").filter( function() { return !$(this).parents('#edd_price_fields').length }).not("[size]").chosen( chosen_options );
 
 	/* Special case the Meta-Box toggle */
 	$( document ).on( 'postbox-toggled', function( event, postbox ) {
