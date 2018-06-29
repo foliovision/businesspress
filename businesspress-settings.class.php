@@ -24,6 +24,8 @@ class BusinessPress_Settings {
               <textarea id="<?php echo $name; ?>" name="<?php echo $name; ?>" class="large-text code" rows="8"><?php echo esc_textarea( $businesspress->get_setting($option_key) ); ?></textarea><br />
             <?php elseif( $type == 'text' ) : ?>
               <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $businesspress->get_setting($option_key) ); ?>" />
+            <?php elseif( $type == 'checkbox_readonly' ) : ?>
+              <input type="checkbox" id="<?php echo $name; ?>" checked="checked" readonly disabled="true" /> 
             <?php else : ?>
               <input type="hidden" name="<?php echo $name; ?>" value="0" /> 
               <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $businesspress->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
@@ -501,6 +503,13 @@ class BusinessPress_Settings {
                     'admin-dropdown',
                     'Enhance wp-admin Dropdowns',
                     __('Makes long, unwieldy select boxes much more user-friendly, including search functionality.', 'businesspress' ) );
+                    
+      $this->admin_show_setting(
+                    'businesspress-login-redirect',
+                    'login-redirect',
+                    'Login Redirect',
+                    __('After you log in you will be redirected back to the page where you clicked <code>wp-login.php</code> link, unless there was a custom <code>redirect_to</code> parameter. Uses HTTP referer.', 'businesspress' ),
+                    'checkbox_readonly' );
       
       $this->admin_show_setting(
                     'businesspress-auto-set-featured-image',

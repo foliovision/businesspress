@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.8.9
+Version: 0.9
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.8.9';
+  const VERSION = '0.9';
   
   
   private $disallowed_caps_default = array( 
@@ -124,6 +124,9 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
+    
+    add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
+    add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
     
     parent::__construct();
     
@@ -1197,6 +1200,16 @@ JSR;
     }
     return false;
   }
+  
+  
+  
+  
+  function tweak_login_redirect( $url ) {
+    if( empty($_REQUEST['redirect_to']) ){
+      $url = $_SERVER["HTTP_REFERER"];
+    }
+    return $url;
+  }  
   
   
   

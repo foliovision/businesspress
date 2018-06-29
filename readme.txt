@@ -45,6 +45,14 @@ Plugin by default moves the admin notices into Dashboard -> Notices screen where
 
 Plugin also supports fail2ban, see install instructions.
 
+**Tweaks**
+
+* Enable Google style results - Gives you similar layout and keyword highlight.
+* Enable Link Manager - Legacy feature of WordPress, hidden since version 3.5.
+* Enhance wp-admin Dropdowns - Makes long, unwieldy select boxes much more user-friendly, including search functionality.
+* Login redirection - After you log in you will be redirected back to the page where you clicked wp-login.php link, unless there was a custom redirect_to parameter. Uses HTTP referer.
+* Set Featured Images Automatically - First image in the post becomes the featured image on save.
+
 **Credits**
 
 This plugin integrates some of the amazing WordPress plugins which keep it lean and removed the unnecessary features:
@@ -90,7 +98,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.8.9 - 2018/0611 =
+= 0.9 - 2018/06/29 =
+
+* Login redirection - After you log in you will be redirected back to the page where you clicked wp-login.php link, unless there was a custom redirect_to parameter. Uses HTTP referer.
+
+= 0.8.9 - 2018/06/11 =
 
 * Fail2ban protection for bad password reset attempts
 * Bugfix - Enhance wp-admin Dropdowns - excluding EDD variable prices
