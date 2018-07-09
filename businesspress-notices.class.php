@@ -245,10 +245,39 @@ class BusinessPress_Notices {
       }
       
       $sHTML = $this->outerHTML($objDiv);
-      if( stripos($sHTML,'poll ') !== false ) { //  whitelist for "Polldaddy Polls & Ratings"
+      
+      // simple whitelisting
+      $whitelist = array(
+        'Settings updated.',
+        'Your email address has not been updated yet', // core WP email change action
+        'FV Player Pro extension activated', // FV Player
+        'poll ', // Polldaddy Polls & Ratings
+        'admin.php?page=sucuriscan_lastlogins', // Sucuri Security - Auditing, Malware Scanner and Hardening login notice
+        'The purchase receipt has been resent.', // EDD
+        'The reports have been refreshed.', // EDD
+        'The payment has been created.', // EDD
+        'The payment has been deleted.', // EDD
+        'The payment has been successfully updated.', // EDD
+        'Customer successfully deleted',  // EDD
+        'Critical CSS generation', // WP Rocket
+        'Post cache cleared.', // WP Rocket
+        'Cache cleared.', // WP Rocket
+        'Switched back to' // User Switching
+      );
+      
+      foreach( $whitelist AS $rule ) {
+        if( stripos($sHTML,$rule) !== false ) {
+          echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
+          continue;
+        }
+      }
+      
+      // special rules, bbPress actions
+      if( stripos($sHTML,'Topic "') !== false && preg_match('~successfully (un)?marked as~',$sHTML) ) {
         echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
         continue;
       }
+      
   
       $aClass = explode(' ', $objDiv->getAttribute('class'));
       if( in_array('notice', $aClass) ) {
