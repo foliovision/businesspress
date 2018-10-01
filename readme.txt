@@ -98,6 +98,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.9.1 - 2018/10/01 =
+
+* Fixing notice dismissing and whitelisting.
+
 = 0.9 - 2018/06/29 =
 
 * Login redirection - After you log in you will be redirected back to the page where you clicked wp-login.php link, unless there was a custom redirect_to parameter. Uses HTTP referer.

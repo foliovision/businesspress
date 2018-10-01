@@ -216,8 +216,11 @@ class BusinessPress_Notices {
   
   
   function sort_notices( $a, $b ) {
-    if( isset($a['time']) && isset($b['time']) && $a['time'] > $b['time'] ) return false; 
-    return true;
+    if( isset($a['time']) && isset($b['time']) ) {
+      if( $a['time'] > $b['time'] ) return -1;
+      if( $a['time'] < $b['time'] ) return 1;
+    }
+    return 0;
   }
   
   
@@ -265,19 +268,21 @@ class BusinessPress_Notices {
         'Switched back to' // User Switching
       );
       
+      $skip = false;
       foreach( $whitelist AS $rule ) {
         if( stripos($sHTML,$rule) !== false ) {
           echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
-          continue;
+          $skip = true;
         }
       }
       
       // special rules, bbPress actions
       if( stripos($sHTML,'Topic "') !== false && preg_match('~successfully (un)?marked as~',$sHTML) ) {
         echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
-        continue;
+        $skip = true;
       }
       
+      if( $skip ) continue;
   
       $aClass = explode(' ', $objDiv->getAttribute('class'));
       if( in_array('notice', $aClass) ) {
