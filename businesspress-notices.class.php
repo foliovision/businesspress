@@ -66,7 +66,7 @@ class BusinessPress_Notices {
   
   
   function menu() {
-    add_dashboard_page( 'Notices', 'Notices', 'read', 'businesspress-notices', array( $this, 'screen' ) );
+    add_dashboard_page( 'Notices', 'Notices', 'manage_options', 'businesspress-notices', array( $this, 'screen' ) );
   }
   
   
