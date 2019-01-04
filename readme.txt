@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 4.9.6
+Tested up to: 4.9.9
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -97,6 +97,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
 
 == Changelog ==
+
+= 0.9.2 - 2018/01/04 =
+
+* New updates setting - "Version Control System - Forces WordPress to use auto-updates even on websites which use Git or SVN" and it's on by default
 
 = 0.9.1 - 2018/10/01 =
 

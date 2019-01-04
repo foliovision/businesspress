@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.9.1
+Version: 0.9.2
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -40,9 +40,6 @@ class BusinessPress extends BusinessPress_Plugin {
   private $strArrMessages = array(); // string array, contains messages used in this plugin
 
   var $aCoreUpdatesDismiss = array();
-  
-  var $aCoreUpdatesWhitelist = false;
-
 
   public function __construct() {
     if( !function_exists('add_action') ) {
@@ -226,6 +223,8 @@ class BusinessPress extends BusinessPress_Plugin {
       }
     }
     
+    if( $this->get_setting('autoupdates_vcs') ) add_filter( 'automatic_updates_is_vcs_checkout', '__return_false', 999 );
+    
     if( ( $this->get_setting('wp_admin_bar_subscribers') || $this->get_setting('wp_admin_redirect_subscribers') ) && get_current_user_id() > 0 ) {
       $objUser = get_userdata( get_current_user_id() );
       
@@ -256,7 +255,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   function cache_core_version_info() {
     $aVersions = get_option( 'businesspress_core_versions' );
-    if( isset($_GET['martinv5']) || !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
+    if( !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
       $bSuccess = false;
       $aResponse = wp_remote_get( 'https://codex.wordpress.org/WordPress_Versions' );
       if( !is_wp_error($aResponse) ) {      
@@ -265,7 +264,7 @@ class BusinessPress extends BusinessPress_Plugin {
           $aVersions['ttl'] = time() + 900;
           if( count($aTableRows) > 0 ) {
             foreach( $aTableRows[0] as $sTableRow ) {
-              preg_match( '~Version_([0-9.-]+)~', $sTableRow, $aVersion );
+              preg_match( '~>([0-9.-]+)</a>~', $sTableRow, $aVersion );
               preg_match( '~\S+ \d+, 20\d\d~', $sTableRow, $aDate );
               if( $aVersion && $aDate ) {
                 $bSuccess = true;
@@ -374,39 +373,23 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
+  // checks the release date for the WordPress version and if it's less than 5 days old it's not permitted for auto update
   function delay_core_updates( $update, $item ) {
     if( $update ) {
       
-      if( $this->aCoreUpdatesWhitelist == $item->current ) return $update;  //  this it to prevent endless loop in the process
+      $aBlockedUpdates = get_site_option('businesspress_core_update_delay',array());
       
-      
-      //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', date('r').":\n".var_export( func_get_args(),true)."\n\n", FILE_APPEND );
-      $aBlockedUpdates = get_site_option('businesspress_core_update_delay');
-      if( !$aBlockedUpdates ) $aBlockedUpdates = array();
-      
-      if( isset($aBlockedUpdates[$item->current]) ) {
-        if( $aBlockedUpdates[$item->current] + 5*24*3600 - 3600 < time() ) {  //  5 days minus 1 hour
-          //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: 5 days old update, go on!\n\n", FILE_APPEND );
-          
+      $aVersions = $this->cache_core_version_info();
+      if( $aVersions && !empty($aVersions['data']) && !empty($aVersions['data'][$item->current]) ) {
+        if( strtotime($aVersions['data'][$item->current]) + 5*24*3600 > time() ) {
+          $aBlockedUpdates[$item->current] = time();
+          update_site_option('businesspress_core_update_delay', $aBlockedUpdates );
+          return false; // block the update if it's less than 5 days old
+        } else {
           unset($aBlockedUpdates[$item->current]);
           update_site_option('businesspress_core_update_delay', $aBlockedUpdates );
-          $this->aCoreUpdatesWhitelist = $item->current;
-          return $update;
-        
-        } else {
-          //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: relatively new update (".$aBlockedUpdates[$item->current]." vs. ".time()."), blocking!\n\n", FILE_APPEND );
-          return false;
-        
         }
-        
-      } else {        
-        $aBlockedUpdates[$item->current] = time();
-        update_site_option('businesspress_core_update_delay', $aBlockedUpdates );
-        
-        //file_put_contents( ABSPATH.'bpress-delay_core_updates.log', "Result: new update, blocking!\n\n", FILE_APPEND );
-        
-        return false;
-      }      
+      }
       
     }
     
@@ -664,7 +647,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
     if( $key == 'hide-notices' ) return false;
-    
+    if( $key == 'autoupdates_vcs' ) return true;
     
     return false;
   }
@@ -725,6 +708,8 @@ class BusinessPress extends BusinessPress_Plugin {
       }
       
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
+      
+      $this->aOptions['autoupdates_vcs'] = trim($_POST['autoupdates_vcs']);
       
       $this->aOptions['wp_admin_bar_subscribers'] = isset($_POST['wp_admin_bar_subscribers']) && $_POST['wp_admin_bar_subscribers'] == 1 ? true : false;
       $this->aOptions['wp_admin_redirect_subscribers'] = isset($_POST['wp_admin_redirect_subscribers']) && $_POST['wp_admin_redirect_subscribers'] == 1 ? true : false;

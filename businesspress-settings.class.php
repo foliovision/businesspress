@@ -671,7 +671,12 @@ class BusinessPress_Settings {
             <option value="major" <?php if( !empty($this->aOptions['core_auto_updates']) && $this->aOptions['core_auto_updates'] == "major" ) echo 'selected' ?>>Major</option>
           </select>
         </td>
-      </tr>        
+      </tr>
+			<?php $this->admin_show_setting(
+                    'autoupdates_vcs',
+                    'autoupdates_vcs',
+                    'Version Control System',
+                    __('Forces WordPress to use auto-updates even on websites which use Git or SVN.','businesspress') ); ?>
     </table>
     <script>
       if( jQuery('#restrictions_enabled:checked').length ) {
