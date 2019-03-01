@@ -18,7 +18,11 @@ jQuery( document ).ready( function ( $ ) {
 		+ ', .customize-pane-parent select';
 
 	/* Attach */
-	$( chosen_targets ).filter(":visible").filter( function() { return !$(this).parents('#edd_price_fields').length }).not("[size]").chosen( chosen_options );
+	$( chosen_targets ).filter(":visible").filter( function() {
+    return // do not process the select drop down menu if
+      !$(this).parents('#edd_price_fields').length && // it is used in EDD for pricing
+      !$(this).parents('.mb-right-column').length // it is part of the Profile Builder interface
+  }).not("[size]").chosen( chosen_options );
 
 	/* Special case the Meta-Box toggle */
 	$( document ).on( 'postbox-toggled', function( event, postbox ) {
