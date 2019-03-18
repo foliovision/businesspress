@@ -125,6 +125,13 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
     
+    /*
+     *  Email blocking
+     */
+    if( $this->get_setting('email-blocking') ) {
+      add_filter( 'wp_mail', array( $this, 'wp_mail_block_stage_1' ) );
+    }
+    
     parent::__construct();
     
   }
@@ -742,6 +749,7 @@ class BusinessPress extends BusinessPress_Plugin {
       
       $this->aOptions['contact_email'] = !empty($_POST['contact_email']) ? trim($_POST['contact_email']) : false;
       $this->aOptions['multisite-tracking'] = !empty($_POST['businesspress-multisite-tracking']) ? stripslashes($_POST['businesspress-multisite-tracking']) : false;
+      $this->aOptions['email-blocking'] = !empty($_POST['businesspress-email-blocking']) ? stripslashes($_POST['businesspress-email-blocking']) : false;
       
       $this->aOptions['admin-dropdown'] = isset($_POST['businesspress-admin-dropdown']) && $_POST['businesspress-admin-dropdown'] == 1 ? true : false;
       
@@ -1488,8 +1496,30 @@ JSR;
     }
     return $errors;
   }
-
-
+  
+  
+  
+  
+  function wp_mail_block_stage_1( $args ) {
+    $to = $args['to'];
+    $blocked = explode("\n",$this->get_setting('email-blocking'));
+    $blocked = array_map('trim', $blocked);
+    if( in_array($to, $blocked) ) {
+      unset ( $args['to'] );
+      add_action( 'phpmailer_init', array( $this, 'wp_mail_block_stage_2' ), 99, 1 );
+    }
+    return $args;
+  }
+  
+  
+  
+  
+  function wp_mail_block_stage_2( $phpmailer ) {
+    $phpmailer->ClearAllRecipients();
+    $phpmailer->ClearAttachments();
+    $phpmailer->ClearCustomHeaders();
+    $phpmailer->ClearReplyTos();
+  }
   
   
 }

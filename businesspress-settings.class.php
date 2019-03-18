@@ -88,6 +88,7 @@ class BusinessPress_Settings {
           
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_emails', __('Email Preferences', 'businesspress'), array( $this, 'settings_box_email' ), 'businesspress_settings_preferences', 'normal' );
           
           add_meta_box( 'businesspress_search', __('Tweaks', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
@@ -474,6 +475,24 @@ class BusinessPress_Settings {
                     'disable-oembed',
                     '',
                     __('oEmbed', 'businesspress' ) );
+      ?>
+    </table>           
+    <?php
+  }
+  
+  
+  
+  
+  function settings_box_email() {
+    global $businesspress;
+    ?>
+    <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-email-blocking',
+                    'email-blocking',
+                    'Block Emails',
+                    __('No emails will be sent to the above list of addresses - one address per line.', 'businesspress' ),
+                    'textarea' );
       ?>
     </table>           
     <?php
