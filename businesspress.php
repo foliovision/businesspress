@@ -184,6 +184,10 @@ class BusinessPress extends BusinessPress_Plugin {
     <style>
       #adminmenu .menu-icon-plugins .update-plugins { display: none }
       #wp-version-message .button { display: none }
+      /* Yasr – Yet Another Stars Rating promotions */
+      #wpbody-content div.fs-notice.promotion { display: none !important }
+      #wpbody-content .yasr-donatedivdx { display: none !important }
+      #adminmenu .toplevel_page_yasr_settings_page .update-plugins.fs-trial { display: none }
     </style>
     <?php
   }
