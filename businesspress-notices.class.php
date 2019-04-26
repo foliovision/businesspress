@@ -265,6 +265,8 @@ class BusinessPress_Notices {
         'Critical CSS generation', // WP Rocket
         'Post cache cleared.', // WP Rocket
         'Cache cleared.', // WP Rocket
+        'Preload: ', // WP Rocket
+        'One or more plugins have been enabled or disabled', // WP Rocket
         'Switched back to' // User Switching
       );
       
