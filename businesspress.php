@@ -100,6 +100,7 @@ class BusinessPress extends BusinessPress_Plugin {
     
     remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
+    add_filter( 'login_title', array( $this, 'login_title' ) );
     
     /*
      *  Frontend
@@ -926,6 +927,13 @@ JSH;
       include( dirname(__FILE__).'/plugins/wp-chosen/includes/admin.php' );
       include( dirname(__FILE__).'/plugins/wp-chosen/includes/hooks.php' );
     }
+  }
+  
+  
+  
+  function login_title( $title ) {
+    $title = str_replace( ' &#8212; WordPress', '', $title );
+    return $title;
   }
   
   
