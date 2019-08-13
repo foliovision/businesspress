@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 4.9.9
+Tested up to: 5.2.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -98,7 +98,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.9.2 - 2018/01/04 =
+= 0.9.3 - 2019/08/13 =
+
+* Bugfix - Login redirection - preventing redirection back to the password reset link
+
+= 0.9.2 - 2019/01/04 =
 
 * New updates setting - "Version Control System - Forces WordPress to use auto-updates even on websites which use Git or SVN" and it's on by default
 
