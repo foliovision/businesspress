@@ -149,6 +149,21 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
+  function admin_menu_updates_cache( $wp_admin_bar ) {
+    $transient = get_option('_site_transient_update_plugins');
+    if( $transient ) {
+      $args = array(
+        'id'    => 'businesspress_update_cache',
+        'title' => 'Flush plugin update cache',
+        'href'  => wp_nonce_url( get_admin_url() . 'plugins.php', 'businesspress_update_cache', 'businesspress_update_cache' )
+      );
+      $wp_admin_bar->add_node( $args );
+    }
+  }
+  
+  
+  
+  
   function admin_plugin_action_links($links, $file) {
   	$plugin_file = basename(__FILE__);
   	if( basename($file) == $plugin_file ) {
@@ -216,6 +231,9 @@ class BusinessPress extends BusinessPress_Plugin {
       add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 999, 2 );
       add_filter( 'map_meta_cap', array( $this, 'capability_filter' ), 999, 4 );
       add_filter( 'admin_init', array( $this, 'disable_deactivation' ), 999, 4 );
+    } else {
+      add_action( 'admin_bar_menu', array( $this, 'admin_menu_updates_cache' ), 999, 4 );
+      add_action( 'admin_init', array( $this, 'updates_cache_flush' ), 999, 4 );
     }
     
     if( !empty($this->aOptions['core_auto_updates']) ) {
@@ -1206,7 +1224,18 @@ JSR;
       $url = $_SERVER["HTTP_REFERER"];
     }
     return $url;
-  }  
+  }
+  
+  
+  
+  
+  function updates_cache_flush() {
+    if( !empty($_GET['businesspress_update_cache']) ) {
+      if( wp_verify_nonce($_GET['businesspress_update_cache'],'businesspress_update_cache') ) {
+        delete_site_transient('update_plugins');
+      }
+    }
+  }
   
   
   
