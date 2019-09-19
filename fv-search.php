@@ -129,7 +129,8 @@ class FV_Search {
             $sExcerpt .= '&hellip;';
           }
           
-          foreach( $aSearchKeywords AS $sKeyword ) {                        
+          foreach( $aSearchKeywords AS $sKeyword ) {
+            $sKeyword = preg_quote($sKeyword,'/');
             if( stripos($sTitle,'<strong') === false ) $sTitle = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sTitle );
             $sLink = preg_replace( '~https?://~', '', preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sLink ) );
             $sExcerpt = preg_replace("/".$sKeyword."/i", "<strong>\$0</strong>", $sExcerpt );
