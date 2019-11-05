@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.9.3
+Version: 0.9.4
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.9.3';
+  const VERSION = '0.9.4';
   
   
   private $disallowed_caps_default = array( 
@@ -44,7 +44,17 @@ class BusinessPress extends BusinessPress_Plugin {
   public function __construct() {
     if( !function_exists('add_action') ) {
       exit( 0 );
-    }    
+    }
+    
+    /*
+    Since October 2019 WordPress doesn't support ../ in the upload paths: https://core.trac.wordpress.org/changeset/46476
+    
+    Here is a hotfix:
+    */
+    $upload_path = get_option('upload_path');
+    if( $upload_path && ( false !== strpos( $upload_path, '../' ) || false !== strpos( $upload_path, '..' . DIRECTORY_SEPARATOR ) ) ) {
+      include( dirname(__FILE__).'/upload-path-fix.php' );
+    }
     
     $this->adminEmail = get_option('admin_email');
     
