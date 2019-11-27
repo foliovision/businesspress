@@ -135,6 +135,13 @@ class BusinessPress extends BusinessPress_Plugin {
     
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
+
+    /*
+    * Email tweak
+    */
+    
+    add_filter( 'wp_password_change_notification_email', array( $this, 'password_change_email_admin' ), 10, 3 );
+
     
     parent::__construct();
     
@@ -964,6 +971,18 @@ JSH;
     }    
   }
 
+
+
+
+  function password_change_email_admin( $user, $email, $blogname ) {
+    if(in_array('subscriber',$user->roles)) {
+      $email['message'] = '';
+      $email['to'] = '';
+      $email['headers'] ='';
+      $email['subject'] = '';
+    }
+    return($email);
+  }
 
 
 
