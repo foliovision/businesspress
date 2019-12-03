@@ -137,12 +137,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
 
     /*
-    * Email tweak
+    * Email notification disable
     */
-    
-    add_filter( 'wp_password_change_notification_email', array( $this, 'password_change_email_admin' ), 10, 3 );
 
-    
+    add_action( 'after_password_reset', 'subscriber_notification_disable', 0);
+
     parent::__construct();
     
   }
@@ -974,18 +973,6 @@ JSH;
 
 
 
-  function password_change_email_admin( $user, $email, $blogname ) {
-    if(in_array('subscriber',$user->roles)) {
-      $email['message'] = '';
-      $email['to'] = '';
-      $email['headers'] ='';
-      $email['subject'] = '';
-    }
-    return($email);
-  }
-
-
-
   function plugin_action_links( $actions, $plugin_file ) {
     if( stripos($plugin_file,'businesspress') !== false ) {
       unset($actions['deactivate']);
@@ -1158,6 +1145,15 @@ JSR;
   
   
   
+  function subscriber_notification_disable( $user ) {
+    if ( in_array( 'subscriber', $user->roles ) ) {
+      remove_action( 'after_password_reset', 'wp_password_change_notification' );
+    }
+  }
+
+
+
+
   function subscriber__hide_menus() {
 		global $menu;
 
@@ -1531,7 +1527,7 @@ JSR;
   }
 
 
-  
+
   
 }
 
