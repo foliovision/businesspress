@@ -53,6 +53,7 @@ Plugin also supports fail2ban, see install instructions.
 * Login redirection - After you log in you will be redirected back to the page where you clicked wp-login.php link, unless there was a custom redirect_to parameter. Uses HTTP referer.
 * Set Featured Images Automatically - First image in the post becomes the featured image on save.
 * WordPress core hotfix - are you getting error like "Unable to create directory ../images/2019/11. Is its parent directory writable by the server?" Since October 2019 WordPress doesn't support ../ in the upload path. So we translate that path to absolute path and check if it's in the site webroot and then let it pass
+* Disables the "Password Changed" emails when a Subscriber level user changes email address
 
 **Credits**
 
