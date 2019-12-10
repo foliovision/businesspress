@@ -140,7 +140,7 @@ class BusinessPress extends BusinessPress_Plugin {
     * Email notification disable
     */
 
-    add_action( 'after_password_reset', 'subscriber_notification_disable', 0);
+    add_action( 'after_password_reset', array( $this, 'subscriber_notification_disable' ), 0);
 
     parent::__construct();
     
