@@ -21,6 +21,8 @@ class BusinessPress_Notices {
     
     if( is_multisite() ) add_action( 'network_admin_menu',  array( $this, 'menu' ) );
     add_action( 'admin_menu',  array( $this, 'menu' ) );
+    
+    add_filter('option_gf_dismissed_upgrades', array($this, 'plugin_gravityforms') );
   }
   
   
@@ -68,6 +70,17 @@ class BusinessPress_Notices {
   
   function menu() {
     add_dashboard_page( 'Notices', 'Notices', 'manage_options', 'businesspress-notices', array( $this, 'screen' ) );
+  }
+  
+  
+  
+  
+  function plugin_gravityforms( $value ) {
+    if( class_exists('GFCommon') && method_exists('GFCommon','get_version_info') ) {
+      $version_info = GFCommon::get_version_info();
+      $value[] = $version_info['version'];
+    }
+    return $value;
   }
   
   
@@ -266,8 +279,6 @@ class BusinessPress_Notices {
         'Critical CSS generation', // WP Rocket
         'Post cache cleared.', // WP Rocket
         'Cache cleared.', // WP Rocket
-        'Preload: ', // WP Rocket
-        'One or more plugins have been enabled or disabled', // WP Rocket
         'Switched back to' // User Switching
       );
       
