@@ -279,7 +279,8 @@ class BusinessPress_Notices {
         'Critical CSS generation', // WP Rocket
         'Post cache cleared.', // WP Rocket
         'Cache cleared.', // WP Rocket
-        'Switched back to' // User Switching
+        'Switched back to', // User Switching
+        'Your email address has not been updated yet' // Your email address has not been updated yet. Please check your inbox at user@host.com for a confirmation email.
       );
       
       $skip = false;
