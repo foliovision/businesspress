@@ -270,17 +270,31 @@ class BusinessPress_Notices {
         'FV Player Pro extension activated', // FV Player
         'poll ', // Polldaddy Polls & Ratings
         'admin.php?page=sucuriscan_lastlogins', // Sucuri Security - Auditing, Malware Scanner and Hardening login notice
-        'The purchase receipt has been resent.', // EDD
-        'The reports have been refreshed.', // EDD
-        'The payment has been created.', // EDD
-        'The payment has been deleted.', // EDD
-        'The payment has been successfully updated.', // EDD
-        'Customer successfully deleted',  // EDD
-        'Critical CSS generation', // WP Rocket
-        'Post cache cleared.', // WP Rocket
-        'Cache cleared.', // WP Rocket
-        'Switched back to', // User Switching
-        'Your email address has not been updated yet' // Your email address has not been updated yet. Please check your inbox at user@host.com for a confirmation email.
+        'Your email address has not been updated yet', // Your email address has not been updated yet. Please check your inbox at user@host.com for a confirmation email.
+        
+        // EDD
+        'The purchase receipt has been resent.',
+        'The reports have been refreshed.',
+        'The payment has been created.',
+        'The payment has been deleted.',
+        'The payment has been successfully updated.',
+        'Customer successfully deleted',
+
+        // edd-per-product-emails
+        'Email added.',
+        'Email updated.',
+        'Test Email Sent.',
+
+        // User Switching
+        'Switched to',
+        'Switched back to',
+
+        // WP Rocket
+        'Critical CSS generation',
+        'Post cache cleared.',
+        'Cache cleared.',
+        'Preload: ',
+        'One or more plugins have been enabled or disabled',
       );
       
       $skip = false;
