@@ -294,6 +294,7 @@ class BusinessPress_Notices {
         'Post cache cleared.',
         'Cache cleared.',
         'Preload: ',
+        'Preload complete: ',
         'One or more plugins have been enabled or disabled',
       );
       
