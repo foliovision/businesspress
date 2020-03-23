@@ -125,6 +125,8 @@ class FV_Search {
           $sExcerpt = trim(implode('&hellip; ',$aExcerpt));
           if( strlen($sExcerpt) == 0 ) {
             $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+            $sExcerpt = apply_filters( 'businesspress_fv_search_seo_description', $sExcerpt, $post->ID );
+
           } else if( stripos($sExcerpt,'&hellip;') === false && $sExcerpt[strlen($sExcerpt)-1] != '.' ) {
             $sExcerpt .= '&hellip;';
           }
@@ -142,7 +144,10 @@ class FV_Search {
             $sDate = get_the_date('M j, Y');
           }
           
-          $sImage = false; //str_replace( '<img', '<img style="width: 100px"', get_the_post_thumbnail( get_the_id(), 'thumbnail', array( 'class' => 'alignleft' ) ) );
+          $sImage = str_replace( '<img', '<img style="width: 100px"', get_the_post_thumbnail( get_the_id(), 'thumbnail', array( 'class' => 'alignleft' ) ) );
+          if( !apply_filters( 'businesspress_fv_search_show_image', false ) ) {
+            $sImage = '';
+          }
           $sDate = false; //'<em>'.$sDate.'</em> ';
           
           $html .= '<div class="businesspress-search-result">
