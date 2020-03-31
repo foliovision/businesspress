@@ -284,10 +284,18 @@ class BusinessPress_Notices {
         'Email added.',
         'Email updated.',
         'Test Email Sent.',
+        
+        // Shield Security
+        '[Shield]',
 
         // User Switching
         'Switched to',
         'Switched back to',
+        
+        // WooCommerce
+        'order status changed',
+        'Removed personal data from',
+        'subscription status changed',
 
         // WP Rocket
         'Critical CSS generation',
