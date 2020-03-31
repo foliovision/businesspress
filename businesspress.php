@@ -141,6 +141,13 @@ class BusinessPress extends BusinessPress_Plugin {
     */
 
     add_action( 'after_password_reset', array( $this, 'subscriber_notification_disable' ), 0);
+    
+    /*
+    Quick tweaks
+    */
+    
+    // WooCommerce message "Connect your store to WooCommerce.com to receive extensions updates and support."
+    add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );    
 
     parent::__construct();
     
