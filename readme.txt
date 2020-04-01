@@ -54,6 +54,7 @@ Plugin also supports fail2ban, see install instructions.
 * Set Featured Images Automatically - First image in the post becomes the featured image on save.
 * WordPress core hotfix - are you getting error like "Unable to create directory ../images/2019/11. Is its parent directory writable by the server?" Since October 2019 WordPress doesn't support ../ in the upload path. So we translate that path to absolute path and check if it's in the site webroot and then let it pass
 * Disables the "Password Changed" admin email notifications when a Subscriber level user changes email address
+* Alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
 
 **Credits**
 
@@ -99,6 +100,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
 
 == Changelog ==
+
+= 0.9.5 - 2020/04/01 =
+
+* New feature - alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
+* New feature - Stopping subscriber password reset notification emails
 
 = 0.9.4 - 2019/11/05 =
 
