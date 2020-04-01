@@ -12,7 +12,9 @@ function sort_settings_menu_wpse_2331()
 
     // Sort default items
     $default = array_slice( $submenu['options-general.php'], 0, 6, true );
-    usort( $default, 'sort_arra_asc_so_1597736' );
+    
+    // Leave default items unsorted
+    //usort( $default, 'sort_arra_asc_so_1597736' );
 
     // Sort rest of items
     $length = count( $submenu['options-general.php'] );
