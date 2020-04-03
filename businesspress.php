@@ -143,11 +143,19 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'after_password_reset', array( $this, 'subscriber_notification_disable' ), 0);
     
     /*
+    Editor disabling
+    */
+    add_action( 'post_submitbox_start', array( $this, 'editor_disable_checkbox' ) ); 
+    add_action( 'save_post', array( $this, 'editor_disable_checkbox_save' ) ); 
+    add_filter( 'user_can_richedit',  array( $this, 'editor_disable' ) );
+    add_filter( 'the_content', array( $this, 'editor_disabled_thus_no_wpautop'), 0);
+    
+    /*
     Quick tweaks
     */
     
     // WooCommerce message "Connect your store to WooCommerce.com to receive extensions updates and support."
-    add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );    
+    add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );
 
     parent::__construct();
     
@@ -459,6 +467,90 @@ class BusinessPress extends BusinessPress_Plugin {
       remove_action( 'wp_head', 'wlwmanifest_link' );
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
     }      
+  }
+  
+  
+  
+  
+  function editor_disable( $can ) {
+    if( $this->editor_is_disabled() ) {
+      return false;  
+    }
+    
+    return $can;
+  }
+  
+  
+  
+  
+  function editor_is_disabled( $post_id = false ) {
+    global $post;
+    if( !$post_id && $post && !empty($post->ID)) {
+      $post_id = $post->ID;
+    }
+    
+    $disabled = false;
+    
+    // check the old Foliopress WYSIWYG postmeta meta too
+    // if Foliopress WYSIWYG meta is present and it was the last editor used to modify the post
+    $fp_wysiwyg = get_post_meta( $post_id, 'wysiwyg', true );
+    if( $fp_wysiwyg && !empty($fp_wysiwyg['plain_text_editing']) && $fp_wysiwyg['plain_text_editing'] ) {
+      $disabled = true;
+    }
+    
+    if( !$disabled ) {
+      $disabled = get_post_meta( $post_id, 'plain_text_editing', true );
+    }
+    
+    return $disabled;
+  }
+    
+    
+    
+    
+  function editor_disable_checkbox() {
+    $disabled = $this->editor_is_disabled();
+    ?>
+    <label for="plain_text_editing">
+      <input name="plain_text_editing" type="checkbox" id="plain_text_editing" value="true" <?php checked(1,$disabled); ?> />
+      <?php _e('Plain text editing', 'businesspress'); ?>
+      <abbr title="<?php _e('This will disable Visual editor for this post, as well as the WP formating routine (wpautop). Turn this option off only if you are sure this post won\'t get destroyed by it.', 'businesspress') ?>">(?)</abbr>
+    </label>
+    <?php
+  }
+  
+  
+  
+  
+  function editor_disable_checkbox_save($post_id) {
+    // If this is a revision, bail
+    if( wp_is_post_revision($post_id) ) {
+      return;
+    }
+    
+    if( !empty($_POST['plain_text_editing']) ) {
+      update_post_meta($post_id,'plain_text_editing',true);
+    } else {
+      delete_post_meta($post_id,'plain_text_editing');
+    }
+    
+    // update the old Foliopress WYSIWYG postmeta meta too, if it's there
+    $fp_wysiwyg = get_post_meta( $post_id, 'wysiwyg', true );
+    if( $fp_wysiwyg ) {
+      $fp_wysiwyg['plain_text_editing'] = !empty($_POST['plain_text_editing']);
+      update_post_meta($post_id,'plain_text_editing',$fp_wysiwyg);
+    }
+  }
+  
+  
+  
+  
+  function editor_disabled_thus_no_wpautop( $post_content ) {
+    if( $this->editor_is_disabled() ) {
+      remove_filter ('the_content',  'wpautop');
+    }
+    
+    return $post_content;
   }
   
   

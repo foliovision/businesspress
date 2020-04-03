@@ -45,6 +45,10 @@ Plugin by default moves the admin notices into Dashboard -> Notices screen where
 
 Plugin also supports fail2ban, see install instructions.
 
+**Plain text editing**
+
+You can disable the TinyMCE editor (WordPress < 5, or when Classic Editor is installed) to have full control over your post HTML.
+
 **Tweaks**
 
 * Enable Google style results - Gives you similar layout and keyword highlight.
