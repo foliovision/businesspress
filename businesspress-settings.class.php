@@ -503,6 +503,12 @@ class BusinessPress_Settings {
                     'admin-dropdown',
                     'Enhance wp-admin Dropdowns',
                     __('Makes long, unwieldy select boxes much more user-friendly, including search functionality.', 'businesspress' ) );
+
+      $this->admin_show_setting(
+                    'frontend_login_check',
+                    'frontend_login_check',
+                    'Front-end Login Check',
+                    __('Useful for membership websites. Runs a login check when you come back to the browser tab or wake up your phone.', 'businesspress' ) );
                     
       $this->admin_show_setting(
                     'businesspress-login-redirect',

@@ -157,6 +157,13 @@ class BusinessPress extends BusinessPress_Plugin {
     // WooCommerce message "Connect your store to WooCommerce.com to receive extensions updates and support."
     add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );
 
+    /*
+    Front-end login check
+    */
+    add_action( 'wp_footer', array( $this, 'login_check_js'), 999 );
+    add_action( 'wp_ajax_bpress_login_check', array( $this, 'login_check_ajax') );
+    add_action( 'wp_ajax_nopriv_bpress_login_check', array( $this, 'login_check_ajax') );
+
     parent::__construct();
     
   }
@@ -864,6 +871,8 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['multisite-tracking'] = !empty($_POST['businesspress-multisite-tracking']) ? stripslashes($_POST['businesspress-multisite-tracking']) : false;
       
       $this->aOptions['admin-dropdown'] = isset($_POST['businesspress-admin-dropdown']) && $_POST['businesspress-admin-dropdown'] == 1 ? true : false;
+
+      $this->aOptions['frontend_login_check'] = isset($_POST['frontend_login_check']) && $_POST['frontend_login_check'] == 1 ? true : false;
       
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
@@ -1630,7 +1639,38 @@ JSR;
   }
 
 
+  function login_check_ajax() {
+    if( !is_user_logged_in() ) {
+      echo "Not logged in";
+    } else {
+      die();
+    }
+  }
 
+
+  function login_check_js() {
+    if( !is_user_logged_in() || !$this->get_setting('frontend_login_check') ) return;
+
+    ?>
+<script>
+(function($) {
+  function bpress_login_check() {
+    $.post( '<?php echo admin_url('admin-ajax.php'); ?>?bpress_login_check', { action: 'bpress_login_check' }, function(response) {
+      if( response ) {
+        location.href = '<?php echo site_url('wp-login.php') ?>';
+      }
+    });
+  }
+
+  $(document).on('visibilitychange', function() {
+    if( !document.hidden ) {
+      bpress_login_check();
+    }
+  }).on('ready pageshow', bpress_login_check );
+})(jQuery);    
+</script>
+    <?php
+  }
   
 }
 
