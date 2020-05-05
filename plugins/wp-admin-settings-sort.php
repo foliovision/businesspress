@@ -9,6 +9,7 @@ add_action( 'admin_menu', 'sort_settings_menu_wpse_2331', 999 );
 function sort_settings_menu_wpse_2331() 
 {
     global $submenu;
+    if( empty($submenu['options-general.php']) || !is_array($submenu['options-general.php']) ) return;
 
     // Sort default items
     $default = array_slice( $submenu['options-general.php'], 0, 6, true );

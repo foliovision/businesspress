@@ -105,9 +105,13 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.9.6 - 2020/05/05 =
+
+* Bugfix - Alphabetically sorting the wp-admin -> Settings menu - breaking redirections for logged in subscribers in some cases
+
 = 0.9.5 - 2020/04/01 =
 
-* New feature - alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
+* New feature - Alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
 * New feature - Stopping subscriber password reset notification emails
 
 = 0.9.4 - 2019/11/05 =
