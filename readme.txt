@@ -107,6 +107,8 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 = 0.9.6 - 2020/05/05 =
 
+* New post setting - Front-end Login Check
+* New post setting - Plain text editing
 * Bugfix - Alphabetically sorting the wp-admin -> Settings menu - breaking redirections for logged in subscribers in some cases
 
 = 0.9.5 - 2020/04/01 =
