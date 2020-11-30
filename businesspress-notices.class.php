@@ -30,7 +30,24 @@ class BusinessPress_Notices {
   
   function get() {
     $aNotices = is_network_admin() ? get_site_option('businesspress_notices', array() ) : get_option( 'businesspress_notices', array() );
+
+    // sort oldest to newest
     usort($aNotices, array( $this, 'sort_notices' ) );
+
+    // we put in our own get which goes from 0 (oldest) to newest
+    // we use this to dismiss the notices as otherwise there might
+    // be a new notice during the dismissing that would affect the
+    // numbering if we just use the standard array key (0 = newest)
+
+    $count = 0;
+    foreach( $aNotices AS $k => $v ) {
+      $aNotices[$k]['reversed_key'] = $count;
+      $count++;
+    }
+    
+    // finally sort newest to oldest
+    $aNotices = array_reverse($aNotices);
+    
     return $aNotices;
   }
   
@@ -138,7 +155,7 @@ class BusinessPress_Notices {
     if( is_network_admin() ) {
       update_site_option('businesspress_notices', $aNotices );
     } else {
-      update_option( 'businesspress_notices', $aNotices );
+      update_option( 'businesspress_notices', $aNotices, false );
     }
   }  
   
@@ -167,7 +184,11 @@ class BusinessPress_Notices {
     if( isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'businesspress_notice_dismiss') ) {
       if( isset($_GET['dismiss']) ) {
         $aStored = $this->get();
-        $aStored[intval($_GET['dismiss'])]['dismissed'] = true;
+        foreach( $aStored AS $k => $v ) {
+          if( $aStored[$k]['reversed_key'] == intval($_GET['dismiss']) ) {
+            $aStored[$k]['dismissed'] = true;
+          }
+        }
         $this->save($aStored);
         echo "<div class='updated'><p>Notice marked as dismissed. If it keeps coming back, we recommend that you fix the issue that is causing it or <a href='https://foliovision.com/support/businesspress/requests-and-feedback' target='_blank'>let us know about it</a>.</p></div>";
       }
@@ -191,7 +212,7 @@ class BusinessPress_Notices {
         if( isset($aNotice['dismissed']) && $aNotice['dismissed'] ) continue;
         
         $iNew++;
-        $sDismiss = ( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) ? " - <a href='".wp_nonce_url($sAdminURL,'businesspress_notice_dismiss')."&dismiss=".$key."'>Dismiss</a>" : false;
+        $sDismiss = ( !isset($aNotice['dismissed']) || $aNotice['dismissed'] == false ) ? " - <a href='".wp_nonce_url($sAdminURL,'businesspress_notice_dismiss')."&dismiss=".$aNotice['reversed_key']."'>Dismiss</a>" : false;
         ?>
         <p>
           <?php if( $sDismiss ) : ?><strong><?php endif; ?>
@@ -230,11 +251,12 @@ class BusinessPress_Notices {
   
   
   function sort_notices( $a, $b ) {
-    if( isset($a['time']) && isset($b['time']) ) {
-      if( $a['time'] > $b['time'] ) return -1;
-      if( $a['time'] < $b['time'] ) return 1;
-    }
-    return 0;
+    $a_time = !empty($a['time']) ? $a['time'] : 0;
+    $b_time = !empty($b['time']) ? $b['time'] : 0;
+    
+    if( $a_time < $b_time ) return -1;
+    if( $a_time == $b_time ) return 0;
+    if( $a_time > $b_time ) return 1;
   }
   
   

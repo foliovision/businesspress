@@ -105,6 +105,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.9.7 - 2020/11/300 =
+
+* Fixing admin notices dismissing
+
 = 0.9.6 - 2020/05/05 =
 
 * New post setting - Front-end Login Check
