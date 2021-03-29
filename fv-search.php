@@ -80,8 +80,18 @@ class FV_Search {
       foreach( $this->aSearchResults AS $post ) {
 					//setup_postdata( $post);
           
-          $aSentences = array_map( 'trim', preg_split( '~(\. |\n)~', strip_shortcodes( strip_tags( $post->post_content ) ), -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );          
+          // Remove HTML tags and shortcodes
+          // But preserve [[shortcodes]]
+          $replace_from = array( '[[', ']]' );
+          $replace_to = array( 'sample-shortcode-opener-549583490i0heg', 'sample-shortcode-closing-549583490i0heg' );
           
+          $process_html = str_replace( $replace_from, $replace_to, $post->post_content );
+          $process_html = strip_shortcodes( strip_tags( $process_html ) );
+          $process_html = str_replace( $replace_to, $replace_from, $process_html );
+          
+          $aSentences = array_map( 'trim', preg_split( '~(\. |\n)~', $process_html, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );
+          
+          // Get sentences and phrases matching each keyword
           $iCount = 0;
           $aExcerpt = array();          
           foreach( $aSearchKeywords AS $sKeyword ) {
@@ -91,6 +101,7 @@ class FV_Search {
                 
                 unset($aSentences[$k]);
                 
+                // if the next item is a dot, we consider the match a sentence
                 if( isset($aSentences[$k+1]) && $aSentences[$k+1] == '.' ) {                  
                   $aExcerpt['sentence-'.$sKeyword] = $sSentence.$aSentences[$k+1].' ';
                   unset($aSentences[$k+1]);
