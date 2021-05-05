@@ -848,7 +848,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['cap_install'] = isset($_POST['cap_install']) && $_POST['cap_install'] == 1 ? true : false;
       $this->aOptions['cap_export'] = isset($_POST['cap_export']) && $_POST['cap_export'] == 1 ? true : false;
       
-      if( empty($this->aOptions['cap_update']) ) {
+      if( empty($this->aOptions['cap_update']) && !empty($this->aOptions['cap_core']) ) {
         unset($this->aOptions['cap_core']);
       }
       
@@ -1071,7 +1071,7 @@ JSH;
   function multisite_footer() {
     if( !is_multisite() ) return;
     
-    if( $this->aOptions['multisite-tracking'] ) echo $this->aOptions['multisite-tracking'];
+    if( !empty($this->aOptions['multisite-tracking']) ) echo $this->aOptions['multisite-tracking'];
   }
   
   
