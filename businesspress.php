@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.9.7
+Version: 0.9.8
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.9.7';
+  const VERSION = '0.9.8';
   
   
   private $disallowed_caps_default = array( 
@@ -1388,7 +1388,7 @@ JSR;
     if( $aVersions && isset($aVersions['data']) && count($aVersions['data']) > 0 ) {      
       if( $this->get_version_branch() && isset($aVersions['data'][$this->get_version_branch()]) ) {
         $iDate = strtotime($aVersions['data'][$this->get_version_branch()]);
-        $iTTL = $iDate + 3600*24*30*30; //  the current version is good has time to live set to 30 months
+        $iTTL = $iDate + 3600*24*30 * 52; //  the current version is good has time to live set to 30 months, based on 4.7 which started in Dec 2016 and still got an update in April 2021
         if( $iTTL - time() < 0 ) { 
           $sStatus = "Not Secure - Major Upgrade Required";
         } else if( $iTTL - time() < 3600 * 24 * 30 * 3 ) { //  if the current version is older than 23 monts, warn the user

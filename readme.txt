@@ -105,7 +105,11 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.9.7 - 2020/11/300 =
+= 0.9.8 - 2021/05/11 =
+
+* Extending "Projected security updates" to allow WP 4.9 for another 9 months
+
+= 0.9.7 - 2020/11/30 =
 
 * Fixing admin notices dismissing
 
