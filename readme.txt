@@ -105,6 +105,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
+= 0.9.8 - 2021/06/24 =
+
+* "Hide Admin Notices" - whitelisting FV Swiftype, RCP, User Switching, WooCommerce and WP Crontrol
+
 = 0.9.8 - 2021/05/11 =
 
 * Extending "Projected security updates" to allow WP 4.9 for another 9 months
