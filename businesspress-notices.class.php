@@ -287,6 +287,7 @@ class BusinessPress_Notices {
       
       // simple whitelisting
       $whitelist = array(
+        'Settings saved.',
         'Settings saved!',
         'Settings updated.',
         'Terms updated.',
@@ -336,6 +337,10 @@ class BusinessPress_Notices {
         'subscription could not be updated',
         'subscription status changed',
         'subscription statuses changed',
+
+        // WP Crontrol
+        'One or more cron events have missed their schedule.',
+        'The scheduled cron events have changed since you first opened this page.',
 
         // WP Rocket
         'Critical CSS generation',
