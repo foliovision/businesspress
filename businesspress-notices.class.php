@@ -287,13 +287,18 @@ class BusinessPress_Notices {
       
       // simple whitelisting
       $whitelist = array(
+        'Settings saved!',
         'Settings updated.',
+        'Terms updated.',
         'Your email address has not been updated yet', // core WP email change action
         'FV Player Pro extension activated', // FV Player
         'poll ', // Polldaddy Polls & Ratings
         'admin.php?page=sucuriscan_lastlogins', // Sucuri Security - Auditing, Malware Scanner and Hardening login notice
         'Your email address has not been updated yet', // Your email address has not been updated yet. Please check your inbox at user@host.com for a confirmation email.
         
+        // Comment Plus
+        'Image has been deleted from comment.',
+
         // EDD
         'The purchase receipt has been resent.',
         'The reports have been refreshed.',
@@ -307,6 +312,16 @@ class BusinessPress_Notices {
         'Email updated.',
         'Test Email Sent.',
         
+        // FV Swiftype
+        'Swiftype',
+
+        // Restrict Content Pro
+        'Customer updated',
+        'Membership has been',
+        'Membership cancelled',
+        'Membership deleted',
+        'Membership updated',
+        
         // Shield Security
         '[Shield]',
 
@@ -316,8 +331,11 @@ class BusinessPress_Notices {
         
         // WooCommerce
         'order status changed',
+        'order statuses changed',
         'Removed personal data from',
+        'subscription could not be updated',
         'subscription status changed',
+        'subscription statuses changed',
 
         // WP Rocket
         'Critical CSS generation',
@@ -326,6 +344,7 @@ class BusinessPress_Notices {
         'Preload: ',
         'Preload complete: ',
         'One or more plugins have been enabled or disabled',
+        'OPcache successfully purged'
       );
       
       $skip = false;
