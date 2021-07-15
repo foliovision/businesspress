@@ -525,13 +525,13 @@ class BusinessPress extends BusinessPress_Plugin {
     
   function editor_disable_checkbox() {
     $disabled = $this->editor_is_disabled();
-    ?>
-    <label for="plain_text_editing">
-      <input name="plain_text_editing" type="checkbox" id="plain_text_editing" value="true" <?php checked(1,$disabled); ?> />
-      <?php _e('Plain text editing', 'businesspress'); ?>
-      <abbr title="<?php _e('This will disable Visual editor for this post, as well as the WP formating routine (wpautop). Turn this option off only if you are sure this post won\'t get destroyed by it.', 'businesspress') ?>">(?)</abbr>
-    </label>
-    <?php
+    if( $disabled ) : ?>
+      <label for="plain_text_editing">
+        <input name="plain_text_editing" type="checkbox" id="plain_text_editing" value="true" <?php checked(1,$disabled); ?> />
+        <?php _e('Plain text editing', 'businesspress'); ?>
+        <abbr title="<?php _e('This will disable Visual editor for this post, as well as the WP formating routine (wpautop). Turn this option off only if you are sure this post won\'t get destroyed by it.', 'businesspress') ?>">(?)</abbr>
+      </label>
+    <?php endif;
   }
   
   
