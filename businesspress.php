@@ -514,9 +514,12 @@ class BusinessPress extends BusinessPress_Plugin {
     }
     
     if( !$disabled ) {
-      $disabled = get_post_meta( $post_id, 'plain_text_editing', true );
+      $plain_text_editing = get_post_meta( $post_id, 'plain_text_editing', true );
+      if( !empty($plain_text_editing['plain_text_editing']) && $plain_text_editing['plain_text_editing'] ) {
+        $disabled = true;
+      }
     }
-    
+
     return $disabled;
   }
     
