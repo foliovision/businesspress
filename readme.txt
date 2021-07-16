@@ -105,7 +105,13 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-= 0.9.8 - 2021/06/24 =
+Plain text editing
+
+= 0.9.10 - 2021/07/16 =
+
+* "Plain text editing" is now deprecated, only active where already enabled
+
+= 0.9.9 - 2021/06/24 =
 
 * "Hide Admin Notices" - whitelisting FV Swiftype, RCP, User Switching, WooCommerce and WP Crontrol
 
