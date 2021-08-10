@@ -107,6 +107,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 Plain text editing
 
+= 0.9.11 - 2021/08/10 =
+
+* Search template - fix output when using Genesis -> Content Archive -> Display -> Entry excerpts
+
 = 0.9.10 - 2021/07/16 =
 
 * "Plain text editing" is now deprecated, only active where already enabled
