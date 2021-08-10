@@ -50,10 +50,17 @@ class FV_Search {
       $wp_query->max_num_pages = 1;
       
       $wp_query->posts = array($objPost);
-      
+
+      // Without this Genesis would prevent the full search results from showing, it would make Excerpt out of it
+      add_filter( 'genesis_pre_get_option_content_archive', array($this,'disable_genesis_excerpt') );
+
       remove_action( 'genesis_before_loop', 'genesis_do_breadcrumbs' );
       add_action( 'wp_enqueue_scripts', array($this,'css') );
     }
+  }
+
+  function disable_genesis_excerpt() {
+    return 'full';
   }
   
   function the_content( $html ) {
