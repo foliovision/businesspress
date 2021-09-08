@@ -277,15 +277,20 @@ class BusinessPress extends BusinessPress_Plugin {
     
     if( ( $this->get_setting('wp_admin_bar_subscribers') || $this->get_setting('wp_admin_redirect_subscribers') ) && get_current_user_id() > 0 ) {
       $objUser = get_userdata( get_current_user_id() );
-      
-      if( $objUser && isset($objUser->roles) && (
-                                                 count($objUser->roles) == 2 && ( $objUser->roles[0] == 'subscriber' && $objUser->roles[1] == 'bbp_participant' || $objUser->roles[0] == 'bbp_participant' && $objUser->roles[1] == 'subscriber' ) ||
-                                                 count($objUser->roles) > 0 && $objUser->roles[0] == 'subscriber' ||
-                                                 count($objUser->roles) == 0
-                                                ) ) {  //  this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
-        add_filter('show_admin_bar', '__return_false');
-        add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
-        add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
+      if( $objUser && isset($objUser->roles) && is_array($objUser->roles) ) {
+        $roles = $objUser->roles;
+        if(
+          // this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
+          count($roles) == 2 && ( $roles[0] == 'subscriber' && $roles[1] == 'bbp_participant' || $roles[0] == 'bbp_participant' && $roles[1] == 'subscriber' ) ||
+          count($roles) > 0 && $roles[0] == 'subscriber' ||
+          // Easy Digital Downloads with subscriptions
+          count($roles) > 0 && $roles[0] == 'edd_subscriber' ||
+          count($roles) == 0
+        ) {
+          add_filter('show_admin_bar', '__return_false');
+          add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
+          add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
+        }
       }
     }  
     
