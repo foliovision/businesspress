@@ -107,6 +107,10 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 Plain text editing
 
+= 0.9.12 - 2021-11-23 =
+
+* New setting - Settings -> Media -> Maximum size - normally WordPress limits the size of linked images in the posts to 2560 pixels
+
 = 0.9.11 - 2021/08/10 =
 
 * Search template - fix output when using Genesis -> Content Archive -> Display -> Entry excerpts

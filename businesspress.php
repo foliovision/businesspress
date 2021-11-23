@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 0.9.11
+Version: 0.9.12
 Author: Foliovision
 Author URI: http://foliovision.com
 */
@@ -13,7 +13,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '0.9.11';
+  const VERSION = '0.9.12';
   
   
   private $disallowed_caps_default = array( 
@@ -170,6 +170,12 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'wp_footer', array( $this, 'login_check_js'), 999 );
     add_action( 'wp_ajax_bpress_login_check', array( $this, 'login_check_ajax') );
     add_action( 'wp_ajax_nopriv_bpress_login_check', array( $this, 'login_check_ajax') );
+
+    /*
+     * Setting for the "BIG image" threshold value.
+     */
+    add_action( 'admin_init', array( $this, 'big_image_size_threshold_setting') );
+    add_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
 
     parent::__construct();
     
@@ -1080,9 +1086,79 @@ JSH;
     $title = str_replace( ' &#8212; WordPress', '', $title );
     return $title;
   }
-  
-  
-  
+
+  // Apply BusinessPress setting to big_image_size_threshold value
+  function big_image_size_threshold( $threshold, $imagesize, $file, $attachment_id) {
+    if( $custom = get_option('big_image_size_threshold') ) {
+      return $custom;
+    }
+    return $threshold;
+  }
+
+  // Get the current big_image_size_threshold, it migh be adjusted by some theme or plugin already
+  function big_image_size_threshold_get() {
+    // Do not let BusinessPress affect the value we are getting here
+    remove_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
+    $big_image_size_threshold = apply_filters( 'big_image_size_threshold', 2560, array( 8192, 8192 ), 'no-file', -1 ); 
+    add_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
+    return $big_image_size_threshold; 
+  }
+
+  // If the value being stored is the same as deafult, we keep it empty
+  function big_image_size_threshold_sanitize( $value ) {
+    if( $value == $this->big_image_size_threshold_get() ) {
+      $value = null;
+    }
+    return $value;
+  }
+
+  function big_image_size_threshold_setting() {
+    register_setting(
+      'media',
+      'big_image_size_threshold',
+      array(
+        'type' => 'integer',
+        'show_in_rest' => true,
+        'sanitize_callback' => array( $this, 'big_image_size_threshold_sanitize' )
+      )
+    );
+
+    add_settings_field( 'big_image_size_threshold',
+      'Maximum size<span title="Works with JPEG images. This is a hidden WordPress setting made available to you by BusinessPress." class="dashicons dashicons-editor-help"></span>',
+      array( $this, 'maximum_size_show' ),
+      'media'
+    );
+  }
+
+  function maximum_size_show() {
+    $big_image_size_threshold = $this->big_image_size_threshold_get();
+
+    // Making the placeholder value more pale
+    ?>
+    <style>#big_image_size_threshold::placeholder { color: #aaa }</style>
+    <fieldset>
+      <legend class="screen-reader-text"><span><?php _e( 'Maximum size' ); ?></span></legend>
+      <label for="big_image_size_threshold"><?php _e( 'Max Width or Height' ); ?></label>
+      <input name="big_image_size_threshold" type="number" step="1" min="0" id="big_image_size_threshold" value="<?php form_option( 'big_image_size_threshold' ); ?>" class="small-text" placeholder="<?php echo intval($big_image_size_threshold); ?>" />
+    </fieldset>
+    <script>
+    jQuery( function($) {
+      // We use placeholder as the value to make the up and down arrows work and give user the default
+      $('#big_image_size_threshold').on('mouseenter focus', function() {
+        if( $(this).val() == '' ) {
+          $(this).val( $(this).attr( 'placeholder' ) );
+        }
+
+      // If there was no change, we revert to the placeholder
+      }).on('mouseleave blur', function() {
+        if( $(this).val() == $(this).attr( 'placeholder' ) ) {
+          $(this).val('');
+        }
+      });
+    });
+    </script>
+    <?php
+  }
   
   function multisite_footer() {
     if( !is_multisite() ) return;
