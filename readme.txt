@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 5.7
+Tested up to: 5.8
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -107,7 +107,7 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 Plain text editing
 
-= 0.9.12 - 2021-11-23 =
+= 0.9.12 - 2021-11-26 =
 
 * New setting - Settings -> Media -> Maximum size - normally WordPress limits the size of linked images in the posts to 2560 pixels
 
