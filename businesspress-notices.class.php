@@ -350,23 +350,31 @@ class BusinessPress_Notices {
         'One or more plugins have been enabled or disabled',
         'OPcache successfully purged'
       );
-      
+
       $skip = false;
-      foreach( $whitelist AS $rule ) {
-        if( stripos($sHTML,$rule) !== false ) {
-          echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
+
+      // The errors really matter
+      if( stripos( $objDiv->getAttribute('class'), 'error ') === 0 ) {
+        $skip = true;
+
+      } else {
+        foreach( $whitelist AS $rule ) {
+          if( stripos($sHTML,$rule) !== false ) {
+            $skip = true;
+          }
+        }
+
+        // special rules, bbPress actions
+        if( stripos($sHTML,'Topic "') !== false && preg_match('~successfully (un)?marked as~',$sHTML) ) {
           $skip = true;
         }
       }
-      
-      // special rules, bbPress actions
-      if( stripos($sHTML,'Topic "') !== false && preg_match('~successfully (un)?marked as~',$sHTML) ) {
+
+      if( $skip ) {
         echo $sHTML."<!--BusinessPress_Notices - whitelisted! -->\n";
-        $skip = true;
+        continue;
       }
-      
-      if( $skip ) continue;
-  
+
       $aClass = explode(' ', $objDiv->getAttribute('class'));
       if( in_array('notice', $aClass) ) {
         $aMatches[] = $sHTML;
@@ -380,9 +388,9 @@ class BusinessPress_Notices {
       if( in_array('update-nag', $aClass) ) {
         $aMatches[] = $sHTML;
       }
-  
+
     }
-    
+
     $aStored = $this->get();
     $aNew = $aStored;
     if( count($aMatches) > 0 ) {
