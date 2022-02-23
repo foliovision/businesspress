@@ -105,7 +105,9 @@ Note that if you are on cPanel you might need to check the log at /var/log/messa
 
 == Changelog ==
 
-Plain text editing
+= 0.9.13 - 2022-02-23 =
+
+* "Hide Admin Notices" - whiteslisting all error notices (matched by 'class="error ')
 
 = 0.9.12 - 2021-11-26 =
 
