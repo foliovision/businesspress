@@ -119,7 +119,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'init', array( $this, 'remove_generator_tag') );  //  Generator tags
     add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
-    add_action( 'send_headers', array($this, 'prevent_clickjacking'), 10, 0 );
+    add_action( 'wp', array($this, 'prevent_clickjacking'), 10, 0 );
     add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
