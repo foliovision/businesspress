@@ -553,7 +553,13 @@ class BusinessPress_Settings {
     global $businesspress;
     ?>
     <table class="form-table">
-      
+      <?php $this->admin_show_setting(
+                    'businesspress-clickjacking-protection',
+                    'clickjacking-protection',
+                    __('Enable'),
+                    __('Clickjacking Protection ', 'businesspress' ) );
+      ?>
+
       <?php $this->admin_show_setting(
                     'businesspress-remove-generator',
                     'remove-generator',

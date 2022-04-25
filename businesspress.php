@@ -88,7 +88,7 @@ class BusinessPress extends BusinessPress_Plugin {
     
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
     add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
-    
+
     /*
      *  Admin screen
      */
@@ -119,6 +119,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'init', array( $this, 'remove_generator_tag') );  //  Generator tags
     add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
+    add_action( 'send_headers', array($this, 'prevent_clickjacking'), 10, 0 );
     add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
@@ -897,7 +898,9 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['frontend_login_check'] = isset($_POST['frontend_login_check']) && $_POST['frontend_login_check'] == 1 ? true : false;
       
-      if( is_multisite() ){
+      $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
+
+      if( is_multisite() ) {
         update_site_option( 'businesspress', $this->aOptions );
       } else {
         update_option( 'businesspress', $this->aOptions );
@@ -1165,14 +1168,24 @@ JSH;
     
     if( !empty($this->aOptions['multisite-tracking']) ) echo $this->aOptions['multisite-tracking'];
   }
-  
-  
-  
-  
+
+
+
+
+  function prevent_clickjacking() {
+    if( empty(get_query_var('fv_player_embed')) && !empty($this->aOptions['clickjacking-protection']) ) {
+      header( 'X-Frame-Options: SAMEORIGIN' );
+      header( 'Content-Security-Policy: frame-ancestors "none"' );
+    }
+  }
+
+
+
+
   function oembed_template() {
     if( get_query_var('embed') ) {
       add_filter( 'template_include', '__return_false' );
-    }    
+    }
   }
 
 
