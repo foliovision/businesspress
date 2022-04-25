@@ -1175,7 +1175,7 @@ JSH;
 
 
   function prevent_clickjacking() {
-    if( empty(get_query_var('fv_player_embed')) && $this->get_setting('prevent_clickjacking') ) {
+    if( empty(get_query_var('fv_player_embed')) && $this->get_setting('clickjacking-protection') ) {
       header( 'X-Frame-Options: SAMEORIGIN' );
       header( 'Content-Security-Policy: frame-ancestors "none"' );
     }
