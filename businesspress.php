@@ -6,6 +6,7 @@ Description: This plugin secures your site
 Version: 0.9.13
 Author: Foliovision
 Author URI: http://foliovision.com
+Requires PHP: 5.6
 */
 
 require_once( dirname(__FILE__) . '/fp-api.php' );
@@ -787,18 +788,19 @@ class BusinessPress extends BusinessPress_Plugin {
   */
   function get_setting( $key ) {
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
-    
+
     if( isset($this->aOptions[$key]) ) {
       if( $this->aOptions[$key] === true || $this->aOptions[$key] === 'true' ) return true;
       return trim($this->aOptions[$key]);
     }
-    
+
     if( $key == 'disable-rest-api' ) return true;
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
     if( $key == 'hide-notices' ) return false;
     if( $key == 'autoupdates_vcs' ) return true;
-    
+    if( $key == 'clickjacking-protection' ) return true;
+
     return false;
   }
   
