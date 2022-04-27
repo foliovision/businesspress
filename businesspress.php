@@ -1175,9 +1175,52 @@ JSH;
 
 
   function prevent_clickjacking() {
-    if( empty(get_query_var('fv_player_embed')) && $this->get_setting('clickjacking-protection') ) {
-      header( 'X-Frame-Options: SAMEORIGIN' );
-      header( 'Content-Security-Policy: frame-ancestors "none"' );
+    global $wp_rewrite;
+
+    if ( is_multisite() ) {
+      return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/misc.php';
+    
+    $home_path     = get_home_path();
+    $htaccess_file = $home_path . '.htaccess';
+
+    $can_edit_htaccess = file_exists( $htaccess_file ) && is_writable( $home_path ) && $wp_rewrite->using_mod_rewrite_permalinks()
+    || is_writable( $htaccess_file );
+
+    $anti_clickjacking_rule = array(
+      '# BEGIN Businesspress',
+      '<IfModule mod_headers.c>',
+      'Header set X-Frame-Options "SAMEORIGIN"',
+      'Header set Content-Security-Policy "frame-ancestors \'none\'"',
+      '</IfModule>',
+      '# END Businesspress'
+    );
+
+    if( $this->get_setting('clickjacking-protection') ) {
+      if ( $can_edit_htaccess && got_mod_rewrite() ) {
+        if(!get_option('businesspress_anticlickjack_rewrite') ) {
+          $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+          $rules =  array_merge($rules, $anti_clickjacking_rule);
+  
+          update_option('businesspress_anticlickjack_rewrite', true, false);
+  
+          insert_with_markers( $htaccess_file, 'WordPress', $rules );
+        }
+      } else { // use header as fallback
+        if( empty(get_query_var('fv_player_embed')) ) {
+          header( 'X-Frame-Options: SAMEORIGIN' );
+          header( 'Content-Security-Policy: frame-ancestors "none"' );
+        }
+      }
+    } else if ( get_option('businesspress_anticlickjack_rewrite') || 1 ) {
+      update_option('businesspress_anticlickjack_rewrite', false, false);
+
+      $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+
+      insert_with_markers( $htaccess_file, 'WordPress', $rules );
     }
   }
 
