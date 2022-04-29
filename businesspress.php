@@ -1194,7 +1194,7 @@ JSH;
       '# BEGIN Businesspress',
       '<IfModule mod_headers.c>',
       'Header set X-Frame-Options "SAMEORIGIN"',
-      'Header set Content-Security-Policy "frame-ancestors \'none\'"',
+      'Header set Content-Security-Policy "frame-ancestors \'self\'"',
       '</IfModule>',
       '# END Businesspress'
     );
