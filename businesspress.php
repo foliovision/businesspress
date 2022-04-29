@@ -1215,7 +1215,7 @@ JSH;
           header( 'Content-Security-Policy: frame-ancestors "none"' );
         }
       }
-    } else if ( get_option('businesspress_anticlickjack_rewrite') || 1 ) {
+    } else if ( get_option('businesspress_anticlickjack_rewrite') ) {
       update_option('businesspress_anticlickjack_rewrite', false, false);
 
       $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
