@@ -70,6 +70,8 @@ class BusinessPress extends BusinessPress_Plugin {
     register_activation_hook( __FILE__, array( $this , 'activate') );
     register_deactivation_hook( __FILE__, array( $this, 'deactivate') );
     
+
+    add_action( 'wp', array( $this, 'anti_clickjacking_headers') );
     add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -907,6 +909,8 @@ class BusinessPress extends BusinessPress_Plugin {
         update_option( 'businesspress', $this->aOptions );
       }
       
+      $this->prevent_clickjacking();
+
       wp_redirect( $this->get_settings_url() );
       die();
     }
@@ -1173,6 +1177,18 @@ JSH;
 
 
 
+  function anti_clickjacking_headers() {
+    $options = get_option('businesspress');
+
+    if( $this->get_setting('clickjacking-protection') && empty(get_query_var('fv_player_embed')) && empty($options['anticlickjack_rewrite']) ) {
+      header( 'X-Frame-Options: SAMEORIGIN' );
+      header( 'Content-Security-Policy: frame-ancestors "self"' );
+    }
+  }
+
+
+
+
   function prevent_clickjacking() {
     global $wp_rewrite;
 
@@ -1210,11 +1226,6 @@ JSH;
           update_option('businesspress', $options);
 
           insert_with_markers( $htaccess_file, 'WordPress', $rules );
-        }
-      } else { // use header as fallback
-        if( empty(get_query_var('fv_player_embed')) ) {
-          header( 'X-Frame-Options: SAMEORIGIN' );
-          header( 'Content-Security-Policy: frame-ancestors "none"' );
         }
       }
     } else if ( !empty($options['anticlickjack_rewrite']) ) {
