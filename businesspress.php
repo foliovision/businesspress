@@ -1181,6 +1181,8 @@ JSH;
       return;
     }
 
+    $options = get_option('businesspress');
+
     require_once ABSPATH . 'wp-admin/includes/file.php';
     require_once ABSPATH . 'wp-admin/includes/misc.php';
     
@@ -1201,12 +1203,13 @@ JSH;
 
     if( $this->get_setting('clickjacking-protection') ) {
       if ( $can_edit_htaccess && got_mod_rewrite() ) {
-        if(!get_option('businesspress_anticlickjack_rewrite') ) {
+        if( empty($options['anticlickjack_rewrite']) ) {
           $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
           $rules =  array_merge($rules, $anti_clickjacking_rule);
   
-          update_option('businesspress_anticlickjack_rewrite', true, false);
-  
+          $options['anticlickjack_rewrite'] = true;
+          update_option('businesspress', $options);
+
           insert_with_markers( $htaccess_file, 'WordPress', $rules );
         }
       } else { // use header as fallback
@@ -1215,10 +1218,13 @@ JSH;
           header( 'Content-Security-Policy: frame-ancestors "none"' );
         }
       }
-    } else if ( get_option('businesspress_anticlickjack_rewrite') ) {
-      update_option('businesspress_anticlickjack_rewrite', false, false);
+    } else if ( !empty($options['anticlickjack_rewrite']) ) {
+      $this->store_setting_db('anticlickjack_rewrite', false);
 
       $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+
+      $options['anticlickjack_rewrite'] = false;
+      update_option('businesspress', $options);
 
       insert_with_markers( $htaccess_file, 'WordPress', $rules );
     }
