@@ -551,6 +551,8 @@ class BusinessPress_Settings {
   
   function settings_box_security() {
     global $businesspress;
+    $options = get_option('businesspress');
+
     ?>
     <table class="form-table">
       <?php $this->admin_show_setting(
@@ -558,6 +560,19 @@ class BusinessPress_Settings {
                     'clickjacking-protection',
                     __('Enable'),
                     __('Clickjacking Protection ', 'businesspress' ) );
+        
+            if(isset($options['anticlickjack_rewrite_result'])) {
+              ?> 
+                <tr>
+                  <th>
+                    <label></label>
+                  </th>
+                  <td>
+                    <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+                  </td>
+                </tr>
+              <?php
+            }
       ?>
 
       <?php $this->admin_show_setting(

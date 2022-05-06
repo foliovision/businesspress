@@ -1198,9 +1198,15 @@ JSH;
 
     $options = get_option('businesspress');
 
+    if( strpos( $_SERVER['SERVER_SOFTWARE'], 'Apache') === false) {
+      $options['anticlickjack_rewrite_result'] = __('Not using Apache, using header() fallback.', 'businesspress');
+      update_option('businesspress', $options);
+      return;
+    }
+
     require_once ABSPATH . 'wp-admin/includes/file.php';
     require_once ABSPATH . 'wp-admin/includes/misc.php';
-    
+
     $home_path     = get_home_path();
     $htaccess_file = $home_path . '.htaccess';
 
@@ -1222,11 +1228,27 @@ JSH;
           $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
           $rules =  array_merge($rules, $anti_clickjacking_rule);
   
-          $options['anticlickjack_rewrite'] = true;
-          update_option('businesspress', $options);
+          $result = insert_with_markers( $htaccess_file, 'WordPress', $rules );
+          if($result) {
+            $options['anticlickjack_rewrite'] = true;
+            $options['anticlickjack_rewrite_result'] = __('Success: .htaccess modified.', 'businesspress');
+          } else {
+            $options['anticlickjack_rewrite'] = false;
+            $options['anticlickjack_rewrite_result'] = __('Error: failed to modify .htaccess.', 'businesspress');
+          }
 
-          insert_with_markers( $htaccess_file, 'WordPress', $rules );
+          update_option('businesspress', $options);
         }
+      } else {
+        if(!$can_edit_htaccess) {
+          $options['anticlickjack_rewrite_result'] = __('Error: .htaccess is not writable.', 'businesspress');
+        } else {
+          $options['anticlickjack_rewrite_result'] = __('Error: mod_rewrite is not loaded.', 'businesspress');
+        }
+
+        $options['anticlickjack_rewrite'] = false;
+
+        update_option('businesspress', $options);
       }
     } else if ( !empty($options['anticlickjack_rewrite']) ) {
       $this->store_setting_db('anticlickjack_rewrite', false);
