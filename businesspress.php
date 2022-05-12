@@ -179,6 +179,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'big_image_size_threshold_setting') );
     add_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
 
+    /**
+     * Error reporting
+     */
+    add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
+
     parent::__construct();
     
   }
@@ -1290,15 +1295,26 @@ JSH;
     </script>
     <?php 
   }
-  
-  
-  
-  
+
+
+
+
+  function recovery_email($email_data) {
+    $to = $this->get_whitelist_email() ? $this->get_whitelist_email() : get_option('admin_email');
+
+    $email_data['to'] = $to;
+
+    return $email_data;
+  }
+
+
+
+
   function remove_generator_tag() {
     if( $this->get_setting('remove-generator') ) {
       remove_action( 'wp_head', 'edd_version_in_header' );
       remove_action( 'wp_head', 'wp_generator' );      
-    }       
+    }
   }
   
   
