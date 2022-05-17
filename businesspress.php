@@ -135,6 +135,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
+
+    /*
+     * WAF
+     */
+    $this->fail2ban_waf();
     
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
@@ -638,14 +643,52 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
+  function fail2ban_waf() {
+    $rules = array(
+      '.env',
+      '.github/workflows',
+      '.ssh',
+      'boot.ini',
+      'etc/passwd',
+      'ftpsync.settings',
+      'onerror=',
+      'onload=',
+      'phpmyadmin',
+      'win.ini',
+      'wp-config.php',
+    );
+
+    $match = false;
+
+    foreach( $rules AS $rule ) {
+      if(
+        stripos( $_SERVER['REQUEST_URI'], $rule ) ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode($rule) ) ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode($rule) ) ) ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode( urlencode($rule) ) ) )
+      ) {
+        $match = $rule;
+      }
+    }
+
+    if( $match ) {
+      $this->fail2ban_openlog();
+      syslog( LOG_INFO,'BusinessPress WAF - '.$match.' request - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
+      exit;
+    }
+  }
+
+
+
+
   function fail2ban_xmlrpc() {
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC authentication failure from '.$this->get_remote_addr() );
   }
-  
-  
-  
-  
+
+
+
+
   function fail2ban_xmlrpc_ping( $ixr_error ) {
     if( $ixr_error->code === 48 ) return $ixr_error;
     
