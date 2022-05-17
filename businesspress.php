@@ -70,6 +70,8 @@ class BusinessPress extends BusinessPress_Plugin {
     register_activation_hook( __FILE__, array( $this , 'activate') );
     register_deactivation_hook( __FILE__, array( $this, 'deactivate') );
     
+
+    add_action( 'wp', array( $this, 'anti_clickjacking_headers') );
     add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -120,7 +122,6 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'init', array( $this, 'apply_restrictions') );
     add_action( 'init', array( $this, 'remove_generator_tag') );  //  Generator tags
     add_action( 'wp_footer', array( $this, 'multisite_footer'), 999 );
-    add_action( 'wp', array($this, 'prevent_clickjacking'), 10, 0 );
     add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
@@ -908,6 +909,8 @@ class BusinessPress extends BusinessPress_Plugin {
         update_option( 'businesspress', $this->aOptions );
       }
       
+      $this->prevent_clickjacking();
+
       wp_redirect( $this->get_settings_url() );
       die();
     }
@@ -1174,10 +1177,88 @@ JSH;
 
 
 
-  function prevent_clickjacking() {
-    if( empty(get_query_var('fv_player_embed')) && $this->get_setting('clickjacking-protection') ) {
+  function anti_clickjacking_headers() {
+    $options = get_option('businesspress');
+
+    if( $this->get_setting('clickjacking-protection') && empty(get_query_var('fv_player_embed')) && empty($options['anticlickjack_rewrite']) ) {
       header( 'X-Frame-Options: SAMEORIGIN' );
-      header( 'Content-Security-Policy: frame-ancestors "none"' );
+      header( 'Content-Security-Policy: frame-ancestors "self"' );
+    }
+  }
+
+
+
+
+  function prevent_clickjacking() {
+    global $wp_rewrite;
+
+    if ( is_multisite() ) {
+      return;
+    }
+
+    $options = get_option('businesspress');
+
+    if( strpos( $_SERVER['SERVER_SOFTWARE'], 'Apache') === false) {
+      $options['anticlickjack_rewrite_result'] = __('Not using Apache, using header() fallback.', 'businesspress');
+      update_option('businesspress', $options);
+      return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/misc.php';
+
+    $home_path     = get_home_path();
+    $htaccess_file = $home_path . '.htaccess';
+
+    $can_edit_htaccess = file_exists( $htaccess_file ) && is_writable( $home_path ) && $wp_rewrite->using_mod_rewrite_permalinks()
+    || is_writable( $htaccess_file );
+
+    $anti_clickjacking_rule = array(
+      '# BEGIN Businesspress',
+      '<IfModule mod_headers.c>',
+      'Header set X-Frame-Options "SAMEORIGIN"',
+      'Header set Content-Security-Policy "frame-ancestors \'self\'"',
+      '</IfModule>',
+      '# END Businesspress'
+    );
+
+    if( $this->get_setting('clickjacking-protection') ) {
+      if ( $can_edit_htaccess && got_mod_rewrite() ) {
+        if( empty($options['anticlickjack_rewrite']) ) {
+          $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+          $rules =  array_merge($rules, $anti_clickjacking_rule);
+  
+          $result = insert_with_markers( $htaccess_file, 'WordPress', $rules );
+          if($result) {
+            $options['anticlickjack_rewrite'] = true;
+            $options['anticlickjack_rewrite_result'] = __('Success: .htaccess modified.', 'businesspress');
+          } else {
+            $options['anticlickjack_rewrite'] = false;
+            $options['anticlickjack_rewrite_result'] = __('Error: failed to modify .htaccess.', 'businesspress');
+          }
+
+          update_option('businesspress', $options);
+        }
+      } else {
+        if(!$can_edit_htaccess) {
+          $options['anticlickjack_rewrite_result'] = __('Error: .htaccess is not writable.', 'businesspress');
+        } else {
+          $options['anticlickjack_rewrite_result'] = __('Error: mod_rewrite is not loaded.', 'businesspress');
+        }
+
+        $options['anticlickjack_rewrite'] = false;
+
+        update_option('businesspress', $options);
+      }
+    } else if ( !empty($options['anticlickjack_rewrite']) ) {
+      $this->store_setting_db('anticlickjack_rewrite', false);
+
+      $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+
+      $options['anticlickjack_rewrite'] = false;
+      update_option('businesspress', $options);
+
+      insert_with_markers( $htaccess_file, 'WordPress', $rules );
     }
   }
 
@@ -1230,6 +1311,8 @@ JSH;
       } else {
         update_option( 'businesspress', $this->aOptions );
       }
+
+      $this->prevent_clickjacking();
     }
     
   }
