@@ -555,23 +555,25 @@ class BusinessPress_Settings {
 
     ?>
     <table class="form-table">
-      <?php $this->admin_show_setting(
-                    'businesspress-clickjacking-protection',
-                    'clickjacking-protection',
-                    __('Enable'),
-                    __('Clickjacking Protection ', 'businesspress' ) );
-        
-            if(isset($options['anticlickjack_rewrite_result'])) {
-              ?> 
-                <tr>
-                  <th>
-                    <label></label>
-                  </th>
-                  <td>
-                    <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
-                  </td>
-                </tr>
-              <?php
+      <?php if( !is_multisite() ) {
+              $this->admin_show_setting(
+                      'businesspress-clickjacking-protection',
+                      'clickjacking-protection',
+                      __('Enable'),
+                      __('Clickjacking Protection ', 'businesspress' ) );
+
+              if(isset($options['anticlickjack_rewrite_result'])) {
+                ?> 
+                  <tr>
+                    <th>
+                      <label></label>
+                    </th>
+                    <td>
+                      <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+                    </td>
+                  </tr>
+                <?php
+              }
             }
       ?>
 
