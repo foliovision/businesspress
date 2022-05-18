@@ -1300,9 +1300,9 @@ JSH;
 
 
   function recovery_email($email_data) {
-    $to = $this->get_whitelist_email() ? $this->get_whitelist_email() : get_option('admin_email');
-
-    $email_data['to'] = $to;
+    if( $this->get_whitelist_email() ) {
+      $email_data['to'] = $this->get_whitelist_email();
+    }
 
     return $email_data;
   }
