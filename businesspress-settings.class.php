@@ -583,7 +583,14 @@ class BusinessPress_Settings {
                     __('Disable'),
                     __('Generator Tag (WP, EDD)', 'businesspress' ) );
       ?>
-      
+
+      <?php $this->admin_show_setting(
+                    'businesspress-disable-user-login-scanning',
+                    'disable-user-login-scanning',
+                    '',
+                    __('User login scanning', 'businesspress' ) );
+      ?>
+
       <?php $this->admin_show_setting(
                     'businesspress-disable-rest-api',
                     'disable-rest-api',
