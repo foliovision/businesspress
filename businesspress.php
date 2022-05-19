@@ -649,28 +649,31 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   function fail2ban_waf() {
+    // If a phrase starts with / it means it only triggers if it's the start of the request URL or requested from a folder, but it will work if used in query string without /
+    // This way you can search for .ssh or phpmyadmin in articles using site.com/?s=phpmyadmin and not get banned
+    // TODO: What if I search for phpmyadmin in bbPress ? site.com/support/search/phpmyadmin
     $rules = array(
-      '.env',
-      '.github/workflows',
-      '.ssh',
+      '/.env',
+      '/.github/workflows',
+      '/.ssh',
       'boot.ini',
       'etc/passwd',
       'ftpsync.settings',
       'onerror=',
       'onload=',
-      'phpmyadmin',
+      '/phpmyadmin',
       'win.ini',
-      'wp-config.php',
+      '/wp-config.php',
     );
 
     $match = false;
 
     foreach( $rules AS $rule ) {
       if(
-        stripos( $_SERVER['REQUEST_URI'], $rule ) ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode($rule) ) ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode($rule) ) ) ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode( urlencode($rule) ) ) )
+        stripos( $_SERVER['REQUEST_URI'], $rule ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode($rule) ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode($rule) ) ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode( urlencode($rule) ) ) ) !== false
       ) {
         $match = $rule;
       }
