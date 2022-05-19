@@ -1230,7 +1230,7 @@ JSH;
 
     if( $this->get_setting('clickjacking-protection') && empty(get_query_var('fv_player_embed')) && empty($options['anticlickjack_rewrite']) ) {
       header( 'X-Frame-Options: SAMEORIGIN' );
-      header( 'Content-Security-Policy: frame-ancestors "self"' );
+      header( "Content-Security-Policy: frame-ancestors 'self'" );
     }
   }
 
