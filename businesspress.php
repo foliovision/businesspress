@@ -661,8 +661,9 @@ class BusinessPress extends BusinessPress_Plugin {
       'ftpsync.settings',
       'onerror=',
       'onload=',
-      '/phpmyadmin',
       'win.ini',
+      '/phpMyAdmin/server_import.php',
+      '/phpmyadmin/scripts/setup.php',
       '/wp-config.php',
     );
 
