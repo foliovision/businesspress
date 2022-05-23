@@ -551,9 +551,32 @@ class BusinessPress_Settings {
   
   function settings_box_security() {
     global $businesspress;
+    $options = get_option('businesspress');
+
     ?>
     <table class="form-table">
-      
+      <?php if( !is_multisite() ) {
+              $this->admin_show_setting(
+                      'businesspress-clickjacking-protection',
+                      'clickjacking-protection',
+                      __('Enable'),
+                      __('Clickjacking Protection ', 'businesspress' ) );
+
+              if(isset($options['anticlickjack_rewrite_result'])) {
+                ?> 
+                  <tr>
+                    <th>
+                      <label></label>
+                    </th>
+                    <td>
+                      <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+                    </td>
+                  </tr>
+                <?php
+              }
+            }
+      ?>
+
       <?php $this->admin_show_setting(
                     'businesspress-remove-generator',
                     'remove-generator',

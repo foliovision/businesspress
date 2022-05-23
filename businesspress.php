@@ -6,6 +6,7 @@ Description: This plugin secures your site
 Version: 0.9.13
 Author: Foliovision
 Author URI: http://foliovision.com
+Requires PHP: 5.6
 */
 
 require_once( dirname(__FILE__) . '/fp-api.php' );
@@ -69,6 +70,8 @@ class BusinessPress extends BusinessPress_Plugin {
     register_activation_hook( __FILE__, array( $this , 'activate') );
     register_deactivation_hook( __FILE__, array( $this, 'deactivate') );
     
+
+    add_action( 'wp', array( $this, 'anti_clickjacking_headers') );
     add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -88,7 +91,7 @@ class BusinessPress extends BusinessPress_Plugin {
     
     add_filter( 'send_core_update_notification_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "WordPress x.y.z is available. Please update!"
     add_filter( 'auto_core_update_send_email', '__return_false' );  //  disabling WP_Automatic_Updater::send_email() with subject of "Your site has updated to WordPress x.y.z"
-    
+
     /*
      *  Admin screen
      */
@@ -132,6 +135,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
+
+    /*
+     * WAF
+     */
+    $this->fail2ban_waf();
     
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
@@ -176,6 +184,11 @@ class BusinessPress extends BusinessPress_Plugin {
      */
     add_action( 'admin_init', array( $this, 'big_image_size_threshold_setting') );
     add_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
+
+    /**
+     * Error reporting
+     */
+    add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
 
     parent::__construct();
     
@@ -635,14 +648,56 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
+  function fail2ban_waf() {
+    // If a phrase starts with / it means it only triggers if it's the start of the request URL or requested from a folder, but it will work if used in query string without /
+    // This way you can search for .ssh or phpmyadmin in articles using site.com/?s=phpmyadmin and not get banned
+    // TODO: What if I search for phpmyadmin in bbPress ? site.com/support/search/phpmyadmin
+    $rules = array(
+      '/.env',
+      '/.github/workflows',
+      '/.ssh',
+      '/boot.ini',
+      'etc/passwd',
+      '/ftpsync.settings',
+      ' onerror=',
+      ' onload=',
+      '/phpMyAdmin/server_import.php',
+      '/phpmyadmin/scripts/setup.php',
+      '/win.ini',
+      '/wp-config.php',
+    );
+
+    $match = false;
+
+    foreach( $rules AS $rule ) {
+      if(
+        stripos( $_SERVER['REQUEST_URI'], $rule ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode($rule) ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode($rule) ) ) !== false ||
+        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode( urlencode($rule) ) ) ) !== false
+      ) {
+        $match = $rule;
+      }
+    }
+
+    if( $match ) {
+      $this->fail2ban_openlog();
+      syslog( LOG_INFO,'BusinessPress WAF - '.$match.' request - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
+      exit;
+    }
+  }
+
+
+
+
   function fail2ban_xmlrpc() {
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC authentication failure from '.$this->get_remote_addr() );
   }
-  
-  
-  
-  
+
+
+
+
   function fail2ban_xmlrpc_ping( $ixr_error ) {
     if( $ixr_error->code === 48 ) return $ixr_error;
     
@@ -786,18 +841,19 @@ class BusinessPress extends BusinessPress_Plugin {
   */
   function get_setting( $key ) {
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
-    
+
     if( isset($this->aOptions[$key]) ) {
       if( $this->aOptions[$key] === true || $this->aOptions[$key] === 'true' ) return true;
       return trim($this->aOptions[$key]);
     }
-    
+
     if( $key == 'disable-rest-api' ) return true;
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
     if( $key == 'hide-notices' ) return false;
     if( $key == 'autoupdates_vcs' ) return true;
-    
+    if( $key == 'clickjacking-protection' ) return true;
+
     return false;
   }
   
@@ -897,12 +953,16 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['frontend_login_check'] = isset($_POST['frontend_login_check']) && $_POST['frontend_login_check'] == 1 ? true : false;
       
-      if( is_multisite() ){
+      $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
+
+      if( is_multisite() ) {
         update_site_option( 'businesspress', $this->aOptions );
       } else {
         update_option( 'businesspress', $this->aOptions );
       }
       
+      $this->prevent_clickjacking();
+
       wp_redirect( $this->get_settings_url() );
       die();
     }
@@ -1165,14 +1225,102 @@ JSH;
     
     if( !empty($this->aOptions['multisite-tracking']) ) echo $this->aOptions['multisite-tracking'];
   }
+
+
+
+
+  function anti_clickjacking_headers() {
+    $options = get_option('businesspress');
+
+    if( $this->get_setting('clickjacking-protection') && empty(get_query_var('fv_player_embed')) && empty($options['anticlickjack_rewrite']) ) {
+      header( 'X-Frame-Options: SAMEORIGIN' );
+      header( "Content-Security-Policy: frame-ancestors 'self'" );
+    }
+  }
+
+
+
+
+  function prevent_clickjacking() {
+    global $wp_rewrite;
+
+    if ( is_multisite() ) {
+      return;
+    }
+
+    $options = get_option('businesspress');
+
+    if( strpos( $_SERVER['SERVER_SOFTWARE'], 'Apache') === false) {
+      $options['anticlickjack_rewrite_result'] = __('Not using Apache, using header() fallback.', 'businesspress');
+      update_option('businesspress', $options);
+      return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/misc.php';
+
+    $home_path     = get_home_path();
+    $htaccess_file = $home_path . '.htaccess';
+
+    $can_edit_htaccess = file_exists( $htaccess_file ) && is_writable( $home_path ) && $wp_rewrite->using_mod_rewrite_permalinks()
+    || is_writable( $htaccess_file );
+
+    $anti_clickjacking_rule = array(
+      '# BEGIN Businesspress',
+      '<IfModule mod_headers.c>',
+      'Header set X-Frame-Options "SAMEORIGIN"',
+      'Header set Content-Security-Policy "frame-ancestors \'self\'"',
+      '</IfModule>',
+      '# END Businesspress'
+    );
+
+    if( $this->get_setting('clickjacking-protection') ) {
+      if ( $can_edit_htaccess && got_mod_rewrite() ) {
+        if( empty($options['anticlickjack_rewrite']) ) {
+          $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+          $rules =  array_merge($rules, $anti_clickjacking_rule);
   
-  
-  
-  
+          $result = insert_with_markers( $htaccess_file, 'WordPress', $rules );
+          if($result) {
+            $options['anticlickjack_rewrite'] = true;
+            $options['anticlickjack_rewrite_result'] = __('Success: .htaccess modified.', 'businesspress');
+          } else {
+            $options['anticlickjack_rewrite'] = false;
+            $options['anticlickjack_rewrite_result'] = __('Error: failed to modify .htaccess.', 'businesspress');
+          }
+
+          update_option('businesspress', $options);
+        }
+      } else {
+        if(!$can_edit_htaccess) {
+          $options['anticlickjack_rewrite_result'] = __('Error: .htaccess is not writable.', 'businesspress');
+        } else {
+          $options['anticlickjack_rewrite_result'] = __('Error: mod_rewrite is not loaded.', 'businesspress');
+        }
+
+        $options['anticlickjack_rewrite'] = false;
+
+        update_option('businesspress', $options);
+      }
+    } else if ( !empty($options['anticlickjack_rewrite']) ) {
+      $this->store_setting_db('anticlickjack_rewrite', false);
+
+      $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
+
+      $options['anticlickjack_rewrite'] = false;
+      update_option('businesspress', $options);
+
+      insert_with_markers( $htaccess_file, 'WordPress', $rules );
+    }
+  }
+
+
+
+
   function oembed_template() {
     if( get_query_var('embed') ) {
       add_filter( 'template_include', '__return_false' );
-    }    
+    }
   }
 
 
@@ -1215,6 +1363,8 @@ JSH;
       } else {
         update_option( 'businesspress', $this->aOptions );
       }
+
+      $this->prevent_clickjacking();
     }
     
   }
@@ -1275,15 +1425,26 @@ JSH;
     </script>
     <?php 
   }
-  
-  
-  
-  
+
+
+
+
+  function recovery_email($email_data) {
+    if( $this->get_whitelist_email() ) {
+      $email_data['to'] = $this->get_whitelist_email();
+    }
+
+    return $email_data;
+  }
+
+
+
+
   function remove_generator_tag() {
     if( $this->get_setting('remove-generator') ) {
       remove_action( 'wp_head', 'edd_version_in_header' );
       remove_action( 'wp_head', 'wp_generator' );      
-    }       
+    }
   }
   
   
