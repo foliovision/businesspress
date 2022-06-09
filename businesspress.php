@@ -1463,6 +1463,7 @@ JSH;
     global $wp_admin_bar;
     $wp_admin_bar->remove_menu('wp-logo');
     $wp_admin_bar->remove_menu('updates');
+    $wp_admin_bar->remove_menu('customize');
   }
   
   
