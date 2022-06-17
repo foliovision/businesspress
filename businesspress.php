@@ -253,6 +253,8 @@ class BusinessPress extends BusinessPress_Plugin {
       #wpbody-content div.fs-notice.promotion { display: none !important }
       #wpbody-content .yasr-donatedivdx { display: none !important }
       #adminmenu .toplevel_page_yasr_settings_page .update-plugins.fs-trial { display: none }
+      #wp-admin-bar-searchwp { display: none !important }
+      .searchwp-settings-header-nav ul li a.searchwp-settings-nav-tab-support > span > span { display: none !important }
     </style>
     <?php
   }
