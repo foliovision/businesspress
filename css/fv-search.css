@@ -1,9 +1,4 @@
 /* Custom search results */
-
-.businesspress-search-result p {
-    margin: 0.3em 0;
-}
-
 .businesspress-search-form {
     max-width: 500px;
     border: 1px solid #ccc;
@@ -87,4 +82,5 @@
 .entry-content .businesspress-search-result p {
     font-size: 14px;
     line-height: 1.35;
+    margin: 0.3em 0;
 }
