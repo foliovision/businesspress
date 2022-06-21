@@ -1130,6 +1130,8 @@ JSH;
     if( !function_exists('sort_settings_menu_wpse_2331') && !function_exists('sort_arra_asc_so_1597736') ) {
       include( dirname(__FILE__).'/plugins/wp-admin-settings-sort.php' );
     }
+
+    include( dirname(__FILE__).'/plugins/wp-live-chat-software-for-wordpress.php' );
   }
   
   
