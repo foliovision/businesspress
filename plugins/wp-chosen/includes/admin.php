@@ -32,7 +32,7 @@ function wp_chosen_enqueue_assets() {
 
 	// Scripts
 	wp_enqueue_script( $handle,     $url . 'assets/js/chosen.jquery.min.js', array( 'jquery' ), $ver, true );
-	wp_enqueue_script( 'wp-chosen', $url . 'assets/js/wp-chosen.js',         array( $handle  ), $ver, true );
+	wp_enqueue_script( 'wp-chosen', $url . 'assets/js/wp-chosen.js',         array( $handle  ), filemtime( dirname(__FILE__).'/../assets/js/wp-chosen.js'), true );
 }
 
 /**

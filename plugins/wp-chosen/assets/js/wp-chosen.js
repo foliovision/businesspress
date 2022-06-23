@@ -17,16 +17,22 @@ jQuery( document ).ready( function ( $ ) {
 		+ ', .form-wrap select'
 		+ ', .customize-pane-parent select';
 
+	// do not process the select drop down menu if...
+	function filter() {
+		if(
+			!$(this).parents('#edd_price_fields').length && // it is used in EDD for pricing
+			!$(this).parents('.mb-right-column').length // it is part of the Profile Builder interface
+		) return true;
+
+		return false;
+	}
+
 	/* Attach */
-	$( chosen_targets ).filter(":visible").filter( function() {
-    return // do not process the select drop down menu if
-      !$(this).parents('#edd_price_fields').length && // it is used in EDD for pricing
-      !$(this).parents('.mb-right-column').length // it is part of the Profile Builder interface
-  }).not("[size]").chosen( chosen_options );
+	$( chosen_targets ).filter(":visible").filter( filter ).not("[size]").chosen( chosen_options );
 
 	/* Special case the Meta-Box toggle */
 	$( document ).on( 'postbox-toggled', function( event, postbox ) {
-		$( postbox ).find( 'select' )
+		$( postbox ).find( 'select' ).filter( filter ).not("[size]")
 			.chosen( 'destroy' )
 			.chosen( chosen_options );
 	} );
