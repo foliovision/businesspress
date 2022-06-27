@@ -528,7 +528,13 @@ class BusinessPress_Settings {
                     'frontend_login_check',
                     'Front-end Login Check',
                     __('Useful for membership websites. Runs a login check when you come back to the browser tab or wake up your phone.', 'businesspress' ) );
-                    
+
+      $this->admin_show_setting(
+                    'hide_password_posts',
+                    'hide_password_posts',
+                    'Hide Password Protected Posts',
+                    __('Password protected posts won\'t show up anywhere unless you have the direct link or your are the admin or editor.', 'businesspress' ) );
+
       $this->admin_show_setting(
                     'businesspress-login-redirect',
                     'login-redirect',

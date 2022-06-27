@@ -185,6 +185,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'big_image_size_threshold_setting') );
     add_action( 'big_image_size_threshold', array( $this, 'big_image_size_threshold'), PHP_INT_MAX, 4 );
 
+    /*
+     * Hide Password Protected Posts
+     */
+    add_action( 'pre_get_posts', array( $this, 'hide_password_protected_posts' ) );
+
     /**
      * Error reporting
      */
@@ -954,7 +959,9 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['admin-dropdown'] = isset($_POST['businesspress-admin-dropdown']) && $_POST['businesspress-admin-dropdown'] == 1 ? true : false;
 
       $this->aOptions['frontend_login_check'] = isset($_POST['frontend_login_check']) && $_POST['frontend_login_check'] == 1 ? true : false;
-      
+
+      $this->aOptions['hide_password_posts'] = isset($_POST['hide_password_posts']) && $_POST['hide_password_posts'] == 1 ? true : false;
+
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
 
       if( is_multisite() ) {
@@ -1001,9 +1008,23 @@ JSH;
     $settings['interval'] = 60;
     return $settings;
   }
-  
-  
-  
+
+
+
+
+  function hide_password_protected_posts( $query ) {
+    if (
+      $this->get_setting('hide_password_posts') &&
+      !$query->is_singular() &&
+      !is_admin() &&
+      !current_user_can('edit_posts') 
+    ) {
+      $query->set( 'has_password', false );
+    }
+  }
+
+
+
 
   function list_core_update( $update, $show_checkboxes = true ) {
     global $wp_local_package, $wpdb, $wp_version;
