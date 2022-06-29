@@ -365,7 +365,7 @@ class BusinessPress extends BusinessPress_Plugin {
         
       }
       
-      update_option( 'businesspress_core_versions', $aVersions );
+      update_option( 'businesspress_core_versions', $aVersions, false );
       
     }
     
