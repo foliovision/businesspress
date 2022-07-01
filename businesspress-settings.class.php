@@ -588,7 +588,7 @@ class BusinessPress_Settings {
                     'businesspress-disable-user-login-scanning',
                     'disable-user-login-scanning',
                     '',
-                    __('User login scanning', 'businesspress' ) );
+                    __('User login scanning (using requests like <code>/?author=1</code> to find admin user login)', 'businesspress' ) );
       ?>
 
       <?php $this->admin_show_setting(
