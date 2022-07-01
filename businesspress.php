@@ -136,6 +136,13 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
 
+    if( $this->get_setting('disable-user-login-scanning') ) {
+      if( !empty($_GET['author']) ) {
+        if( is_admin() && !defined('DOING_AJAX') ) return;
+        die();
+      }
+    }
+
     /*
      * WAF
      */
@@ -860,6 +867,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'hide-notices' ) return false;
     if( $key == 'autoupdates_vcs' ) return true;
     if( $key == 'clickjacking-protection' ) return true;
+    if( $key == 'disable-user-login-scanning' ) return true;
 
     return false;
   }
@@ -963,6 +971,8 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['hide_password_posts'] = isset($_POST['hide_password_posts']) && $_POST['hide_password_posts'] == 1 ? true : false;
 
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
+
+      $this->aOptions['disable-user-login-scanning'] = isset($_POST['businesspress-disable-user-login-scanning']) && $_POST['businesspress-disable-user-login-scanning'] == 1 ? true : false;
 
       if( is_multisite() ) {
         update_site_option( 'businesspress', $this->aOptions );
