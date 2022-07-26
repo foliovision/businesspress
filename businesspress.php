@@ -1659,7 +1659,6 @@ JSR;
       $html = preg_replace( '~<tfoot[\s\S]*?</tfoot>~', '', $html ); 
       $html = preg_replace( '~<input[^>]*?upgrade-plugins[^>]*?>~', '', $html );      
       $html = preg_replace( '~<input[^>]*?upgrade-themes[^>]*?>~', '', $html );
-      
     }
     
     global $wp_version;
@@ -1892,8 +1891,10 @@ JSR;
   
     $new_html .= ob_get_clean();
 
-    if( preg_match( '~<h\d[^>]*?>Plugins</h\d>~', $html ) ) {
-      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)(<h\d[^>]*?>Plugins</h\d>)~', '$1'.$new_html.'$3', $html );
+    $plugins_translated = __( 'Plugins' );
+
+    if( preg_match( '~<h\d[^>]*?>[\s\S]*'.$plugins_translated.'[\s\S]*</h\d>~', $html ) ) {
+      $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)(<h\d[^>]*?>[\s\S]*'.$plugins_translated.'[\s\S]*</h\d>)~', '$1'.$new_html.'$3', $html );
     } else {
       $html = preg_replace( '~(<div class="wrap">)([\s\S]*?)$~', '$1'.$new_html, $html );
     }
