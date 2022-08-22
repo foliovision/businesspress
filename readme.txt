@@ -45,10 +45,6 @@ Plugin by default moves the admin notices into Dashboard -> Notices screen where
 
 Plugin also supports fail2ban, see install instructions.
 
-**Plain text editing**
-
-You can disable the TinyMCE editor (WordPress < 5, or when Classic Editor is installed) to have full control over your post HTML.
-
 **Tweaks**
 
 * Enable Google style results - Gives you similar layout and keyword highlight.
@@ -59,6 +55,7 @@ You can disable the TinyMCE editor (WordPress < 5, or when Classic Editor is ins
 * WordPress core hotfix - are you getting error like "Unable to create directory ../images/2019/11. Is its parent directory writable by the server?" Since October 2019 WordPress doesn't support ../ in the upload path. So we translate that path to absolute path and check if it's in the site webroot and then let it pass
 * Disables the "Password Changed" admin email notifications when a Subscriber level user changes email address
 * Alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
+* Hide Password Protected Posts - Password protected posts won't show up anywhere unless you have the direct link or your are the admin or editor.
 
 **Credits**
 
@@ -86,22 +83,13 @@ From that point forward, you will have to elevated admin privileges over the web
 
 ### Fail2ban
 
-To protect against bruteforce hacking of WordPress login form and XML-RPC:
+BusinessPress works with **Fail2Ban** Linux utility to protect against bruteforce hacking of WordPress login form and XML-RPC.
 
-1. Install fail2ban, you will need root access to your server running on Linux
-2. Setup fail2ban filter for BusinessPress, just copy plugin file fail2ban/wordpress.conf into /etc/fail2ban/filter.d/wordpress.conf
-3. Setup fail2ban jail for BusinessPress, just copy plugin file fail2ban/jail.local into /etc/fail2ban/jail.local
+Guides:
 
-Note that if you are on cPanel you might need to adjust the logpath variable to /var/log/messages
-
-4. Restart fail2ban daemon
-5. Do some bad login attempts and you should be able to see entries being added at the end of /var/log/auth.log
-
-Note that if you are on cPanel you might need to check the log at /var/log/messages
-
-6. You can use a command like this to check ban status: fail2ban-client status wordpress
-7. For troubleshooting try this command to check if your filter works: fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/wordpress.conf
-8. To remove a ban use fail2ban-client set wordpress unbanip IPADDRESSHERE
+* [How to setup login protection](https://foliovision.com/wordpress/plugins/businesspress/login-protection)
+* [How to block repeated offenders with BusinessPress](https://foliovision.com/wordpress/plugins/businesspress/repeated-offenders-businesspress)
+* [How to block malicious web requests with BusinessPress](https://foliovision.com/wordpress/plugins/businesspress/malicious-requests-businesspress)
 
 == Changelog ==
 
