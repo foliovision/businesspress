@@ -916,9 +916,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   function get_version_branch() {
     global $wp_version;
-    if( preg_match( '~\d+\.\d+~', $wp_version, $aMatch ) ) {
-      return $aMatch[0];
-    }
+    return $wp_version;
   }
 
   
