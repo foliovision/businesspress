@@ -165,8 +165,16 @@ class BusinessPress_Settings {
       if( !anchor || jQuery('#' + anchor).length == 0 ) {
         anchor = 'welcome';
       }
+
+      // Did we find the tab?
+      if( jQuery('#' + anchor).hasClass('.postbox-container') ) {
+        tab_switch(anchor);
+
+      // Is it anchor for one of the settings boxes? Go to its tab.
+      } else {
+        tab_switch( jQuery('#' + anchor).closest('.postbox-container').attr('id') );
+      }
       
-      tab_switch(anchor);
     });
     $('#businesspress-header-nav a').on('click',function(e){
       e.preventDefault();
@@ -408,10 +416,20 @@ class BusinessPress_Settings {
   
   
   function settings_box_login() {
-    global $businesspress;
     ?>
     <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
     <p><?php _e("If you don't have fail2ban available, we recommend <a href='https://wordpress.org/plugins/login-lockdown/' target='_blank'>Login LockDown</a>.", 'businesspress' ); ?></p>
+
+    <p><?php _e('The tranditional IP banning is not effective against botnets. The only way is to block further login attempts on a per account basis:', 'businesspress' ); ?></p>
+    <table class="form-table">
+      <?php
+      $this->admin_show_setting(
+        'businesspress-login-lockout',
+        'login-lockout',
+        'Login Lockout',
+        __('If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email let user re-enable login for his account.', 'businesspress' ) );
+        ?>
+    </table>
     <?php
   }
   

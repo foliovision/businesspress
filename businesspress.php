@@ -887,6 +887,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'autoupdates_vcs' ) return true;
     if( $key == 'clickjacking-protection' ) return true;
     if( $key == 'disable-user-login-scanning' ) return true;
+    if( $key == 'login-lockout' ) return true;
 
     return false;
   }
@@ -992,6 +993,8 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
 
       $this->aOptions['disable-user-login-scanning'] = isset($_POST['businesspress-disable-user-login-scanning']) && $_POST['businesspress-disable-user-login-scanning'] == 1 ? true : false;
+
+      $this->aOptions['login-lockout'] = isset($_POST['businesspress-login-lockout']) && $_POST['businesspress-login-lockout'] == 1 ? true : false;
 
       if( is_multisite() ) {
         update_site_option( 'businesspress', $this->aOptions );
@@ -1182,6 +1185,10 @@ JSH;
     }
 
     include( dirname(__FILE__).'/plugins/wp-live-chat-software-for-wordpress.php' );
+
+    if( $this->get_setting('login-lockout') ) {
+      include( dirname(__FILE__).'/plugins/fv-user-lock-out.php' );
+    }
   }
   
   
@@ -1438,6 +1445,18 @@ JSH;
       }
       die();
     }
+
+    if( isset($_POST['key']) && $_POST['key'] == 'businesspress_login_lockout' && isset($_POST['value']) ) {
+      check_ajax_referer('businesspress_login_lockout');
+
+      $this->aOptions['pointer_login_lockout'] = true;
+      if( is_multisite() ){
+        update_site_option( 'businesspress', $this->aOptions );
+      } else {
+        update_option( 'businesspress', $this->aOptions );
+      }
+      die();
+    }
   }
   
   
@@ -1454,7 +1473,21 @@ JSH;
             'button1' => __('Open Settings', 'businesspress'),
             'button2' => __('Dismiss', 'businesspress')
           );
-      
+    }
+
+    if( $this->get_setting('login-lockout') && !$this->get_setting('pointer_login_lockout') ) {
+      $this->pointer_boxes['businesspress_login_lockout'] = array(
+            'id' => '#wp-admin-bar-new-content',
+            'pointerClass' => 'businesspress_login_lockout',
+            'heading' => __('BusinessPress', 'fv-wordpress-flowplayer'),
+            'content' => sprintf( __('<p>We have enabled the <strong>Login Lockout</strong> to protect your user accounts from botnets password guessing.</p><p>Please turn off if you have disabled the standard WordPress Password Reset form.</p>', 'businesspress'), $this->get_settings_url() ),
+            'position' => array( 'edge' => 'top', 'align' => 'center' ),
+            'button1' => __('Open Settings', 'businesspress'),
+            'button2' => __('Dismiss', 'businesspress')
+          );
+    }
+    
+    if( !empty($this->pointer_boxes) ) {
       add_action( 'admin_print_footer_scripts', array($this,'pointer_scripts'), 999 );
     }
     
@@ -1472,6 +1505,12 @@ JSH;
           $('.businesspress_default_settings .button-primary').click( function(e) {
             $(document).ajaxComplete( function() {
               window.location = '<?php echo $this->get_settings_url(); ?>#preferences';
+            });
+          });
+
+          $('.businesspress_login_lockout .button-primary').click( function(e) {
+            $(document).ajaxComplete( function() {
+              window.location = '<?php echo $this->get_settings_url(); ?>#businesspress_login';
             });
           });
         });
