@@ -342,7 +342,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
-  function cache_core_version_info() {
+  function cache_core_version_info() { // TODO
     $aVersions = get_option( 'businesspress_core_versions' );
     if( !$aVersions || !isset($aVersions['ttl']) || $aVersions['ttl'] < time()  ) {
       $bSuccess = false;
@@ -365,7 +365,7 @@ class BusinessPress extends BusinessPress_Plugin {
         }
         
       }
-      
+
       if( !$bSuccess ) {
         $aVersions = get_option( 'businesspress_core_versions', array() );
         $aVersions['ttl'] =  time()+120;
@@ -375,7 +375,9 @@ class BusinessPress extends BusinessPress_Plugin {
       update_option( 'businesspress_core_versions', $aVersions, false );
       
     }
-    
+
+    if( !isset($aVersions['data']['5.7']) ) $aVersions['data']['5.7'] = 'March 9, 2021'; // fix 5.7 if missing date
+
     return $aVersions;
   }
   
