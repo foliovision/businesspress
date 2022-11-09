@@ -21,8 +21,8 @@ class FV_User_Lock_Out {
   
     $last_lockout = get_user_meta( $user_id, 'fv_user_lockout_email', true );
   
-    // Only send email out once in a day
-    if( $last_lockout && $last_lockout + DAY_IN_SECONDS > time() ) {
+    // Only send email once
+    if( $last_lockout ) {
       return;
     }
   
