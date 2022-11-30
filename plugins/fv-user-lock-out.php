@@ -17,6 +17,80 @@ class FV_User_Lock_Out {
 
     // Password reset should unlock the account
     add_action( 'password_reset', array( $this, 'password_reset' ), 10, 2 );
+
+    add_filter( 'manage_users_columns', array( $this, 'admin_column' ) );
+    add_filter( 'manage_users_custom_column', array( $this, 'admin_column_content' ), 10, 3 );
+
+    add_action( 'wp_ajax_fv_user_lock_out_unlock', array( $this, 'admin_ajax') );
+  }
+
+  function admin_ajax() {
+    if( !wp_verify_nonce($_POST['nonce'], 'fv_user_lock_out_unlock='.$_POST['user_id']) ) {
+      wp_send_json( array( 'error' => 'Nonce error.' ) );
+    }
+    
+    $this->remove_lock( $_POST['user_id'] );
+
+    wp_send_json( array( 'message' => 'Done, user will be able to log in again.' ) );
+  }
+
+  function admin_column( $columns ) {
+    $columns['fv_user_lock_out'] = "Locked Out?";
+    return $columns;
+  }
+
+  function admin_column_content( $content, $column_name, $user_id ) {
+
+    if( $column_name == 'fv_user_lock_out' && $data = $this->is_user_locked_out( $user_id ) ) {
+      $content = '<div data-fv_user_lock_out_unlock_wrap="'.$user_id.'">';
+      $content .= '<abbr title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account.">Yes</abbr>';
+      $content .= '<div class="row-actions"><a href="#" data-fv_user_lock_out_unlock="'.$user_id.'" data-nonce="'.wp_create_nonce('fv_user_lock_out_unlock='.$user_id).'">Unlock</a></div>';
+      $content .= '</div>';
+
+      add_action( 'admin_footer', array( $this, 'admin_script' ) );
+    }
+
+    return $content;
+  }
+
+  function admin_script() {
+    ?>
+<script>
+jQuery( function($) {
+  $('a[data-fv_user_lock_out_unlock]').on( 'click', function() {
+    var link = $(this),
+      user_id = link.data('fv_user_lock_out_unlock');
+
+    $.post( ajaxurl, {
+      'action': 'fv_user_lock_out_unlock',
+      'nonce': link.data('nonce'),
+      'user_id': user_id
+    }, function( response ) {
+      if( response.error ) {
+        alert( response.error );
+      } else {
+        alert( response.message );
+
+        $('[data-fv_user_lock_out_unlock_wrap='+user_id+']').remove();
+      }
+    });
+  });
+});
+</script>
+    <?php
+  }
+
+  function is_user_locked_out( $user_id ) {
+    $count = get_user_meta( $user_id, '_fv_bad_logins_count', true );
+    $time = get_user_meta( $user_id, '_fv_bad_logins_last', true );
+    if( $count > 20 && $time + DAY_IN_SECONDS > time() ) {
+      return array(
+        'count' => $count,
+        'time' => $time
+      );
+    }
+
+    return false;
   }
 
   function lockout_email( $user ) {
@@ -102,9 +176,7 @@ class FV_User_Lock_Out {
   function prevent_authentication( $user_logged_in, $username, $password) {
     $user = get_user_by( 'login', $username );
     if( $user ) {
-      $count = get_user_meta( $user->ID, '_fv_bad_logins_count', true );
-      $time = get_user_meta( $user->ID, '_fv_bad_logins_last', true );
-      if( $count > 20 && $time + DAY_IN_SECONDS > time() ) {
+      if( $this->is_user_locked_out( $user->ID ) ) {
 
         $this->lockout_email($user);
 
