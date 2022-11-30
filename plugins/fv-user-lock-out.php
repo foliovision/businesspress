@@ -14,6 +14,9 @@ class FV_User_Lock_Out {
 
     // Show unlock confirmation when it succeeds
     add_filter( 'wp_login_errors', array( $this, 'show_unlock_confirmation' ), PHP_INT_MAX, 3 );
+
+    // Password reset should unlock the account
+    add_action( 'password_reset', array( $this, 'password_reset' ), 10, 2 );
   }
 
   function lockout_email( $user ) {
@@ -86,19 +89,14 @@ class FV_User_Lock_Out {
   
     $user_id = $user->ID;
   
-    // Remove block, but backup old values
-    foreach( array(
-      '_fv_bad_logins_last',
-      '_fv_bad_logins_count',
-      'fv_user_lockout_email'
-    ) AS $meta_key ) {
-      $meta_value = get_user_meta( $user_id, $meta_key, true );
-      delete_user_meta( $user_id, $meta_key );
-      update_user_meta( $user_id, $meta_key.'_previous', $meta_value );
-    }
+    $this->remove_lock( $user_id );
   
     wp_redirect( add_query_arg( 'unlocked', true, wp_login_url() ) );
     exit;
+  }
+
+  function password_reset( $user ) {
+    $this->remove_lock( $user->ID );
   }
 
   function prevent_authentication( $user_logged_in, $username, $password) {
@@ -115,6 +113,19 @@ class FV_User_Lock_Out {
     }
 
     return $user_logged_in;
+  }
+
+  // Remove block, but backup old values
+  function remove_lock( $user_id ) {
+    foreach( array(
+      '_fv_bad_logins_last',
+      '_fv_bad_logins_count',
+      'fv_user_lockout_email'
+    ) AS $meta_key ) {
+      $meta_value = get_user_meta( $user_id, $meta_key, true );
+      delete_user_meta( $user_id, $meta_key );
+      update_user_meta( $user_id, $meta_key.'_previous', $meta_value );
+    }
   }
 
   function show_unlock_confirmation( $errors ) {
