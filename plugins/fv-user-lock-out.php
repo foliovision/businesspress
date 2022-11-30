@@ -108,17 +108,17 @@ jQuery( function($) {
     $key = get_password_reset_key( $user );
   
     $message = __( 'Hi %1$s,
-  
-  We have detected too many failed login attempts for your user account. If you had no login issues recently, then there might be automated login attempts targeted towards your user account.
-  
-  Click here to re-enable login: %2$s
-  
-  If you have a simple password it\'s possible that it was compromised. In that case click this link to set a more complex password: %3$s
-  
-  Regards,
-  All at %4$s
-  %5$s' );
-  
+
+We have detected too many failed login attempts for your user account. If you had no login issues recently, then there might be automated login attempts targeted towards your user account.
+
+Click here to re-enable login: %2$s
+
+If you have a simple password it\'s possible that it was compromised. In that case click this link to set a more complex password: %3$s
+
+Regards,
+All at %4$s
+%5$s' );
+
     wp_mail(
       $user->user_email,
       sprintf( __( '[%s] Failed login attempts detected' ), wp_specialchars_decode( get_option( 'blogname' ) ) ),
@@ -175,6 +175,10 @@ jQuery( function($) {
 
   function prevent_authentication( $user_logged_in, $username, $password) {
     $user = get_user_by( 'login', $username );
+    if( !$user ) {
+      $user = get_user_by( 'email', $username );
+    }
+
     if( $user ) {
       if( $this->is_user_locked_out( $user->ID ) ) {
 
@@ -214,7 +218,12 @@ jQuery( function($) {
   }
 
   function wp_login_failed( $username ) {
+
     $user = get_user_by( 'login', $username );
+    if( !$user ) {
+      $user = get_user_by( 'email', $username );
+    }
+
     if( $user ) {
       $count = get_user_meta( $user->ID, '_fv_bad_logins_count', true );
       if( !$count ) {
