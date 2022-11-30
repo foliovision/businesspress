@@ -133,7 +133,7 @@ class FV_User_Lock_Out {
       $errors = new WP_Error();
     }
   
-    if( is_wp_error($errors) ) {
+    if( !empty($_GET['unlocked']) && is_wp_error($errors) ) {
       if( !$errors->has_errors() ) {
         $errors->add( 'unlocked', __( '<strong>Success</strong>: Your user account has been unlocked, you can log in again.' ) );
       }
