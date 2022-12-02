@@ -100,7 +100,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'handle_post') );
     add_filter( 'plugin_action_links', array( $this, 'admin_plugin_action_links' ), 10, 2);
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
-    
+
     // Hide "Welcome" on Dashboard
     add_action( 'welcome_panel', array( $this, 'dashboard_hide_welcome' ), 0 );
 
@@ -459,10 +459,10 @@ class BusinessPress extends BusinessPress_Plugin {
       wp_schedule_event( time(), 'hourly', 'businesspress_cron' );
     }
   }
-  
-  
-  
-  
+
+
+
+
   function dashboard_hide_welcome() {
     if( !$this->check_user_permission() )  {
       remove_action( 'welcome_panel', 'wp_welcome_panel' );
@@ -787,12 +787,23 @@ class BusinessPress extends BusinessPress_Plugin {
   
   function get_disallowed_caps() {
     $aCaps = array();
-    
-    if( empty($this->aOptions['cap_activate']) || !$this->aOptions['cap_activate'] ) $aCaps = array_merge( $aCaps, array('activate_plugins','switch_themes','deactivate_plugins') );
-    if( empty($this->aOptions['cap_update']) || !$this->aOptions['cap_update'] ) $aCaps = array_merge( $aCaps, array('update_plugins','update_themes') );
-    if( empty($this->aOptions['cap_install']) || !$this->aOptions['cap_install'] ) $aCaps = array_merge( $aCaps, array('install_plugins','install_themes','delete_plugins','delete_themes','edit_plugins','edit_themes') );
-    if( empty($this->aOptions['cap_export']) || !$this->aOptions['cap_export'] ) $aCaps = array_merge( $aCaps, array('export') );
-    
+
+    $settings_to_capabilities = array( 
+      'cap_activate' => array('activate_plugins', 'switch_themes', 'deactivate_plugins'),
+      'cap_update' => array('update_plugins', 'update_themes'),
+      'cap_install' => array('install_plugins', 'install_themes', 'delete_plugins', 'delete_themes', 'edit_plugins', 'edit_themes'),
+      'cap_export' => array('export'),
+      'cap_core' => array('update_core', 'view_site_health_checks', 'update_languages')
+    );
+
+    // Disallow different capabilities based on the "Allow other admins to" settings NOT enabled
+    foreach( $settings_to_capabilities AS $setting => $capabilities ) {
+      if( empty($this->aOptions[$setting]) || !$this->aOptions[$setting] ) {
+        $aCaps = array_merge( $aCaps, $capabilities );
+      }
+    }
+
+
     return $aCaps;
   }
   
