@@ -101,6 +101,9 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'plugin_action_links', array( $this, 'admin_plugin_action_links' ), 10, 2);
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
     
+    // Hide "Welcome" on Dashboard
+    add_action( 'welcome_panel', array( $this, 'dashboard_hide_welcome' ), 0 );
+
     /*
      *  Visual WP-Admin tweaks
      */
@@ -457,6 +460,15 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
+  function dashboard_hide_welcome() {
+    if( !$this->check_user_permission() )  {
+      remove_action( 'welcome_panel', 'wp_welcome_panel' );
+    }
+  }
+
+
+
+
   function deactivate() {
     
   }
