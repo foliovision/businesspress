@@ -106,7 +106,10 @@ class BusinessPress extends BusinessPress_Plugin {
 
     // Hide "WordPress Events and News" on dashboard
     add_action( 'wp_dashboard_setup', array( $this, 'dashboard_hide_wordpress_events_and_news' ) );
-    
+
+    // Hide "PHP Update Recommended, if user is doesn't have the full permissions
+    add_action( 'wp_dashboard_setup', array( $this, 'dashboard_hide_php_update_recommended' ) );
+
     /*
      *  Visual WP-Admin tweaks
      */
@@ -457,6 +460,15 @@ class BusinessPress extends BusinessPress_Plugin {
     $timestamp = wp_next_scheduled( 'businesspress_cron' );
     if( $timestamp == false ) {
       wp_schedule_event( time(), 'hourly', 'businesspress_cron' );
+    }
+  }
+
+
+
+
+  function dashboard_hide_php_update_recommended() {
+    if( !$this->check_user_permission() )  {
+      remove_meta_box( 'dashboard_php_nag', get_current_screen(), 'normal' );
     }
   }
 
