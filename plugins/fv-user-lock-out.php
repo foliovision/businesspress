@@ -111,9 +111,9 @@ jQuery( function($) {
 
 We have detected too many failed login attempts for your user account. If you had no login issues recently, then there might be automated login attempts targeted towards your user account.
 
-Click here to re-enable login: %2$s
+Only click this link if you are trying to log in yourself <strong>right now</strong>: <a href="%2$s">Unlock Login</a>
 
-If you have a simple password it\'s possible that it was compromised. In that case click this link to set a more complex password: %3$s
+If you have a simple password it\'s possible that it was compromised. In that case click this link to set a more complex password: <a href="%3$s">Password Reset</a>
 
 Regards,
 All at %4$s
@@ -123,13 +123,14 @@ All at %4$s
       $user->user_email,
       sprintf( __( '[%s] Failed login attempts detected' ), wp_specialchars_decode( get_option( 'blogname' ) ) ),
       sprintf(
-        $message,
+        wpautop( $message ),
         $user->display_name,
-        '<' . network_site_url( "wp-login.php?action=unlock&ukey=$key&login=" . rawurlencode( $user->user_login ), 'login' ) . ">",
-        '<' . network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' ) . ">",
+        network_site_url( "wp-login.php?action=unlock&ukey=$key&login=" . rawurlencode( $user->user_login ), 'login' ),
+        network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' ),
         wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ),
         home_url()
-      )
+      ),
+      array('Content-Type: text/html; charset=UTF-8')
     );
   }
 
