@@ -104,6 +104,9 @@ class BusinessPress extends BusinessPress_Plugin {
     // Hide "Welcome" on Dashboard
     add_action( 'welcome_panel', array( $this, 'dashboard_hide_welcome' ), 0 );
 
+    // Hide "WordPress Events and News" on dashboard
+    add_action( 'wp_dashboard_setup', array( $this, 'dashboard_hide_wordpress_events_and_news' ) );
+    
     /*
      *  Visual WP-Admin tweaks
      */
@@ -463,6 +466,15 @@ class BusinessPress extends BusinessPress_Plugin {
   function dashboard_hide_welcome() {
     if( !$this->check_user_permission() )  {
       remove_action( 'welcome_panel', 'wp_welcome_panel' );
+    }
+  }
+
+
+
+
+  function dashboard_hide_wordpress_events_and_news() {
+    if( !$this->check_user_permission() )  {
+      remove_meta_box( 'dashboard_primary', get_current_screen(), 'side' );
     }
   }
 
