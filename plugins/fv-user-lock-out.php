@@ -99,7 +99,7 @@ jQuery( function($) {
     $last_lockout = get_user_meta( $user_id, 'fv_user_lockout_email', true );
   
     // Only send email once per week
-    if( $last_lockout && ( strtotime($last_lockout) + WEEK_IN_SECONDS ) > time() ) {
+    if( $last_lockout && ( $last_lockout + WEEK_IN_SECONDS ) > time() ) {
       return;
     }
   
