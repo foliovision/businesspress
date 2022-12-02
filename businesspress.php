@@ -181,6 +181,8 @@ class BusinessPress extends BusinessPress_Plugin {
     // WooCommerce message "Connect your store to WooCommerce.com to receive extensions updates and support."
     add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );
 
+    add_filter( 'wp_mail_from_name', array( $this, 'wp_mail_from' ), PHP_INT_MAX );
+
     /*
      *  Email blocking
      */
@@ -2034,6 +2036,13 @@ JSR;
       $errors->errors['confirm'][0] .= "<br /><br />".__("Please check your Junk or Spam folder if the email doesn't seem to arrive in 10 minutes.",'businesspress');
     }
     return $errors;
+  }
+
+  function wp_mail_from( $from ) {
+    if( $from == 'WordPress' ) {
+      $from = get_bloginfo();
+    }
+    return $from;
   }
 
   function wp_mail_block_stage_1( $args ) {
