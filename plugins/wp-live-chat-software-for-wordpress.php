@@ -13,6 +13,9 @@ add_action( 'admin_notices', function() {
       $html = ob_get_clean();
       $html = preg_replace( '~<div id="lc-notice-container"[\s\S]*?livechatinc.com[\s\S]*?</script>~', '<!--debug BusinessPress removed wp-live-chat-software-for-wordpress notice from here--> ', $html );
       echo $html;
+
+      // hide the other notice which they show: "Action required - connect LiveChat"
+      echo "<style>#lc-connect-notice { display: none; }</style>";
     
     }, PHP_INT_MAX );
 
