@@ -1043,6 +1043,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
 
+      $this->aOptions['fix-new-user-nicenames'] = isset($_POST['businesspress-fix-new-user-nicenames']) && $_POST['businesspress-fix-new-user-nicenames'] == 1 ? true : false;
+
       $this->aOptions['disable-user-login-scanning'] = isset($_POST['businesspress-disable-user-login-scanning']) && $_POST['businesspress-disable-user-login-scanning'] == 1 ? true : false;
 
       $this->aOptions['login-lockout'] = isset($_POST['businesspress-login-lockout']) && $_POST['businesspress-login-lockout'] == 1 ? true : false;
@@ -1240,6 +1242,10 @@ JSH;
     if( $this->get_setting('login-lockout') ) {
       include( dirname(__FILE__).'/plugins/fv-user-lock-out.php' );
     }
+
+    if( $this->get_setting('fix-new-user-nicenames') ) {
+      include( dirname(__FILE__).'/plugins/fv-fix-new-user-nicenames.php' );
+    }    
   }
   
   

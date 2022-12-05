@@ -598,6 +598,12 @@ class BusinessPress_Settings {
                   </tr>
                 <?php
               }
+
+              $this->admin_show_setting(
+                'businesspress-fix-new-user-nicenames',
+                'fix-new-user-nicenames',
+                '',
+                __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
             }
       ?>
 
