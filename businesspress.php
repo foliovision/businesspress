@@ -1246,6 +1246,8 @@ JSH;
     if( $this->get_setting('fix-new-user-nicenames') ) {
       include( dirname(__FILE__).'/plugins/fv-fix-new-user-nicenames.php' );
     }    
+
+    include( dirname(__FILE__).'/plugins/fv-simpler-login-errors.php' );
   }
   
   
