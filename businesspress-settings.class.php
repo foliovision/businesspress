@@ -428,7 +428,14 @@ class BusinessPress_Settings {
         'login-lockout',
         'Login Lockout',
         __('If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email let user re-enable login for his account.', 'businesspress' ) );
-        ?>
+
+      $this->admin_show_setting(
+        'businesspress-login-email-address',
+        'login-email-address',
+        'Require Email Address for Login',
+        __('This is useful if you get too many bot login attempts and your account gets locked out. The bots can find out what is the user login, but not the user email address. So repeated bot logins using user login will not count for the Login Lockout.', 'businesspress' ) );
+
+      ?>
     </table>
     <?php
   }

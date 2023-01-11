@@ -10,7 +10,7 @@ class FV_User_Lock_Out {
     add_action( 'login_form_unlock', array( $this, 'login_form_unlock' ) );
 
     // Record number of bad login attempts and last time of bad login attempt
-    add_action( 'wp_login_failed', array( $this, 'wp_login_failed' ) );
+    add_action( 'wp_login_failed', array( $this, 'wp_login_failed' ), 10, 2 );
 
     // Show unlock confirmation when it succeeds
     add_filter( 'wp_login_errors', array( $this, 'show_unlock_confirmation' ), PHP_INT_MAX, 3 );
@@ -218,7 +218,12 @@ All at %4$s
     return $errors;
   }
 
-  function wp_login_failed( $username ) {
+  function wp_login_failed( $username, $error ) {
+
+    // Ignore if using "Require Email Address for Login"
+    if( $error->get_error_code() == 'email_required' ) {
+      return;
+    }
 
     $user = get_user_by( 'login', $username );
     if( !$user ) {

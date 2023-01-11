@@ -1049,6 +1049,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['login-lockout'] = isset($_POST['businesspress-login-lockout']) && $_POST['businesspress-login-lockout'] == 1 ? true : false;
 
+      $this->aOptions['login-email-address'] = isset($_POST['businesspress-login-email-address']) && $_POST['businesspress-login-email-address'] == 1 ? true : false;
+
       if( is_multisite() ) {
         update_site_option( 'businesspress', $this->aOptions );
       } else {
@@ -1245,7 +1247,11 @@ JSH;
 
     if( $this->get_setting('fix-new-user-nicenames') ) {
       include( dirname(__FILE__).'/plugins/fv-fix-new-user-nicenames.php' );
-    }    
+    }
+
+    if( $this->get_setting('login-email-address') ) {
+      include( dirname(__FILE__).'/plugins/fv-require-email-address-for-login.php' );
+    }
 
     include( dirname(__FILE__).'/plugins/fv-simpler-login-errors.php' );
   }
