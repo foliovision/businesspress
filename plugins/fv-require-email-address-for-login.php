@@ -30,7 +30,20 @@ function fv_profile_builder_pro_login_with_email() {
   if( !empty($wppb_generalSettings['loginWith']) && in_array( $wppb_generalSettings['loginWith'], array( 'email', 'usernameemail' ) ) ) {
     // Is it using email? Then skin our check
     if( !empty($_POST['log']) && is_email( trim($_POST['log']) ) ) {
-      remove_filter( 'authenticate', 'fv_require_email_address_for_login', PHP_INT_MAX, 2 );    
+      remove_filter( 'authenticate', 'fv_require_email_address_for_login', PHP_INT_MAX, 2 ); 
     }
   }
 }
+
+/*
+ * Restrict Content Pro support
+ */
+add_action( 'rcp_login_form_errors', 'fv_rcp_require_email' );
+
+function fv_rcp_require_email( $post ) {
+  remove_filter( 'authenticate', 'fv_require_email_address_for_login', PHP_INT_MAX, 2 );
+
+  if( !empty($_POST['rcp_user_login']) && !is_email( $_POST['rcp_user_login'] ) ) {
+    rcp_errors()->add( 'email_required', __( 'Please use your e-mail address as the login user name.' ), 'login' );
+  }
+} 
