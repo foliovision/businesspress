@@ -42,6 +42,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
   var $aCoreUpdatesDismiss = array();
 
+  var $aOptions = array();
+
   public function __construct() {
     if( !function_exists('add_action') ) {
       exit( 0 );
