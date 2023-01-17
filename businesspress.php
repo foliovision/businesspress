@@ -1243,6 +1243,8 @@ JSH;
 
     include( dirname(__FILE__).'/plugins/wp-live-chat-software-for-wordpress.php' );
 
+    include( dirname(__FILE__).'/plugins/fv-comment-cookies.php' );
+
     if( $this->get_setting('login-lockout') ) {
       include( dirname(__FILE__).'/plugins/fv-user-lock-out.php' );
     }
