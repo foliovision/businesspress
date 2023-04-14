@@ -141,8 +141,8 @@ class BusinessPress extends BusinessPress_Plugin {
      *  Login protection
      */
     
-    add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
-    add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
+    add_action( 'template_redirect', array( $this, 'fail2ban_404' ) );
+    add_action( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
@@ -773,9 +773,11 @@ class BusinessPress extends BusinessPress_Plugin {
 
 
 
-  function fail2ban_xmlrpc() {
+  function fail2ban_xmlrpc( $error ) {
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC authentication failure from '.$this->get_remote_addr() );
+
+    return $error;
   }
 
 
@@ -786,6 +788,8 @@ class BusinessPress extends BusinessPress_Plugin {
     
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban pingback error - XML-RPC Pingback error '.$ixr_error->code.' generated from '.$this->get_remote_addr() );
+
+    return $ixr_error;
   }
   
   
