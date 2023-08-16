@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 6.0
+Tested up to: 6.3
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -307,3 +307,37 @@ An answer to that question.
 4. Branding options
 
 5. The improved Updates screen
+
+== Testing ==
+
+1. Install the plugin
+
+1.1. Go to Settings -> BusinessPress
+
+1.2. Enable restrictions for your email address or your email domain
+
+1.3. Second admin user should not be able to update plugins, themes or WordPress core
+
+2. Go to Settings -> BusinessPress -> Branding and set theme for user profile to impose admin color theme
+
+2.1. All users should have the same admin color theme
+
+3. Go to Settings -> BusinessPress -> Preferences and enable "Clickjacking Protection"
+
+3.1. The .htaccess file should be modified
+
+4. Go to Settings -> BusinessPress -> Preferences and enable "Set Featured Images Automatically"
+
+4.1. Create a new post and add an image to the post
+
+4.2. The image should be set as featured image
+
+5. Go to Settings -> BusinessPress -> Preferences and enable "Hide Admin Notices"
+
+5.1. All admin notices should be moved to Dashboard -> Notices
+
+6. Go to Settings -> BusinessPress -> Preferences and enable "Require Email Address for Login"
+
+6.1. The login form should now require email address instead of username
+
+7. If there are more than 20 login attempts, the user wont be able to login and will receive email with instructions how to unlock the account
