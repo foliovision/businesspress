@@ -328,6 +328,7 @@ class BusinessPress_Notices {
 
         // User Switching
         'switch_to_olduser',
+        'Switched back to ',
         
         // WooCommerce
         'order status changed',
