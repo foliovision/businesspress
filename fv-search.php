@@ -93,6 +93,7 @@ class FV_Search {
           $replace_to = array( 'sample-shortcode-opener-549583490i0heg', 'sample-shortcode-closing-549583490i0heg' );
           
           $process_html = str_replace( $replace_from, $replace_to, $post->post_content );
+          $process_html = preg_replace( '~<table[\s\S]*?</table>~', '', $process_html );
           $process_html = strip_shortcodes( strip_tags( $process_html ) );
           $process_html = str_replace( $replace_to, $replace_from, $process_html );
           
