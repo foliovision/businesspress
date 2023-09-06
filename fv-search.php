@@ -111,12 +111,12 @@ class FV_Search {
                 
                 // if the next item is a dot, we consider the match a sentence
                 if( isset($aSentences[$k+1]) && $aSentences[$k+1] == '.' ) {                  
-                  $aExcerpt['sentence-'.$sKeyword] = $sSentence.$aSentences[$k+1].' ';
+                  $aExcerpt['sentence-'.$sKeyword] = $sSentence. wp_trim_words( $aSentences[$k+1], 20, '&hellip;' ) .' ';
                   unset($aSentences[$k+1]);
                   break;
                 } else {
                   $iCount++;
-                  $aExcerpt['phrase-'.$sKeyword.'-'.$iCount] = $sSentence;
+                  $aExcerpt['phrase-'.$sKeyword.'-'.$iCount] = wp_trim_words( $sSentence, 20, '&hellip;' );
                 }
                 
               }  
