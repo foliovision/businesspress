@@ -97,7 +97,7 @@ class FV_Search {
           $process_html = strip_shortcodes( strip_tags( $process_html ) );
           $process_html = str_replace( $replace_to, $replace_from, $process_html );
           
-          $aSentences = array_map( 'trim', preg_split( '~(\. |\n)~', $process_html, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );
+          $aSentences = array_map( 'trim', preg_split( '~(\.\B|\n)~', $process_html, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );
           
           // Get sentences and phrases matching each keyword
           $iCount = 0;
