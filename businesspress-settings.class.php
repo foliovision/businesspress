@@ -669,6 +669,7 @@ class BusinessPress_Settings {
             }
           ?> 
           </select>
+          <label for="admin-login-duration"><?php _e('Using "Remember Me" checkbox when logging in will only remember the login for 2 weeks if you log in as admin. You can extend that period here.', 'businesspress' ); ?></label>
         </td>
       </tr>
 
