@@ -2,6 +2,8 @@
 
 class BusinessPress_Settings {
   
+  public $aOptions = array();
+
   public function __construct() {
     add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu',  array( $this, 'menu' ) );
   }
@@ -9,7 +11,7 @@ class BusinessPress_Settings {
   
   
   
-  function admin_show_setting( $name, $option_key, $title, $help = false, $type = 'checkbox', $class = false ) {
+  function admin_show_setting( $name, $option_key, $title, $help = false, $type = 'checkbox', $class = false, $options = array() ) {
     global $businesspress;
     $name = esc_attr($name);
     $class = 'businesspress-setting-'.$name.' ' .$class;
@@ -642,6 +644,34 @@ class BusinessPress_Settings {
                     __('XML-RPC', 'businesspress').' (<a href="#" class="xml-rpc-obscure">'.__('Protect', 'businesspress').'</a>)' );
       ?>
       
+      <tr>
+        <th>
+          <p><label>Admin login duration</label></p>
+        </th>
+        <td>
+          <select id="admin-login-duration" name="admin-login-duration">
+          <?php 
+            $admin_login_duration = $businesspress->get_setting('admin-login-duration');
+
+            foreach(
+              array(
+                '2 weeks' => '2_weeks',
+                '2 months' => '2_months',
+                '6 months' => '6_months',
+              ) as
+              $sLabel => $sValue
+            ) {
+              $sSelected = '';
+              if( strcmp($admin_login_duration, $sValue) == 0 ) {
+                $sSelected = ' selected="selected"';
+              }
+              echo '<option value="'.$sValue.'"'.$sSelected.'>'.$sLabel.'</option>';
+            }
+          ?> 
+          </select>
+        </td>
+      </tr>
+
       <?php
       $token = rand();
       $this->admin_show_setting(
@@ -659,7 +689,7 @@ class BusinessPress_Settings {
       
 
         
-    </table>           
+    </table>
     <?php
   }
 

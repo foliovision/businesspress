@@ -102,6 +102,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'handle_post') );
     add_filter( 'plugin_action_links', array( $this, 'admin_plugin_action_links' ), 10, 2);
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
+    add_filter( 'auth_cookie_expiration', array( $this, 'admin_login_duration' ), 10, 3 );
 
     // Hide "Welcome" on Dashboard
     add_action( 'welcome_panel', array( $this, 'dashboard_hide_welcome' ), 0 );
@@ -440,6 +441,22 @@ class BusinessPress extends BusinessPress_Plugin {
     die('1');
   }
 
+
+
+
+  function admin_login_duration( $expiration, $user_id, $remember) {
+    $duration = $this->get_setting('admin-login-duration');
+
+    if( strcmp($duration, '2_weeks') == 0 ) {
+      $expiration = 2*7*24*60*60;
+    } else if ( strcmp($duration, '2_months') == 0 ) {
+      $expiration = 2*30*24*60*60;
+    } else if ( strcmp($duration, '6_monts') == 0 ) {
+      $expiration = 6*30*24*60*60;
+    }
+
+    return $expiration;
+  }
   
   
   
@@ -953,6 +970,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'clickjacking-protection' ) return true;
     if( $key == 'disable-user-login-scanning' ) return true;
     if( $key == 'login-lockout' ) return true;
+    if( $key == 'admin-login-duration') return '2_weeks';
 
     return false;
   }
@@ -999,7 +1017,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
 
-  function handle_post() {    
+  function handle_post() {
     if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
       
       $this->aOptions['restrictions_enabled'] = isset($_POST['restrictions_enabled']) && $_POST['restrictions_enabled'] == 1 ? true : false;
@@ -1012,6 +1030,8 @@ class BusinessPress extends BusinessPress_Plugin {
         $this->aOptions['domain'] = '';  
       }
       
+      $this->aOptions['admin-login-duration'] = trim($_POST['admin-login-duration']);
+
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
       $this->aOptions['autoupdates_vcs'] = trim($_POST['autoupdates_vcs']);
