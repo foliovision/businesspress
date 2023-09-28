@@ -52,6 +52,20 @@ function apt_check_required_transition($new_status='', $old_status='', $post='')
  */
 function apt_publish_post($post_id)
 {
+
+  /**
+   * Only set featured image if user is actually editing a post.
+   * 
+   * This excludes Quick Edit and Bulk actions.
+   */
+  global $wp;
+  $is_classic_editor_save = !empty($_POST['action']) && $_POST['action'] === 'editpost' && !empty($_POST['post_ID']) && $_POST['post_ID'] == $post_id;
+  $is_gutenberg_post_save = !empty($wp->query_vars['rest_route']) && $wp->query_vars['rest_route'] == '/wp/v2/posts/'.$post_id;
+
+  if ( ! $is_classic_editor_save && ! $is_gutenberg_post_save ) {
+    return;
+  }
+
   global $wpdb;
   
   // First check whether Post Thumbnail is already set for this post.
