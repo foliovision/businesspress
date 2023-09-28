@@ -447,16 +447,18 @@ class BusinessPress extends BusinessPress_Plugin {
   function admin_login_duration( $expiration, $user_id, $remember) {
     $duration = $this->get_setting('admin-login-duration');
 
+    // check if remember is set, if not, return the default expiration
     if( !$remember ) {
       return $expiration;
     }
 
+    // get new expiration based on the setting
     if( strcmp($duration, '2_weeks') == 0 ) {
-      $expiration = 2*7*24*60*60;
+      $expiration = 2 * WEEK_IN_SECONDS;
     } else if ( strcmp($duration, '2_months') == 0 ) {
-      $expiration = 2*30*24*60*60;
-    } else if ( strcmp($duration, '6_monts') == 0 ) {
-      $expiration = 6*30*24*60*60;
+      $expiration = 2 * MONTH_IN_SECONDS;
+    } else if ( strcmp($duration, '6_months') == 0 ) {
+      $expiration = 6 * MONTH_IN_SECONDS;
     }
 
     return $expiration;
