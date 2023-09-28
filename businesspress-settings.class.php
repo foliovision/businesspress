@@ -655,7 +655,7 @@ class BusinessPress_Settings {
 
             foreach(
               array(
-                '2 weeks' => '2_weeks',
+                '2 weeks' => '2_weeks (default)', // two weeks is default by WP
                 '2 months' => '2_months',
                 '6 months' => '6_months',
               ) as
