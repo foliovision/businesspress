@@ -102,6 +102,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_init', array( $this, 'handle_post') );
     add_filter( 'plugin_action_links', array( $this, 'admin_plugin_action_links' ), 10, 2);
     add_action( 'wp_ajax_businesspress_contact_admin', array( $this, 'contact_admin') );
+    add_filter( 'auth_cookie_expiration', array( $this, 'admin_login_duration' ), 10, 3 );
 
     // Hide "Welcome" on Dashboard
     add_action( 'welcome_panel', array( $this, 'dashboard_hide_welcome' ), 0 );
@@ -141,8 +142,8 @@ class BusinessPress extends BusinessPress_Plugin {
      *  Login protection
      */
     
-    add_filter( 'template_redirect', array( $this, 'fail2ban_404' ) );
-    add_filter( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
+    add_action( 'template_redirect', array( $this, 'fail2ban_404' ) );
+    add_action( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
     add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
@@ -214,6 +215,14 @@ class BusinessPress extends BusinessPress_Plugin {
      * Error reporting
      */
     add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
+
+    /**
+     * User login sessions
+     */
+
+    // Show on wp-admin user profile screen
+    add_action( 'show_user_profile', array( $this, 'user_session_tokens' ) );
+    add_action( 'edit_user_profile', array( $this, 'user_session_tokens' ) );
 
     parent::__construct();
     
@@ -432,6 +441,28 @@ class BusinessPress extends BusinessPress_Plugin {
     die('1');
   }
 
+
+
+
+  function admin_login_duration( $expiration, $user_id, $remember) {
+    $duration = $this->get_setting('login-duration');
+
+    // check if remember is set, if not, return the default expiration
+    if( !$remember ) {
+      return $expiration;
+    }
+
+    // get new expiration based on the setting
+    if( strcmp($duration, '2_weeks') == 0 ) {
+      return $expiration; // 2 weeks is the default
+    } else if ( strcmp($duration, '2_months') == 0 ) {
+      $expiration = 2 * MONTH_IN_SECONDS;
+    } else if ( strcmp($duration, '6_months') == 0 ) {
+      $expiration = 6 * MONTH_IN_SECONDS;
+    }
+
+    return $expiration;
+  }
   
   
   
@@ -654,8 +685,8 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
-  function fail2ban_404( $username ) {
-    if( preg_match( '~\.(jpg|jpeg|png|gif|css|js|vtt)~i', $_SERVER['REQUEST_URI'] ) ) return;
+  function fail2ban_404() {
+    if( preg_match( '~\.(bmp|css|eot|gif|ico|jpe|jpeg|jpg|js|m3u8|mp3|mp4|ogg|pdf|png|svg|tiff|ts|ttf|txt|vtt|webm|webp|woff|woff2)~i', $_SERVER['REQUEST_URI'] ) ) return;
     
     if( $_SERVER['REQUEST_URI'] == '/apple-app-site-association' || $_SERVER['REQUEST_URI'] == '/.well-known/apple-app-site-association' ) return;
 
@@ -765,9 +796,11 @@ class BusinessPress extends BusinessPress_Plugin {
 
 
 
-  function fail2ban_xmlrpc() {
+  function fail2ban_xmlrpc( $error ) {
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - XML-RPC authentication failure from '.$this->get_remote_addr() );
+
+    return $error;
   }
 
 
@@ -778,6 +811,8 @@ class BusinessPress extends BusinessPress_Plugin {
     
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban pingback error - XML-RPC Pingback error '.$ixr_error->code.' generated from '.$this->get_remote_addr() );
+
+    return $ixr_error;
   }
   
   
@@ -941,6 +976,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'clickjacking-protection' ) return true;
     if( $key == 'disable-user-login-scanning' ) return true;
     if( $key == 'login-lockout' ) return true;
+    if( $key == 'login-duration') return '2_weeks';
 
     return false;
   }
@@ -987,7 +1023,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
 
-  function handle_post() {    
+  function handle_post() {
     if( isset($_POST['businesspress_settings_nonce']) && check_admin_referer( 'businesspress_settings_nonce', 'businesspress_settings_nonce' ) ) {
       
       $this->aOptions['restrictions_enabled'] = isset($_POST['restrictions_enabled']) && $_POST['restrictions_enabled'] == 1 ? true : false;
@@ -1000,6 +1036,8 @@ class BusinessPress extends BusinessPress_Plugin {
         $this->aOptions['domain'] = '';  
       }
       
+      $this->aOptions['login-duration'] = trim($_POST['login-duration']);
+
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       
       $this->aOptions['autoupdates_vcs'] = trim($_POST['autoupdates_vcs']);
@@ -1256,6 +1294,10 @@ JSH;
     }
 
     include( dirname(__FILE__).'/plugins/fv-simpler-login-errors.php' );
+
+    if( get_option( 'surge_installed' ) ) {
+      include( dirname(__FILE__).'/plugins/surge-cache-purge.php' );
+    }
   }
   
   
@@ -2046,6 +2088,57 @@ JSR;
     
   }
   
+  function user_session_tokens( $user ) {
+    if ( !current_user_can( 'edit_users', $user->ID ) ) {
+      return;
+    }
+
+    ?>
+    <h3 id="login-sessions"><?php esc_html_e( 'Login Sessions', 'businesspress' ); ?></h3>
+    <?php
+
+    $session_tokens = get_user_meta( $user->ID, 'session_tokens', true );
+
+    $active_tokens = array_filter( $session_tokens, function( $item ) {
+      return $item['expiration'] > time();
+    } );
+
+    $expired_tokens = array_filter( $session_tokens, function( $item ) {
+      return $item['expiration'] <= time();
+    } );
+
+    if ( $session_tokens ) : ?>
+      <p><span class="description"><?php printf( __( 'Found %d active and %d expired login sessions.', 'genesis' ), count( $active_tokens ), count( $expired_tokens ) ); ?></span></p>
+
+      <table class="widefat">
+        <thead>
+          <tr>
+            <td>Login Time</td>
+            <td>Expiration Time</td>
+            <td>IP Address</td>
+            <td>User Agent</td>
+          </tr>
+        </thead>
+        <?php foreach( array(
+          $active_tokens,
+          $expired_tokens
+        ) as $tokens ) : ?>
+          <?php foreach ( $tokens as $k => $v ) : ?>
+            <tr>
+              <td><abbr title="<?php echo date( 'r', $v['login'] ); ?>"><?php echo date( 'Y-m-d', $v['login'] ); ?></abbr></td>
+              <td style="background: <?php echo $v['expiration'] > time() ? '#bfb' : '#fbb'; ?>"><abbr title="<?php echo date( 'r', $v['expiration'] ); ?>"><?php echo date( 'Y-m-d', $v['expiration'] ); ?></abbr></td>
+              <td><?php echo $v['ip']; ?></td>
+              <td><?php echo $v['ua']; ?></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endforeach; ?>
+      </table>
+
+    <?php else : ?>
+      <p><span class="description"><?php esc_html_e( 'No login sessions found.', 'genesis' ); ?></span></p>
+    <?php endif;
+
+  }
   
   function wp_login_errors( $errors ) {
     if( isset($_GET['checkemail']) && $_GET['checkemail'] == 'confirm' && isset($errors->errors) && isset($errors->errors['confirm']) && isset($errors->errors['confirm'][0]) ) {

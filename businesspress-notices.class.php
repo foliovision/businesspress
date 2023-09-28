@@ -328,6 +328,7 @@ class BusinessPress_Notices {
 
         // User Switching
         'switch_to_olduser',
+        'Switched back to ',
         
         // WooCommerce
         'order status changed',
@@ -345,6 +346,7 @@ class BusinessPress_Notices {
         'Critical CSS generation',
         'Post cache cleared.',
         'Cache cleared.',
+        'Cache purge', // fv-wp-rocket-purging.php
         'Preload: ',
         'Preload complete: ',
         'One or more plugins have been enabled or disabled',
