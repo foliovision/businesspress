@@ -445,7 +445,7 @@ class BusinessPress extends BusinessPress_Plugin {
 
 
   function admin_login_duration( $expiration, $user_id, $remember) {
-    $duration = $this->get_setting('admin-login-duration');
+    $duration = $this->get_setting('login-duration');
 
     // check if remember is set, if not, return the default expiration
     if( !$remember ) {
@@ -976,7 +976,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'clickjacking-protection' ) return true;
     if( $key == 'disable-user-login-scanning' ) return true;
     if( $key == 'login-lockout' ) return true;
-    if( $key == 'admin-login-duration') return '2_weeks';
+    if( $key == 'login-duration') return '2_weeks';
 
     return false;
   }
@@ -1036,7 +1036,7 @@ class BusinessPress extends BusinessPress_Plugin {
         $this->aOptions['domain'] = '';  
       }
       
-      $this->aOptions['admin-login-duration'] = trim($_POST['admin-login-duration']);
+      $this->aOptions['login-duration'] = trim($_POST['login-duration']);
 
       $this->aOptions['core_auto_updates'] = trim($_POST['autoupgrades']);
       

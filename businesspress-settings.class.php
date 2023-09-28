@@ -646,12 +646,12 @@ class BusinessPress_Settings {
       
       <tr>
         <th>
-          <p><label>Admin login duration</label></p>
+          <p><label>Login duration</label></p>
         </th>
         <td>
-          <select id="admin-login-duration" name="admin-login-duration">
+          <select id="login-duration" name="login-duration">
           <?php 
-            $admin_login_duration = $businesspress->get_setting('admin-login-duration');
+            $admin_login_duration = $businesspress->get_setting('login-duration');
 
             foreach(
               array(
@@ -669,7 +669,7 @@ class BusinessPress_Settings {
             }
           ?> 
           </select>
-          <label for="admin-login-duration"><?php _e('Using "Remember Me" checkbox when logging in will only remember the login for 2 weeks if you log in as admin. You can extend that period here.', 'businesspress' ); ?></label>
+          <label for="login-duration"><?php _e('Using "Remember Me" checkbox when logging in will only remember the login for 2 weeks. You can extend that period here.', 'businesspress' ); ?></label>
         </td>
       </tr>
 
