@@ -454,7 +454,7 @@ class BusinessPress extends BusinessPress_Plugin {
 
     // get new expiration based on the setting
     if( strcmp($duration, '2_weeks') == 0 ) {
-      $expiration = 2 * WEEK_IN_SECONDS;
+      return $expiration; // 2 weeks is the default
     } else if ( strcmp($duration, '2_months') == 0 ) {
       $expiration = 2 * MONTH_IN_SECONDS;
     } else if ( strcmp($duration, '6_months') == 0 ) {
