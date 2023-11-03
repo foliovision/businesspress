@@ -289,6 +289,7 @@ class BusinessPress extends BusinessPress_Plugin {
       #adminmenu .toplevel_page_yasr_settings_page .update-plugins.fs-trial { display: none }
       #wp-admin-bar-searchwp { display: none !important }
       .searchwp-settings-header-nav ul li a.searchwp-settings-nav-tab-support > span > span { display: none !important }
+      #xyz-ihs-premium, .xyz_ihs_social_media, .xyz_ihs_sugession, .xyz_ihs_new_subscribe, .xyz_ihs_inmotion, .xyz_our_plugins_new, .xyz_poweredBy { display: none }
     </style>
     <?php
   }
