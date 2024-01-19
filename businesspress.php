@@ -2191,7 +2191,7 @@ JSR;
   function bpress_login_check() {
     $.post( '<?php echo admin_url('admin-ajax.php'); ?>?bpress_login_check', { action: 'bpress_login_check' }, function(response) {
       if( response ) {
-        location.href = '<?php echo site_url('wp-login.php') ?>';
+        location.href = '<?php echo add_query_arg( 'redirect_to', sanitize_url( $_SERVER['REQUEST_URI'] ), site_url('wp-login.php') ); ?>';
       }
     });
   }
