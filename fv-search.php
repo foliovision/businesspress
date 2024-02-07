@@ -96,8 +96,11 @@ class FV_Search {
           $process_html = preg_replace( '~<table[\s\S]*?</table>~', '', $process_html );
           $process_html = strip_shortcodes( strip_tags( $process_html ) );
           $process_html = str_replace( $replace_to, $replace_from, $process_html );
+
+          // Remove UTF-8 non-breaking spaces: https://stackoverflow.com/questions/12837682/non-breaking-utf-8-0xc2a0-space-and-preg-replace-strange-behaviour
+          $process_html = hex2bin( str_replace('c2a0', '20', bin2hex( $process_html ) ) );
           
-          $aSentences = array_map( 'trim', preg_split( '~(\.\B|\n)~', $process_html, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );
+          $aSentences = array_map( 'trim', preg_split( '~(\.\s+|\.&nbsp;|\.&#0160;|\n)~', $process_html, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE ) );
           
           // Get sentences and phrases matching each keyword
           $iCount = 0;
