@@ -182,6 +182,16 @@ class FV_Search {
       }
       
       if( $this->iSearch_max_num_pages > 1 ) {
+        $html .= '<div class="businesspress-search-paging">' . paginate_links( array (
+          'total'       => $this->iSearch_max_num_pages,
+          'current'     => max(1, get_query_var('paged')),
+          'format'      => '?paged=%#%',
+          'show_all'    => false,
+          'prev_next'   => true,
+          'prev_text'   => __('&laquo; Prev'),
+          'next_text'   => __('Next &raquo;')
+        ) ) .'</div>';
+
         $html .= "<!--businesspress fv search paging-->";
       }
       
