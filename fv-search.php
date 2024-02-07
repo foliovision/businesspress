@@ -10,12 +10,17 @@ class FV_Search {
   
   var $aSearchResults = false;
 
+  var $iSearch_max_num_pages = 0;
+
   function __construct() {
     if( is_admin() ) return;
     
     add_action( 'template_redirect', array($this,'template_redirect') );  //  this is where fake page is created, in the_posts it wasn't working so well, it was too late
     add_filter( 'the_content', array($this,'the_content') );  //  show the results here
-    
+
+    // Append pagination to the content as last thing to make sure it's not affected by filters
+    add_filter( 'the_content', array( $this, 'paging' ), PHP_INT_MAX );
+
     add_action( 'pre_get_posts', array($this,'posts_per_page') );
   }
   
@@ -184,20 +189,6 @@ class FV_Search {
         
       }
       
-      if( $this->iSearch_max_num_pages > 1 ) {
-        $html .= '<div class="businesspress-search-paging">' . paginate_links( array (
-          'total'       => $this->iSearch_max_num_pages,
-          'current'     => max(1, get_query_var('paged')),
-          'format'      => '?paged=%#%',
-          'show_all'    => false,
-          'prev_next'   => true,
-          'prev_text'   => __('&laquo; Prev'),
-          'next_text'   => __('Next &raquo;')
-        ) ) .'</div>';
-
-        $html .= "<!--businesspress fv search paging-->";
-      }
-      
     } else {
       $html .= '<div class="businesspress-search-no-result"><p>'.__('Your search did not match any documents.','businesspress').'</p>';
       $html .= '<p>'.__('Suggestions:','businesspress').'</p>';
@@ -210,8 +201,40 @@ class FV_Search {
     $post = $tmp_post;
     return $html;
   }
-  
-  
+
+  function paging( $html ) {
+
+    global $blog_id;
+    if ( 5 != $blog_id || wp_is_mobile() ) {
+      return $html;
+    }
+
+    // No search results present?
+    if( stripos( $html, '<div class="businesspress-search-result">' ) === false) {
+      return $html;
+    }
+
+    if( $this->iSearch_max_num_pages > 1 ) {
+      $html .= '<div class="businesspress-search-paging">' . paginate_links( array (
+        'total'       => $this->iSearch_max_num_pages,
+        'current'     => max(1, get_query_var('paged')),
+        'format'      => '?paged=%#%',
+        'show_all'    => false,
+        'prev_next'   => true,
+        'prev_text'   => __('&laquo; Prev'),
+        'next_text'   => __('Next &raquo;')
+      ) ) .'</div>';
+
+      // Not working
+      remove_action( 'genesis_after_endwhile', 'genesis_posts_nav' );
+
+      // Hotfix
+      $html .= "<style>.archive-pagination.pagination { display: none; }</style>\n";
+    }
+
+    return $html;
+  }
+
   function posts_per_page( $query ) {
     if( $query->is_main_query() && !empty($query->query_vars['s']) ) {
       $query->set( 'posts_per_page', 100 );
