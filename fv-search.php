@@ -239,7 +239,7 @@ class FV_Search {
 
   function posts_per_page( $query ) {
     if( $query->is_main_query() && !empty($query->query_vars['s']) ) {
-      $query->set( 'posts_per_page', 100 );
+      $query->set( 'posts_per_page', 25 );
     }
   }  
   
