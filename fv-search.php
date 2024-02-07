@@ -22,6 +22,8 @@ class FV_Search {
     add_filter( 'the_content', array( $this, 'paging' ), PHP_INT_MAX );
 
     add_action( 'pre_get_posts', array($this,'posts_per_page') );
+
+    add_filter( 'swiftype_search_params', array( $this, 'swiftype_search_params_filter' ) );
   }
   
   function css() {
@@ -241,6 +243,11 @@ class FV_Search {
     }
   }  
   
+  function swiftype_search_params_filter($params) {
+    $params['per_page'] = 25;
+    return $params;
+  }
+
 }
 
 $FV_Search = new FV_Search;
