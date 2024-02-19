@@ -83,3 +83,17 @@
     line-height: 1.35;
     margin: 0.3em 0;
 }
+
+.fv-searchwp-taxonomy-results {
+    background: #fcfcfc;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 1em;
+    padding: 1em;
+}
+.fv-searchwp-taxonomy-results .businesspress-search-result:first-child {
+    margin-top: 0;
+}
+.fv-searchwp-taxonomy-results .businesspress-search-result:last-child {
+    margin-bottom: 0;
+}
