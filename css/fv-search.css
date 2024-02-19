@@ -8,7 +8,7 @@
 .businesspress-search-form input.search-field {
     border: none;
     background-color: transparent;
-    width: 88%;
+    width: calc( 100% - 34px );
     margin: 0;
     padding: 7px;
 }
@@ -18,9 +18,7 @@
 }
 .businesspress-search-form input.search-submit {
     text-indent: -9999px;
-    background: url('search-icon.png') no-repeat right center;
-    background-color: transparent;
-    width: 11%;
+    width: 34px;
     height: auto;
     min-height: 34px;
     position: relative;
@@ -30,8 +28,9 @@
     margin: 0;
     padding: 7px;
 }
+.businesspress-search-form input.search-submit,
 .businesspress-search-form input.search-submit:hover {
-    background: url('css/search-icon.png') no-repeat right center;
+    background: url('search-icon.png') no-repeat right center;
     background-color: transparent;
 }
 .businesspress-search-form search-submit:before {
