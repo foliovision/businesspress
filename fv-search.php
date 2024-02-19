@@ -81,6 +81,24 @@ class FV_Search {
     $aSearchKeywords = array_map( 'trim', explode( " ", get_search_query() ) );
     $aSearchKeywords = array_merge( array( trim($search_query) ), $aSearchKeywords ); //  make sure full query is highlighted first
     $aSearchKeywords = array_unique($aSearchKeywords);
+
+    foreach( $aSearchKeywords as $k => $v ) {
+      // Remove keywords shorter than 3 characters
+      if ( strlen( $v ) < 3 ) {
+        unset( $aSearchKeywords[$k] );
+
+      // Remove keywords shorter than 4 characters if lowercase
+      } else if ( strlen( $v ) < 4 && strcmp( $v, strtolower( $v ) ) == 0 ) {
+        unset( $aSearchKeywords[$k] );
+      }
+
+      $aSearchKeywords[$k] = trim( $v, ',.' );
+    }
+
+    // Sort $aSearchKeywords by keyword length, descending
+    usort( $aSearchKeywords, function( $a, $b ) {
+      return strlen( $b ) - strlen( $a );
+    } );
     
     $search_form = apply_filters('businesspress_search_form', '<form role="search" method="get" class="search-form businesspress-search-form" action="' . esc_url( home_url( '/' ) ) . '">
                 <input type="search" class="search-field" placeholder="' . esc_attr_x( 'Search &hellip;', 'placeholder' ) . '" value="' . $search_query . '" name="s" />                
@@ -148,6 +166,9 @@ class FV_Search {
               }
             }
           }
+          
+          // Trim $aExcerpt to 2 items
+          $aExcerpt = array_slice( $aExcerpt, 0, 2 );
           
           $sTitle = get_the_title();
           $sLink = get_the_permalink();
