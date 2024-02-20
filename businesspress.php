@@ -137,7 +137,7 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'wp_login_errors', array( $this, 'wp_login_errors' ) );
     
     if( $this->get_setting('search-results') || isset($_GET['bpsearch']) ) include( dirname(__FILE__).'/fv-search.php' );
-    
+
     /*
      *  Login protection
      */
@@ -969,6 +969,8 @@ class BusinessPress extends BusinessPress_Plugin {
       return trim($this->aOptions[$key]);
     }
 
+    //default settings
+    if( $key == 'search-results-domain' ) return true;
     if( $key == 'disable-rest-api' ) return true;
     if( $key == 'disable-emojis' ) return true;
     if( $key == 'remove-generator' ) return true;
@@ -1057,6 +1059,7 @@ class BusinessPress extends BusinessPress_Plugin {
       }
       
       $this->aOptions['search-results'] = isset($_POST['businesspress-search-results']) && $_POST['businesspress-search-results'] == 1 ? true : false;
+      $this->aOptions['search-results-domain'] = isset($_POST['businesspress-search-results-domain']) && $_POST['businesspress-search-results-domain'] == 1 ? true : false;
       $this->aOptions['link-manager'] = isset($_POST['businesspress-link-manager']) && $_POST['businesspress-link-manager'] == 1 ? true : false;
       $this->aOptions['auto-set-featured-image'] = isset($_POST['businesspress-auto-set-featured-image']) && $_POST['businesspress-auto-set-featured-image'] == 1 ? true : false;
       $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;

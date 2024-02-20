@@ -169,9 +169,21 @@ class FV_Search {
           
           // Trim $aExcerpt to 2 items
           $aExcerpt = array_slice( $aExcerpt, 0, 2 );
-          
+
           $sTitle = get_the_title();
           $sLink = get_the_permalink();
+          //checking for "enable domain name" setting
+          global $businesspress;
+          if( isset($businesspress) && method_exists($businesspress,'get_setting') ) {
+            $showDomainStatus = $businesspress->get_setting('search-results-domain');
+            
+            
+            if(!$showDomainStatus) {
+              $link_parts = parse_url($sLink);
+              $sLink = isset($link_parts['path']) ? $link_parts['path'] : '';
+              $sLink = ltrim($sLink, '/');
+          }
+
           $sExcerpt = trim(implode('&hellip; ',$aExcerpt));
           if( strlen($sExcerpt) == 0 ) {
             $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
@@ -198,18 +210,17 @@ class FV_Search {
           if( !apply_filters( 'businesspress_fv_search_show_image', false ) ) {
             $sImage = '';
           }
-          $sDate = false; //'<em>'.$sDate.'</em> ';
-          
+          $sDate = false; //'<em>'.$sDate.'</em> ';      
+    
           $html .= '<div class="businesspress-search-result">
-                
-                <h2><a href="'.get_permalink().'">'.$sTitle.'</a></h2>
-                '.$sImage.'
-                <span><a href="'.get_permalink().'">'.$sLink.'</a></span>
-                <p>'.$sExcerpt .'</p>
-            </div>
-            <div style="clear:both"></div>
-            ';          
-        
+          <h2><a href="'.get_permalink().'">'.$sTitle.'</a></h2>
+          '.$sImage.'
+          <span><a href="'.get_permalink().'">'.$sLink.'</a></span>
+          <p>'.$sExcerpt .'</p>
+      </div>
+      <div style="clear:both"></div>
+      ';
+        };            
       }
       
     } else {

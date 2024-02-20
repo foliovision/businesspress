@@ -91,7 +91,8 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_emails', __('Email Preferences', 'businesspress'), array( $this, 'settings_box_email' ), 'businesspress_settings_preferences', 'normal' );
-          
+
+          add_meta_box( 'businesspress_', __('Search settings', 'businesspress'), array( $this, 'settings_results_style' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_search', __('Tweaks', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
           add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
           
@@ -525,6 +526,25 @@ class BusinessPress_Settings {
     <?php
   }
 
+  function settings_results_style() {
+      global $businesspress; 
+      ?>
+      <table class="form-table">
+        <?php $this->admin_show_setting(
+                    'businesspress-search-results',
+                    'search-results',
+                    'Enable Google style results',
+                    sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
+
+              $this->admin_show_setting(
+                    'businesspress-search-results-domain',
+                    'search-results-domain',
+                    'Enable domain name',
+                    sprintf( __('Include domain name of searched website in the search results', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
+        ?>
+      </table>
+      <?php
+  }
 
 
 
@@ -532,11 +552,7 @@ class BusinessPress_Settings {
     global $businesspress;
     ?>
     <table class="form-table">
-      <?php $this->admin_show_setting(
-                    'businesspress-search-results',
-                    'search-results',
-                    'Enable Google style results',
-                    sprintf( __('Gives you similar layout and keyword highlight.', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
+      <?php 
       
       $this->admin_show_setting(
                     'businesspress-link-manager',
