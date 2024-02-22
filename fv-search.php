@@ -99,7 +99,9 @@ class FV_Search {
     usort( $aSearchKeywords, function( $a, $b ) {
       return strlen( $b ) - strlen( $a );
     } );
-    
+
+    $aSearchKeywords = array_filter( $aSearchKeywords );
+
     $search_form = apply_filters('businesspress_search_form', '<form role="search" method="get" class="search-form businesspress-search-form" action="' . esc_url( home_url( '/' ) ) . '">
                 <input type="search" class="search-field" placeholder="' . esc_attr_x( 'Search &hellip;', 'placeholder' ) . '" value="' . $search_query . '" name="s" />                
                 <input type="submit" class="search-submit" value="'. esc_attr_x( 'Search', 'submit button' ) .'" />
@@ -220,7 +222,7 @@ class FV_Search {
       </div>
       <div style="clear:both"></div>
       ';
-        };            
+        };
       }
       
     } else {
