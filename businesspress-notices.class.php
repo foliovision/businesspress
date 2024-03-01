@@ -350,7 +350,9 @@ class BusinessPress_Notices {
         'Preload: ',
         'Preload complete: ',
         'One or more plugins have been enabled or disabled',
-        'OPcache successfully purged'
+        'OPcache successfully purged',
+        'Unused CSS',
+        'Used CSS',
       );
 
       $skip = false;
