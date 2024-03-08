@@ -24,6 +24,8 @@ class FV_Search {
     add_action( 'pre_get_posts', array($this,'posts_per_page') );
 
     add_filter( 'swiftype_search_params', array( $this, 'swiftype_search_params_filter' ) );
+
+    add_filter( 'rocket_rucss_external_exclusions', array( $this, 'wp_rocket_rucss_exclude' ) );
   }
   
   function css() {
@@ -280,6 +282,11 @@ class FV_Search {
   function swiftype_search_params_filter($params) {
     $params['per_page'] = 25;
     return $params;
+  }
+
+  public function wp_rocket_rucss_exclude( $exclusions ) {
+    $exclusions[] = 'css/fv-search.css';
+    return $exclusions;
   }
 
 }
