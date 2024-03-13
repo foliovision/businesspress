@@ -296,7 +296,10 @@ class BusinessPress_Notices {
         'poll ', // Polldaddy Polls & Ratings
         'admin.php?page=sucuriscan_lastlogins', // Sucuri Security - Auditing, Malware Scanner and Hardening login notice
         'Your email address has not been updated yet', // Your email address has not been updated yet. Please check your inbox at user@host.com for a confirmation email.
-        
+
+        // AffiliateWP
+        'Affiliate request',
+
         // Comment Plus
         'Image has been deleted from comment.',
 
