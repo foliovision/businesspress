@@ -242,11 +242,6 @@ class FV_Search {
 
   function paging( $html ) {
 
-    global $blog_id;
-    if ( 5 != $blog_id || wp_is_mobile() ) {
-      return $html;
-    }
-
     // No search results present?
     if( stripos( $html, '<div class="businesspress-search-result">' ) === false) {
       return $html;
