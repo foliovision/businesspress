@@ -1,5 +1,9 @@
 <?php
 /**
+ * Note: Fixed to not destroy contnet of other custom user table cells.
+ */
+
+/**
  * Original Plugin Name: Users by Date Registered
  * Plugin URI:  https://wordpress.org/plugins/users-by-date-registered
  * Description: Allows you to see the dates users registered and filter the users by date.
@@ -67,6 +71,8 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 
 		return '<abbr title="' . $t_time . '">' . apply_filters( 'user_registered_date_column_time', $h_time, $user ) . '</abbr>';
 	}
+
+	return $val;
 } // END sd_modify_user_table_row()
 add_filter( 'manage_users_custom_column', 'sd_modify_user_table_row', 10, 3 );
 
