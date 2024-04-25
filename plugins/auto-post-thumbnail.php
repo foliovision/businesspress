@@ -88,7 +88,13 @@ function apt_publish_post($post_id)
     }
   }
   
-  preg_match_all('/<\s*img [^\>]*src\s*=\s*[\""\']?([^\""\'>]*)/i', $post[0]->post_content, $matches_img);
+  /**
+   * Match the entire image tag and remember the src attribute (including quotes, these are stripped later)
+   * We need the full tag to be able to check its class to find the thumbnail id, like:
+   * 
+   * <img src="..." alt="" class="wp-image-65"/>
+   */
+  preg_match_all('/<\s*img [^\>]*src\s*=\s*[\""\']?([^\""\'>]*).*?>/i', $post[0]->post_content, $matches_img);
   
   $matches = array( array_merge($matches_a[0],$matches_img[0]), array_merge($matches_a[1],$matches_img[1]) );
   
@@ -104,7 +110,7 @@ function apt_publish_post($post_id)
       } else {
         $thumb_id = false;
       }
-      
+
       // If thumb id is not found, try to look for the image in DB. Thanks to "Erwin Vrolijk" for providing this code.
       if (!$thumb_id) {
         $image = substr($image, strpos($image, '"')+1);
