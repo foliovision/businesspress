@@ -23,6 +23,8 @@ class BusinessPress_Notices {
     add_action( 'admin_menu',  array( $this, 'menu' ) );
     
     add_filter('option_gf_dismissed_upgrades', array($this, 'plugin_gravityforms') );
+
+    add_action( 'admin_footer', array( $this, 'remove_ShortPixel_notices'), 9 );
   }
   
   
@@ -147,9 +149,13 @@ class BusinessPress_Notices {
     $value = array( $version_info['version'] );
     return $value;
   }
-  
-  
-  
+
+  function remove_ShortPixel_notices() {
+    if ( method_exists( 'ShortPixel\Controller\AdminNoticesController', 'getInstance' ) ) {
+      $adminNotices = ShortPixel\Controller\AdminNoticesController::getInstance();
+      remove_action( 'admin_footer', array($adminNotices, 'displayNotices') );
+    }
+  }
   
   function save( $aNotices ) {
     if( is_network_admin() ) {
