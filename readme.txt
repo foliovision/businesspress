@@ -3,7 +3,7 @@
 Contributors: FolioVision
 Tags: core updates,editing,installing,plugins,permissions
 Requires at least: 4.0
-Tested up to: 6.4
+Tested up to: 6.5
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,27 @@ Guides:
 * [How to block malicious web requests with BusinessPress](https://foliovision.com/wordpress/plugins/businesspress/malicious-requests-businesspress)
 
 == Changelog ==
+
+= 1.0 - 2024-04-25 =
+
+* Button to purge the Surge plugin HTML page cache
+* Dashboard: Hide "PHP Update Recommended, if user is doesn't have the full admin rights
+* Dashboard: Remove Welcome box
+* Dashboard: Remove WordPress Events and News
+* "Hide Admin Notices" - allow User Switching plugin notices
+* "Hide Admin Notices" - allow WP Rocket Unused CSS and Used CSS
+* "Hide Admin Notices" - block ShortPixel sale offers which would still show
+* Hide XYZ Html plugin ads on its settings screen
+* New plugin: Users by Date Registered - allows you to sort wp-admin -> Users by registration date
+* New setting: "Clickjacking Protection" - adds X-Frame-Options header to prevent clickjacking
+* New setting: "Login Lockout" - The tranditional IP banning is not effective against botnets. The only way is to block further login attempts on a per account basis. If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email let user re-enable login for his account.
+* New setting: "Hide Password Protected Posts" - Password protected posts won't show up anywhere unless you have the direct link or your are the admin or editor.
+* New setting: "Require Email Address for Login" - avoids bots being able to find out about your login name and use that in login attempts
+* Search template - "Enable domain name" setting for search results, on by default
+* Search template - fix issue when searching for keyword and white space after it
+* Search template - WP Rocket Remoe Unused CSS fix
+* User login sessions - Show on wp-admin user profile screen
+* WAF - detect bad requests and log the issue for fail2ban to take action: https://foliovision.com/wordpress/plugins/businesspress/malicious-requests-businesspress
 
 = 0.9.13 - 2022-02-23 =
 
