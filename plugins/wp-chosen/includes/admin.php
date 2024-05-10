@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Chosen Adminu
+ * Chosen Admin
  *
  * @package Plugins/Chosen/Admin
  */
@@ -26,6 +26,7 @@ function wp_chosen_enqueue_assets() {
 	// Vars
 	$url = trailingslashit( plugins_url('wp-chosen',dirname(dirname(__FILE__))) );
 	$ver = BusinessPress::VERSION;
+
 	// Styles
 	wp_enqueue_style( $handle,     $url . 'assets/css/chosen.min.css', array(),          $ver );
 	wp_enqueue_style( 'wp-chosen', $url . 'assets/css/wp-chosen.css',  array( $handle ), $ver );
