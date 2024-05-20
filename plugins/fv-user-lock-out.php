@@ -22,6 +22,9 @@ class FV_User_Lock_Out {
     add_filter( 'manage_users_custom_column', array( $this, 'admin_column_content' ), 10, 3 );
 
     add_action( 'wp_ajax_fv_user_lock_out_unlock', array( $this, 'admin_ajax') );
+
+    // The "Unlock" link to allow your account login should not expire in 1, but 3 days
+    add_filter( 'password_reset_expiration', array( $this, 'password_reset_expiration' ) );
   }
 
   function admin_ajax() {
@@ -172,6 +175,13 @@ All at %4$s
 
   function password_reset( $user ) {
     $this->remove_lock( $user->ID );
+  }
+
+  function password_reset_expiration( $expiration_duration ) {
+    if ( ! empty( $_GET['action'] ) && 'unlock' === $_GET['action'] ) {
+      $expiration_duration = 3 * DAY_IN_SECONDS;
+    }
+    return $expiration_duration;
   }
 
   function prevent_authentication( $user_logged_in, $username, $password) {
