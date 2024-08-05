@@ -136,6 +136,31 @@ function apt_publish_post($post_id)
       // If we succeed in generating thumg, let's update post meta
       if ($thumb_id) {
         update_post_meta( $post_id, '_thumbnail_id', $thumb_id );
+
+        /**
+         * Update Social Warfare Open Graph image if it's not set or if it was set by us.
+         */
+        $swp_og_image                      = get_post_meta( $post_id, 'swp_og_image', true );
+        $swp_og_image_set_by_businesspress = get_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+
+        if (
+          // Is there no Social Warfare Pro image saved and no image being saved?
+          ! $swp_og_image && empty( $_POST['swp_og_image'] ) ||
+          // The image is there, but it's the same as Featured image and it was set by us
+          $swp_og_image && intval( $_POST['swp_og_image'][0] ) === intval( $swp_og_image_set_by_businesspress )
+        ) {
+          update_post_meta( $post_id, 'swp_og_image', $thumb_id );
+          update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumb_id );
+
+          /**
+           * Also put the image into $_POST in case Social Warfare plugin gets to it later.
+           * Otherwise it would remove the image which we just set.
+           */
+          $_POST['swp_og_image'] = array( $thumb_id );
+
+        } else {
+          delete_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+        }
         break;
       }
     }
@@ -258,3 +283,35 @@ function curl_get_file_contents($URL) {
   
   return FALSE;
 }
+
+/**
+ * Update Social Warfare Open Graph image if it has been set by us
+ * and it's not the same as Featured image.
+ * 
+ * Or if it's not set at all.
+ * 
+ * Runs anytime the post is saved.
+ */
+add_action(
+  'swpmb_after_save_post',
+  function( $post_id ) {
+    $thumbnail_id = !empty( $_REQUEST['_thumbnail_id'] ) ? intval( $_REQUEST['_thumbnail_id'] ) : false;
+
+    // Featured image is not set
+    if ( ! $thumbnail_id || -1 === intval( $thumbnail_id ) ) {
+      return;
+    }
+
+    $swp_og_image                      = get_post_meta( $post_id, 'swp_og_image', true );
+    $swp_og_image_set_by_businesspress = get_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+
+    if (
+      ! $swp_og_image ||
+      $swp_og_image == $swp_og_image_set_by_businesspress &&
+      $thumbnail_id != $swp_og_image
+      ) {
+      update_post_meta( $post_id, 'swp_og_image', $thumbnail_id );
+      update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumbnail_id );
+    }
+  }
+);
