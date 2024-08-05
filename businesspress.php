@@ -1299,6 +1299,10 @@ JSH;
 
     include( dirname(__FILE__).'/plugins/fv-simpler-login-errors.php' );
 
+    if ( function_exists( 'initialize_social_warfare_pro' ) ) {
+      include( dirname(__FILE__).'/plugins/social-warfare-pro-tweaks.php' );
+    }
+
     if( get_option( 'surge_installed' ) ) {
       include( dirname(__FILE__).'/plugins/surge-cache-purge.php' );
     }
