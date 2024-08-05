@@ -41,7 +41,7 @@ add_action('transition_post_status', 'apt_check_required_transition', 10, 3);
  * @param $post
  * @return void
  */
-function apt_check_required_transition($new_status='', $old_status='', $post='') {
+function apt_check_required_transition( $new_status, $old_status, $post ) {
   if ('publish' == $new_status) {
     apt_publish_post($post->ID);
   }
@@ -49,6 +49,8 @@ function apt_check_required_transition($new_status='', $old_status='', $post='')
 
 /**
  * Function to save first image in post as post thumbmail.
+ * 
+ * Runs if the featured image is not already set.
  */
 function apt_publish_post($post_id)
 {
