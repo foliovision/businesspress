@@ -145,28 +145,30 @@ function apt_publish_post($post_id)
         /**
          * Update Social Warfare Open Graph image if it's not set or if it was set by us.
          */
-        $swp_og_image                      = get_post_meta( $post_id, 'swp_og_image', true );
-        $swp_og_image_set_by_businesspress = get_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+        if ( function_exists( 'initialize_social_warfare_pro' ) ) {
+          $swp_og_image                      = get_post_meta( $post_id, 'swp_og_image', true );
+          $swp_og_image_set_by_businesspress = get_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
 
-        if (
-          // Is there no Social Warfare Pro image saved and no image being saved?
-          ! $swp_og_image && empty( $_POST['swp_og_image'] ) ||
-          // The image is there, but it's the same as Featured image and it was set by us
-          $swp_og_image && intval( $_POST['swp_og_image'][0] ) === intval( $swp_og_image_set_by_businesspress )
-        ) {
-          update_post_meta( $post_id, 'swp_og_image', $thumb_id );
-          update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumb_id );
+          if (
+            // Is there no Social Warfare Pro image saved and no image being saved?
+            ! $swp_og_image && empty( $_POST['swp_og_image'] ) ||
+            // The image is there, but it's the same as Featured image and it was set by us
+            $swp_og_image && intval( $_POST['swp_og_image'][0] ) === intval( $swp_og_image_set_by_businesspress )
+          ) {
+            update_post_meta( $post_id, 'swp_og_image', $thumb_id );
+            update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumb_id );
 
-          $did_set_social_warfare_image = true;
+            $did_set_social_warfare_image = true;
 
-          /**
-           * Also put the image into $_POST in case Social Warfare plugin gets to it later.
-           * Otherwise it would remove the image which we just set.
-           */
-          $_POST['swp_og_image'] = array( $thumb_id );
+            /**
+             * Also put the image into $_POST in case Social Warfare plugin gets to it later.
+             * Otherwise it would remove the image which we just set.
+             */
+            $_POST['swp_og_image'] = array( $thumb_id );
 
-        } else {
-          delete_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+          } else {
+            delete_post_meta( $post_id, 'swp_og_image_set_by_businesspress', true );
+          }
         }
         break;
       }
