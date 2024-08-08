@@ -55,6 +55,9 @@ function apt_check_required_transition( $new_status, $old_status, $post ) {
 function apt_publish_post($post_id)
 {
 
+  $did_set_featured_image = false;
+  $did_set_social_warfare_image = false;
+
   /**
    * Only set featured image if user is actually editing a post.
    * 
@@ -137,6 +140,8 @@ function apt_publish_post($post_id)
       if ($thumb_id) {
         update_post_meta( $post_id, '_thumbnail_id', $thumb_id );
 
+        $did_set_featured_image = true;
+
         /**
          * Update Social Warfare Open Graph image if it's not set or if it was set by us.
          */
@@ -152,6 +157,8 @@ function apt_publish_post($post_id)
           update_post_meta( $post_id, 'swp_og_image', $thumb_id );
           update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumb_id );
 
+          $did_set_social_warfare_image = true;
+
           /**
            * Also put the image into $_POST in case Social Warfare plugin gets to it later.
            * Otherwise it would remove the image which we just set.
@@ -165,6 +172,39 @@ function apt_publish_post($post_id)
       }
     }
   }
+
+  // Display notice once the page reloads after saving the post
+  if ( $did_set_featured_image ) {
+    add_filter(
+      'redirect_post_location',
+      function( $location ) {
+
+        // Same condition as in core WordPress redirect_post()
+        if (isset($_POST['save']) || isset($_POST['publish'])) {
+          $location = add_query_arg('bp_featured_image', '1', $location);
+        }
+
+        return $location;
+      }
+    );
+  }
+
+  // Display notice once the page reloads after saving the post
+  if ( $did_set_social_warfare_image ) {
+    add_filter(
+      'redirect_post_location',
+      function( $location ) {
+
+        // Same condition as in core WordPress redirect_post()
+        if (isset($_POST['save']) || isset($_POST['publish'])) {
+          $location = add_query_arg('bp_social_warfare_image', '1', $location);
+        }
+
+        return $location;
+      }
+    );
+  }
+
 }// end apt_publish_post()
 
 /**
@@ -312,6 +352,50 @@ add_action(
       ) {
       update_post_meta( $post_id, 'swp_og_image', $thumbnail_id );
       update_post_meta( $post_id, 'swp_og_image_set_by_businesspress', $thumbnail_id );
+
+      // Display notice once the page reloads after saving the post
+      add_filter(
+        'redirect_post_location',
+        function( $location ) {
+
+          // Same condition as in core WordPress redirect_post()
+          if (isset($_POST['save']) || isset($_POST['publish'])) {
+            $location = add_query_arg('bp_social_warfare_image', '1', $location);
+          }
+
+          return $location;
+        }
+      );
     }
+  }
+);
+
+/**
+ * Display notices once the post is saved.
+ */
+add_action(
+  'admin_notices',
+  function() {
+    if ( ! empty( $_GET['bp_featured_image'] ) ) {
+      echo '<div class="updated"><p>BusinessPress: Featured image set.</p></div>';
+    }
+
+    if ( ! empty( $_GET['bp_social_warfare_image'] ) ) {
+      echo '<div class="updated"><p>BusinessPress: Social Warfare Open Graph image set.</p></div>';
+    }
+  }
+);
+
+/**
+ * Let WordPress core JavaScript remove the URL arguments used for these notices.
+ * This way the URL looks clean after you save the post.
+ */
+add_filter(
+  'removable_query_args',
+  function( $removable_query_args ) {
+    $removable_query_args[] = 'bp_featured_image';
+    $removable_query_args[] = 'bp_social_warfare_image';
+
+    return $removable_query_args;
   }
 );

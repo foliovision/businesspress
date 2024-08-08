@@ -306,6 +306,9 @@ class BusinessPress_Notices {
         // AffiliateWP
         'Affiliate request',
 
+        // BusinessPress
+        'BusinessPress: ',
+
         // Comment Plus
         'Image has been deleted from comment.',
 
