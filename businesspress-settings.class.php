@@ -343,6 +343,9 @@ class BusinessPress_Settings {
           <label for="login-logo"><?php _e('Login Logo', 'businesspress' ); ?></label>
         </th>
         <td>
+          <?php if ( class_exists( 'CWS_Login_Logo_Plugin' ) && ! isset( CWS_Login_Logo_Plugin::$is_fv_version ) ) : ?>
+            <p><strong>Error:</strong> You are already using the Login Logo plugin by Mark Jaquith. Please deactivate it as BusinessPress bundles that plugin with some improvements - letting you pick the image from Media Library.</p>
+          <?php endif; ?>
           <p class="description"><input type="hidden" id="login-logo" name="businesspress-login-logo" value="<?php echo esc_attr($businesspress->get_setting('login-logo') ); ?>" class="regular-text code" />
             <?php
             $sRemoveButtonStyle = ' style="display: none; "';
@@ -353,7 +356,7 @@ class BusinessPress_Settings {
             ?>
             <input id="upload_image_button" class="upload_image_button button no-margin small" type="button" value="<?php _e('Upload Image', 'businesspress'); ?>" />
             <input id="upload_image_button" class="remove_image_button button" type="button" value="<?php _e('Remove', 'businesspress'); ?>"<?php echo $sRemoveButtonStyle; ?> />
-            <label for="login-logo"><?php _e('This will the default Wordpress logo on the login screen to the one you chose. The uploaded logo will also be used on the search results page template.', 'businesspress' ); ?></p>
+            <label for="login-logo"><?php _e('This image will replace the default Wordpress logo on the login screen. The uploaded logo will also be used on the search results page template.', 'businesspress' ); ?></p>
         </td>
       </tr>
     </table>           

@@ -39,6 +39,8 @@ class CWS_Login_Logo_Plugin {
 	var $logo_size;
 	var $logo_file_exists;
 
+	static $is_fv_version = true;
+
 	public function __construct() {
 		self::$instance = $this;
 		add_action( 'login_head', array( $this, 'login_head' ) );
