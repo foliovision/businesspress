@@ -695,7 +695,7 @@ class BusinessPress extends BusinessPress_Plugin {
 
     if( stripos($_SERVER['REQUEST_URI'], 'null' ) !== false ) return;
 	  
-    if( preg_match( '~(Mediapartners-Google|googlebot|bingbot)~i', $_SERVER['HTTP_USER_AGENT'] ) ) return;
+    if( ! empty( $_SERVER['HTTP_USER_AGENT'] ) && preg_match( '~(Mediapartners-Google|googlebot|bingbot)~i', $_SERVER['HTTP_USER_AGENT'] ) ) return;
 
     if( !is_404() || function_exists('bbp_is_single_user') && bbp_is_single_user() ) return;
 
