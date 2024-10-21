@@ -68,6 +68,9 @@ function fv_rcp_require_email( $post ) {
   }
 }
 
+/**
+ * wp-login.php form
+ */
 add_action( 'login_footer', 'fv_require_email_address_for_login_script' );
 
 function fv_require_email_address_for_login_script() {
@@ -89,4 +92,39 @@ function fv_require_email_address_for_login_script() {
   } )();
   </script>
   <?php
+}
+
+/**
+ * Easy Digital Downloads
+ */
+add_filter( 'edd_login_form', 'fv_require_email_address_for_login_edd_script' );
+
+function fv_require_email_address_for_login_edd_script( $html ) {
+
+  ob_start();
+  ?>
+  <script>
+  ( function() {
+    let user_login = document.getElementById('edd_user_login'),
+      submit = document.getElementById('edd_login_submit');
+
+    if ( submit ) {
+      submit.addEventListener( 'mousedown', notice );
+      submit.addEventListener( 'touchstart', notice );
+    }
+
+    function notice() {
+      user_login.type = 'email';
+
+      let label = document.querySelector( 'label[for=edd_user_login]' );
+      if ( label ) {
+        label.innerHTML = 'E-mail Address';
+      }
+    }
+  } )();
+  </script>
+  <?php
+  $html .= "\n" . ob_get_clean();
+
+  return $html;
 }
