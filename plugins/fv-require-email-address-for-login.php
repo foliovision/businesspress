@@ -105,12 +105,28 @@ function fv_require_email_address_for_login_edd_script( $html ) {
   ?>
   <script>
   ( function() {
+    let notice_shown = false;
+
     let user_login = document.getElementById('edd_user_login'),
-      submit = document.getElementById('edd_login_submit');
+      submit = document.getElementById('edd_login_submit'),
+      form = document.getElementById('edd_login_form');
 
     if ( submit ) {
       submit.addEventListener( 'mousedown', notice );
       submit.addEventListener( 'touchstart', notice );
+    }
+
+    if ( form ) {
+      form.addEventListener( 'submit', function( e ) {
+        if ( notice_shown ) {
+          return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        notice();
+      } );
     }
 
     function notice() {
@@ -120,6 +136,8 @@ function fv_require_email_address_for_login_edd_script( $html ) {
       if ( label ) {
         label.innerHTML = 'E-mail Address';
       }
+
+      notice_shown = true;
     }
   } )();
   </script>
