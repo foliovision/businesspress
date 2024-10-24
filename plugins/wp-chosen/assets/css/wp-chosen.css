@@ -4,7 +4,6 @@
 body.js select,
 body.js div.chosen-container {
   min-width: 58px;
-  max-width: 300px;
 }
 /* WordPress Core overrides */
 .wrap .actions:not(.bulkactions),
