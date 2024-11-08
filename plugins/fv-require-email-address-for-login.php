@@ -74,6 +74,12 @@ function fv_rcp_require_email( $post ) {
 add_action( 'login_footer', 'fv_require_email_address_for_login_script' );
 
 function fv_require_email_address_for_login_script() {
+
+  // Do not run when resetting password
+  if ( ! empty( $_GET['action'] ) && 'rp' === $_GET['action'] ) {
+    return;
+  }
+
   ?>
   <script>
   ( function() {
