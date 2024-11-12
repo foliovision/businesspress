@@ -2209,7 +2209,7 @@ JSR;
     if( !document.hidden ) {
       bpress_login_check();
     }
-  }).on('ready pageshow', bpress_login_check );
+  }).on('popstate pageshow', bpress_login_check );
 })(jQuery);    
 </script>
     <?php
