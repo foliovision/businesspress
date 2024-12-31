@@ -742,6 +742,11 @@ class BusinessPress extends BusinessPress_Plugin {
     // TODO: What if I search for phpmyadmin in bbPress ? site.com/support/search/phpmyadmin
     $rules = array(
       '/.env',
+      '/.github/COMMIT_EDITMSG',
+      '/.github/config',
+      '/.github/description',
+      '/.github/HEAD',
+      '/.github/index',
       '/.github/workflows',
       '/.ssh',
       '/boot.ini',

@@ -97,6 +97,7 @@ Guides:
 
 * Tested up to: 6.7
 * Require Email Address for Login: Do not show email address requirement on wp-login.php
+* WAF - More .git/ folder rules
 * Bugfix - Front-end Login Check: Improve browser back button detection
 * Bugfix - Require Email Address for Login: Fix for Easy Digital Downloads
 * Bugfix - Enhance wp-admin Dropdowns: Avoid max-width for select boxes
