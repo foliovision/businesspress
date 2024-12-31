@@ -93,6 +93,14 @@ Guides:
 
 == Changelog ==
 
+= 1.1 - 2024-12-31 =
+
+* Tested up to: 6.7
+* Require Email Address for Login: Do not show email address requirement on wp-login.php
+* Bugfix - Front-end Login Check: Improve browser back button detection
+* Bugfix - Require Email Address for Login: Fix for Easy Digital Downloads
+* Bugfix - Enhance wp-admin Dropdowns: Avoid max-width for select boxes
+
 = 1.0 - 2024-04-25 =
 
 * Button to purge the Surge plugin HTML page cache
