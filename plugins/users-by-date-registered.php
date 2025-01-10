@@ -58,7 +58,7 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 		$time_diff = time() - $time;
 
 		// Get the last 7 days.
-		$days = ( intval( $time_diff ) / DAY_IN_SECONDS ) % 8;
+		$days = round( $time_diff / DAY_IN_SECONDS ) % 8;
 		$days = $days * -1; // Convert negative value to positive.
 
 		if ( $days > 0 && $days < 8 ) {
