@@ -228,10 +228,10 @@ All at %4$s
     return $errors;
   }
 
-  function wp_login_failed( $username, $error ) {
+  function wp_login_failed( $username, $error = false ) {
 
     // Ignore if using "Require Email Address for Login"
-    if( $error->get_error_code() == 'email_required' ) {
+    if( $error && $error->get_error_code() == 'email_required' ) {
       return;
     }
 
