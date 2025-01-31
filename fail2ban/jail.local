@@ -3,6 +3,7 @@ enabled = true
 filter = wordpress
 logpath = /var/log/auth.log
 port = http,https
+backend = auto
 
 maxretry = 12
 findtime = 1200
