@@ -595,6 +595,12 @@ class BusinessPress_Settings {
                     __('First image in the post becomes the featured image on save.', 'businesspress' ) );
 
       $this->admin_show_setting(
+                    'businesspress-admin-woocommerce-search-speed',
+                    'admin-woocommerce-search-speed',
+                    'WooCommerce Search Speed',
+                    __('Speed up the search by only searching the billing email address and not shipping nor billing address.', 'businesspress' ) );
+
+      $this->admin_show_setting(
                     'businesspress-admin-posts-yearly-dropdowns',
                     'admin-posts-yearly-dropdowns',
                     'Yearly dropdowns for posts filtering',

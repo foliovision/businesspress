@@ -1068,6 +1068,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['link-manager'] = isset($_POST['businesspress-link-manager']) && $_POST['businesspress-link-manager'] == 1 ? true : false;
       $this->aOptions['auto-set-featured-image'] = isset($_POST['businesspress-auto-set-featured-image']) && $_POST['businesspress-auto-set-featured-image'] == 1 ? true : false;
       $this->aOptions['admin-posts-yearly-dropdowns'] = isset($_POST['businesspress-admin-posts-yearly-dropdowns']) && $_POST['businesspress-admin-posts-yearly-dropdowns'] == 1 ? true : false;
+      $this->aOptions['admin-woocommerce-search-speed'] = isset($_POST['businesspress-admin-woocommerce-search-speed']) && $_POST['businesspress-admin-woocommerce-search-speed'] == 1 ? true : false;
       $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;
       $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
       $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
@@ -1288,7 +1289,11 @@ JSH;
     if ( $this->get_setting('admin-posts-yearly-dropdowns') ) {
       include( dirname(__FILE__).'/plugins/admin-posts-yearly-dropdowns.php' );
     }
-    
+
+    if ( $this->get_setting('admin-woocommerce-search-speed') ) {
+      include( dirname(__FILE__).'/plugins/admin-woocommerce-search-speed.php' );
+    }
+
     if( !function_exists('sort_settings_menu_wpse_2331') && !function_exists('sort_arra_asc_so_1597736') ) {
       include( dirname(__FILE__).'/plugins/wp-admin-settings-sort.php' );
     }
@@ -1550,7 +1555,11 @@ JSH;
       if( empty($this->aOptions['admin-posts-yearly-dropdowns']) ) {
         $this->aOptions['admin-posts-yearly-dropdowns'] = true;
       }
-      
+
+      if( empty($this->aOptions['admin-woocommerce-search-speed']) ) {
+        $this->aOptions['admin-woocommerce-search-speed'] = true;
+      }      
+
       $this->aOptions['version'] = BusinessPress::VERSION;
       if( is_multisite() ){
         update_site_option( 'businesspress', $this->aOptions );
