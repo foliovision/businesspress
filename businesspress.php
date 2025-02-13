@@ -1067,6 +1067,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['search-results-domain'] = isset($_POST['businesspress-search-results-domain']) && $_POST['businesspress-search-results-domain'] == 1 ? true : false;
       $this->aOptions['link-manager'] = isset($_POST['businesspress-link-manager']) && $_POST['businesspress-link-manager'] == 1 ? true : false;
       $this->aOptions['auto-set-featured-image'] = isset($_POST['businesspress-auto-set-featured-image']) && $_POST['businesspress-auto-set-featured-image'] == 1 ? true : false;
+      $this->aOptions['admin-posts-yearly-dropdowns'] = isset($_POST['businesspress-admin-posts-yearly-dropdowns']) && $_POST['businesspress-admin-posts-yearly-dropdowns'] == 1 ? true : false;
       $this->aOptions['disable-emojis'] = isset($_POST['businesspress-disable-emojis']) && $_POST['businesspress-disable-emojis'] == 1 ? true : false;
       $this->aOptions['disable-oembed'] = isset($_POST['businesspress-disable-oembed']) && $_POST['businesspress-disable-oembed'] == 1 ? true : false;
       $this->aOptions['disable-rest-api'] = isset($_POST['businesspress-disable-rest-api']) && $_POST['businesspress-disable-rest-api'] == 1 ? true : false;
@@ -1282,6 +1283,10 @@ JSH;
     
     if( !function_exists('apt_publish_post') && $this->get_setting('auto-set-featured-image') ) {
       include( dirname(__FILE__).'/plugins/auto-post-thumbnail.php' );
+    }
+
+    if ( $this->get_setting('admin-posts-yearly-dropdowns') ) {
+      include( dirname(__FILE__).'/plugins/admin-posts-yearly-dropdowns.php' );
     }
     
     if( !function_exists('sort_settings_menu_wpse_2331') && !function_exists('sort_arra_asc_so_1597736') ) {
@@ -1540,6 +1545,10 @@ JSH;
       
       if( empty($this->aOptions['admin-dropdown']) ) {
         $this->aOptions['admin-dropdown'] = true;
+      }
+
+      if( empty($this->aOptions['admin-posts-yearly-dropdowns']) ) {
+        $this->aOptions['admin-posts-yearly-dropdowns'] = true;
       }
       
       $this->aOptions['version'] = BusinessPress::VERSION;

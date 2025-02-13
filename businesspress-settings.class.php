@@ -593,6 +593,12 @@ class BusinessPress_Settings {
                     'auto-set-featured-image',
                     'Set Featured Images Automatically',
                     __('First image in the post becomes the featured image on save.', 'businesspress' ) );
+
+      $this->admin_show_setting(
+                    'businesspress-admin-posts-yearly-dropdowns',
+                    'admin-posts-yearly-dropdowns',
+                    'Yearly dropdowns for posts filtering',
+                    __('The standard list of months in wp-admin -> Posts is just too long. Use this setting to show years instead. Adds a "Last 12 months" option too.', 'businesspress' ) );
       ?>	      
     </table>           
     <?php
