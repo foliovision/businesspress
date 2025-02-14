@@ -841,7 +841,8 @@ class BusinessPress extends BusinessPress_Plugin {
     // Are we redirecting to the website URL at all?
     if (
       $redirect_domain === $home_domain ||
-      $redirect_domain === $home_domain_non_www
+      $redirect_domain === $home_domain_non_www ||
+      $redirect_domain === "www." . $home_domain_non_www
     ) {
       $home_has_www     = stripos( $home_domain, 'www.' ) === 0;
       $redirect_has_www = stripos( $redirect_domain, 'www.' ) === 0;
@@ -850,7 +851,7 @@ class BusinessPress extends BusinessPress_Plugin {
         $redirect = str_replace( $home_url_non_www, home_url(), $redirect );
 
       } else if ( ! $home_has_www && $redirect_has_www ) {
-        $redirect = str_replace( home_url(), $home_url_non_www, $redirect );
+        $redirect = str_replace( str_replace( '://', '://www.', home_url() ), home_url(), $redirect );
       }
     }
 
