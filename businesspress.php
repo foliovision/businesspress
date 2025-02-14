@@ -163,6 +163,8 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
 
+    add_filter( 'login_redirect', array( $this, 'fix_login_redirect_domain' ), PHP_INT_MAX );
+
     /*
     * Email notification disable
     */
@@ -820,10 +822,41 @@ class BusinessPress extends BusinessPress_Plugin {
 
     return $ixr_error;
   }
-  
-  
-  
-  
+
+  /**
+   * Make sure the login redirection URL does use www. if the site is set to use www.
+   *
+   * Otherwise the cookies might not be present after logging in.
+   *
+   * @param string $redirect The URL to redirect to.
+   *
+   * @return string The URL to redirect to.
+   */
+  function fix_login_redirect_domain( $redirect ) {
+    $home_domain         = wp_parse_url( home_url(), PHP_URL_HOST );
+    $home_url_non_www    = str_replace( '//www.', '//', home_url() );
+    $home_domain_non_www = wp_parse_url( $home_url_non_www, PHP_URL_HOST );
+    $redirect_domain     = wp_parse_url( $redirect, PHP_URL_HOST );
+
+    // Are we redirecting to the website URL at all?
+    if (
+      $redirect_domain === $home_domain ||
+      $redirect_domain === $home_domain_non_www
+    ) {
+      $home_has_www     = stripos( $home_domain, 'www.' ) === 0;
+      $redirect_has_www = stripos( $redirect_domain, 'www.' ) === 0;
+
+      if ( $home_has_www && ! $redirect_has_www ) {
+        $redirect = str_replace( $home_url_non_www, home_url(), $redirect );
+
+      } else if ( ! $home_has_www && $redirect_has_www ) {
+        $redirect = str_replace( home_url(), $home_url_non_www, $redirect );
+      }
+    }
+
+    return $redirect;
+  }
+
   function get_branch_latest() {
     $sLatest = false;
     if( $branch = $this->get_version_branch() ) {
