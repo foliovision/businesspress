@@ -24,19 +24,23 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 	 * @param WP_Query $query The WP_Query instance (passed by reference).
 	 */
 	function query_last_12_years( $query ) {
-		if ( ! empty( $query->query['year'] ) ) {
-			// Deal with "Last 12 months" option.
-			if ( 'last-12-months' === $query->query['year'] ) {
-				$query->set( 'date_query', array(
-					array(
-						'after' => '12 months ago'
-					)
-				) );
+		// Do not run if not in wp-admin, if no post type is set in URL, or if not on wp-admin -> Posts kind of screen.
+		if ( ! is_admin() || empty( $_GET['post_type'] ) || ! did_action( 'load-edit.php' ) ) {
+			return;
+		}
 
-			// Deal with the "All year" option.
-			} else if ( 'all' === $query->query['year'] ) {
+		if ( ! empty( $query->query['year'] ) ) {
+			// Deal with the "All years" option.
+			if ( 'all' === $query->query['year'] ) {
 				$query->set( 'date_query', false );
 			}
+
+		} else {
+			$query->set( 'date_query', array(
+				array(
+					'after' => '12 months ago'
+				)
+			) );
 		}
 	}
 
@@ -44,9 +48,8 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 	 * Displays a dropdown for filtering items in the list table by year.
 	 *
 	 * Created from the core WordPress months_dropdown() function, but in our case:
-	 * - we default to "Select year" instead of "All years"
+	 * - we default to "Last 12 years" instead of "All years"
 	 * - "All years" has a value of "all"
-	 * - we add "Last 12 years" too
 	 *
 	 * @global wpdb      $wpdb      WordPress database abstraction object.
 	 *
@@ -107,14 +110,12 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 			return;
 		}
 
-		$year              = isset( $_GET['year'] ) ? (int) $_GET['year'] : 0;
-		$is_last_12_months = isset( $_GET['year'] ) && 'last-12-months' === $_GET['year'];
-		$is_all_years      = isset( $_GET['year'] ) && 'all' === $_GET['year'];
+		$year         = isset( $_GET['year'] ) ? (int) $_GET['year'] : 0;
+		$is_all_years = isset( $_GET['year'] ) && 'all' === $_GET['year'];
 		?>
 		<label for="filter-by-year" class="screen-reader-text"><?php echo get_post_type_object( $post_type )->labels->filter_by_date; ?></label>
 		<select name="year" id="filter-by-year">
-			<option<?php selected( $is_all_years ); ?> value=""><?php _e( 'Select year' ); ?></option>
-			<option<?php selected( $is_last_12_months ); ?> value="last-12-months"><?php _e( 'Last 12 months' ); ?></option>
+			<option value=""><?php _e( 'Last 12 months' ); ?></option>
 			<?php
 			foreach ( $years as $arc_row ) {
 				if ( 0 === (int) $arc_row->year ) {
