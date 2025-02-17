@@ -24,8 +24,8 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 	 * @param WP_Query $query The WP_Query instance (passed by reference).
 	 */
 	function query_last_12_years( $query ) {
-		// Do not run if not in wp-admin, if no post type is set in URL, or if not on wp-admin -> Posts kind of screen.
-		if ( ! is_admin() || empty( $_GET['post_type'] ) || ! did_action( 'load-edit.php' ) ) {
+		// Do not run if not in wp-admin, if POST request is being processed, or if not on wp-admin -> Posts kind of screen.
+		if ( ! is_admin() || ! empty( $_POST ) || ! did_action( 'load-edit.php' ) ) {
 			return;
 		}
 
