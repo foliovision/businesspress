@@ -15,6 +15,9 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 		// Check number of months and if it's high alter the main query for wp-admin -> Posts and other	post type screens.
 		add_action( 'pre_get_posts', array( $this, 'query_last_12_years' ) );
 
+		// Make sure the monthly dropdown is enabled as we might need it if there are not enough months.
+		add_filter( 'disable_months_dropdown', '__return_false', PHP_INT_MAX );
+
 		// Disable the standard dropdown for filtering items in the list table by month if there are more than 10 months.
 		add_filter( 'pre_months_dropdown_query',  array( $this, 'maybe_disable_months_dropdown' ), 10, 2 );
 	}
