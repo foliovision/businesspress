@@ -6,26 +6,80 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 
+	const limit = 10;
+
+	private $current_screen_months = array();
+
 	function __construct() {
 
-		// Disable the standard dropdown for filtering items in the list table by month.
-		add_filter( 'disable_months_dropdown', '__return_true' );
-
-		// Tweak WP_Query for the "Last 12 months" and "All years" options.
+		// Check number of months and if it's high alter the main query for wp-admin -> Posts and other	post type screens.
 		add_action( 'pre_get_posts', array( $this, 'query_last_12_years' ) );
 
-		// Show "Select year" dropdown on top of post list tables.
-		add_action( 'restrict_manage_posts', array( $this, 'years_dropdown' ) );
+		// Disable the standard dropdown for filtering items in the list table by month if there are more than 10 months.
+		add_filter( 'pre_months_dropdown_query',  array( $this, 'maybe_disable_months_dropdown' ), 10, 2 );
+	}
+
+	function maybe_disable_months_dropdown( $months, $post_type ) {
+
+		if ( isset( $this->current_screen_months[ $post_type ] ) ) {
+			$months = $this->current_screen_months[ $post_type ];
+
+			// More than 10 months? Show "Select year" dropdown on top of post list tables instead.
+			if ( is_array( $months ) && count( $months ) > self::limit ) {
+				add_action( 'restrict_manage_posts', array( $this, 'years_dropdown' ) );
+				return array();
+			}
+		}
+
+		return $months;
 	}
 
 	/**
-	 * Tweak WP_Query for the "Last 12 months" and "All years" options.
+	 * Check if there are more than 10 months.
+	 * If so, tweak WP_Query for the "Last 12 months" and "All years" options.
 	 *
 	 * @param WP_Query $query The WP_Query instance (passed by reference).
 	 */
 	function query_last_12_years( $query ) {
 		// Do not run if not in wp-admin, if POST request is being processed, or if not on wp-admin -> Posts kind of screen.
-		if ( ! is_admin() || ! empty( $_POST ) || ! did_action( 'load-edit.php' ) ) {
+		if ( ! is_admin() || ! empty( $_POST ) || ! did_action( 'load-edit.php' ) || ! $query->is_main_query() ) {
+			return;
+		}
+
+		$post_type = $query->query_vars['post_type'];
+
+		if ( isset( $this->current_screen_months[ $post_type ] ) ) {
+			$months = $this->current_screen_months[ $post_type ];
+
+		} else {
+			global $wpdb;
+
+			/**
+			 * Using code from WP_List_Table::months_dropdown() to get the months.
+			 */
+			$extra_checks = "AND post_status != 'auto-draft'";
+			if ( ! isset( $_GET['post_status'] ) || 'trash' !== $_GET['post_status'] ) {
+				$extra_checks .= " AND post_status != 'trash'";
+			} elseif ( isset( $_GET['post_status'] ) ) {
+				$extra_checks = $wpdb->prepare( ' AND post_status = %s', $_GET['post_status'] );
+			}
+
+			$months = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT DISTINCT YEAR( post_date ) AS year, MONTH( post_date ) AS month
+					FROM $wpdb->posts
+					WHERE post_type = %s
+					$extra_checks
+					ORDER BY post_date DESC",
+					$post_type
+				)
+			);
+
+			$this->current_screen_months[ $post_type ] = $months;
+		}
+
+		// Not enough months to bother with.
+		if ( count( $months ) <= self::limit ) {
 			return;
 		}
 
