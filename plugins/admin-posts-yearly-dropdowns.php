@@ -51,6 +51,11 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 
 		$post_type = $query->query_vars['post_type'];
 
+		// Only run for Posts, WooCommerce Orders and Subscriptions
+		if ( ! in_array( $post_type, array( 'post', 'shop_order', 'shop_subscription' ) ) ) {
+			return;
+		}
+
 		if ( isset( $this->current_screen_months[ $post_type ] ) ) {
 			$months = $this->current_screen_months[ $post_type ];
 
