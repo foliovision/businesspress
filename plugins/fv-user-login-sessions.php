@@ -28,11 +28,25 @@ class FV_User_Login_Sessions {
       return $item['expiration'] <= time();
     } );
 
+    $limit = 10;
+
     if ( $session_tokens ) : ?>
       <p>
         <span class="description">
           <?php printf( __( 'Found %d active and %d expired login sessions.', 'genesis' ), count( $active_tokens ), count( $expired_tokens ) ); ?>
         </span>
+        <?php if ( count( $active_tokens ) + count( $expired_tokens ) > $limit ) : ?>
+          <?php
+          echo " Showing only first " . $limit . ", click to <a href='#' data-fv-user-login-sessions-more>show all sessions</a>.";
+          ?>
+
+          <style>.fv-user-login-sessions-too-many { display: none; }</style>
+
+          <script>jQuery('[data-fv-user-login-sessions-more]').click(function(e) {
+            e.preventDefault();
+            jQuery('.fv-user-login-sessions-too-many').toggle();
+          });</script>
+        <?php endif; ?>
       </p>
 
       <table class="widefat">
@@ -54,7 +68,7 @@ class FV_User_Login_Sessions {
           <?php foreach ( $tokens as $k => $v ) :
             $count++
             ?>
-            <tr>
+            <tr<?php if ( $count > $limit ) echo " class='fv-user-login-sessions-too-many'"; ?>>
               <td><abbr title="<?php echo date( 'r', $v['login'] ); ?>"><?php echo date( 'Y-m-d', $v['login'] ); ?></abbr></td>
               <td style="background: <?php echo $v['expiration'] > time() ? '#bfb' : '#fbb'; ?>"><abbr title="<?php echo date( 'r', $v['expiration'] ); ?>"><?php echo date( 'Y-m-d', $v['expiration'] ); ?></abbr></td>
               <td><?php echo $v['ip']; ?></td>
