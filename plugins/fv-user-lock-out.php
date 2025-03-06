@@ -208,7 +208,7 @@ All at %4$s
 
         $this->lockout_email($user);
 
-        return new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Too many failed attempts.' ) );
+        return new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Too many failed attempts. Please check your email to log in again.' ) );
       }
     }
 
