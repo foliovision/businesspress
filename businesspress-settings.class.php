@@ -604,7 +604,7 @@ class BusinessPress_Settings {
                     'businesspress-admin-posts-yearly-dropdowns',
                     'admin-posts-yearly-dropdowns',
                     'Yearly dropdowns for posts filtering',
-                    __('The standard list of months in wp-admin -> Posts or WooCommerce Orders and Subscriptions is  is going to show more than 10 months, the years will show instead. Will show only "Last 12 months" by default.', 'businesspress' ) );
+                    __('If the standard list of months in wp-admin -> Posts or WooCommerce Orders and Subscriptions is going to show more than 10 months, the years will show instead. Will show only "Last 12 months" by default.', 'businesspress' ) );
       ?>	      
     </table>           
     <?php
