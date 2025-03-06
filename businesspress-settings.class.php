@@ -426,7 +426,7 @@ class BusinessPress_Settings {
     <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
     <p><?php _e("If you don't have fail2ban available, we recommend <a href='https://wordpress.org/plugins/login-lockdown/' target='_blank'>Login LockDown</a>.", 'businesspress' ); ?></p>
 
-    <p><?php _e('The tranditional IP banning is not effective against botnets. The only way is to block further login attempts on a per account basis:', 'businesspress' ); ?></p>
+    <p><?php _e('Traditional IP banning is not effective against botnets. The only way is to block further login attempts on a per account basis:', 'businesspress' ); ?></p>
     <table class="form-table">
       <?php
       $this->admin_show_setting(
