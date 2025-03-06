@@ -34,6 +34,11 @@ class FV_User_Lock_Out {
     
     $this->remove_lock( $_POST['user_id'] );
 
+    if( function_exists("SimpleLogger") ) {
+      $user = get_user( $_POST['user_id'] );
+      SimpleLogger()->info( 'Admin unlocked locked out user account for: ' . $user->user_email );
+    }
+
     wp_send_json( array( 'message' => 'Done, user will be able to log in again.' ) );
   }
 
@@ -168,6 +173,10 @@ All at %4$s
     $user_id = $user->ID;
   
     $this->remove_lock( $user_id );
+
+    if( function_exists("SimpleLogger") ) {
+      SimpleLogger()->info( 'User unlocked his locked out user account: ' . $user->user_email );
+    }
   
     wp_redirect( add_query_arg( 'unlocked', true, wp_login_url() ) );
     exit;
@@ -175,6 +184,10 @@ All at %4$s
 
   function password_reset( $user ) {
     $this->remove_lock( $user->ID );
+
+    if( function_exists("SimpleLogger") ) {
+      SimpleLogger()->info( 'Password reset unlocked locked out user account for: ' . $user->user_email );
+    }
   }
 
   function password_reset_expiration( $expiration_duration ) {
