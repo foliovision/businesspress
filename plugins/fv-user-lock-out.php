@@ -51,7 +51,7 @@ class FV_User_Lock_Out {
 
     if( $column_name == 'fv_user_lock_out' && $data = $this->is_user_locked_out( $user_id ) ) {
       $content = '<div data-fv_user_lock_out_unlock_wrap="'.$user_id.'">';
-      $content .= '<abbr title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account.">Yes</abbr>';
+      $content .= '<span title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account." style="display: inline-flex; color: #fff; border-radius: 3px; line-height: 30px; padding: 0 0.75rem; margin-right: 0.35rem; background: #AF4c50">Locked Out</span>';
       $content .= '<div class="row-actions"><a href="#" data-fv_user_lock_out_unlock="'.$user_id.'" data-nonce="'.wp_create_nonce('fv_user_lock_out_unlock='.$user_id).'">Unlock</a></div>';
       $content .= '</div>';
 
