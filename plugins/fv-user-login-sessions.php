@@ -20,13 +20,15 @@ class FV_User_Login_Sessions {
 
     $session_tokens = get_user_meta( $user->ID, 'session_tokens', true );
 
-    $active_tokens = array_filter( $session_tokens, function( $item ) {
-      return $item['expiration'] > time();
-    } );
+    if ( is_array( $session_tokens ) ) {
+      $active_tokens = array_filter( $session_tokens, function( $item ) {
+        return $item['expiration'] > time();
+      } );
 
-    $expired_tokens = array_filter( $session_tokens, function( $item ) {
-      return $item['expiration'] <= time();
-    } );
+      $expired_tokens = array_filter( $session_tokens, function( $item ) {
+        return $item['expiration'] <= time();
+      } );
+    }
 
     $limit = 10;
 
