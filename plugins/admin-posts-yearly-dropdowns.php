@@ -6,37 +6,103 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 
+	const limit = 10;
+
+	private $current_screen_months = array();
+
 	function __construct() {
 
-		// Disable the standard dropdown for filtering items in the list table by month.
-		add_filter( 'disable_months_dropdown', '__return_true' );
-
-		// Tweak WP_Query for the "Last 12 months" and "All years" options.
+		// Check number of months and if it's high alter the main query for wp-admin -> Posts and other	post type screens.
 		add_action( 'pre_get_posts', array( $this, 'query_last_12_years' ) );
 
-		// Show "Select year" dropdown on top of post list tables.
-		add_action( 'restrict_manage_posts', array( $this, 'years_dropdown' ) );
+		// Make sure the monthly dropdown is enabled as we might need it if there are not enough months.
+		add_filter( 'disable_months_dropdown', '__return_false', PHP_INT_MAX );
+
+		// Disable the standard dropdown for filtering items in the list table by month if there are more than 10 months.
+		add_filter( 'pre_months_dropdown_query',  array( $this, 'maybe_disable_months_dropdown' ), 10, 2 );
+	}
+
+	function maybe_disable_months_dropdown( $months, $post_type ) {
+
+		if ( isset( $this->current_screen_months[ $post_type ] ) ) {
+			$months = $this->current_screen_months[ $post_type ];
+
+			// More than 10 months? Show "Select year" dropdown on top of post list tables instead.
+			if ( is_array( $months ) && count( $months ) > self::limit ) {
+				add_action( 'restrict_manage_posts', array( $this, 'years_dropdown' ) );
+				return array();
+			}
+		}
+
+		return $months;
 	}
 
 	/**
-	 * Tweak WP_Query for the "Last 12 months" and "All years" options.
+	 * Check if there are more than 10 months.
+	 * If so, tweak WP_Query for the "Last 12 months" and "All years" options.
 	 *
 	 * @param WP_Query $query The WP_Query instance (passed by reference).
 	 */
 	function query_last_12_years( $query ) {
-		if ( ! empty( $query->query['year'] ) ) {
-			// Deal with "Last 12 months" option.
-			if ( 'last-12-months' === $query->query['year'] ) {
-				$query->set( 'date_query', array(
-					array(
-						'after' => '12 months ago'
-					)
-				) );
+		// Do not run if not in wp-admin, if POST request is being processed, or if not on wp-admin -> Posts kind of screen.
+		if ( ! is_admin() || ! empty( $_POST ) || ! did_action( 'load-edit.php' ) || ! $query->is_main_query() ) {
+			return;
+		}
 
-			// Deal with the "All year" option.
-			} else if ( 'all' === $query->query['year'] ) {
+		$post_type = $query->query_vars['post_type'];
+
+		// Only run for Posts, WooCommerce Orders and Subscriptions
+		if ( ! in_array( $post_type, array( 'post', 'shop_order', 'shop_subscription' ) ) ) {
+			return;
+		}
+
+		if ( isset( $this->current_screen_months[ $post_type ] ) ) {
+			$months = $this->current_screen_months[ $post_type ];
+
+		} else {
+			global $wpdb;
+
+			/**
+			 * Using code from WP_List_Table::months_dropdown() to get the months.
+			 */
+			$extra_checks = "AND post_status != 'auto-draft'";
+			if ( ! isset( $_GET['post_status'] ) || 'trash' !== $_GET['post_status'] ) {
+				$extra_checks .= " AND post_status != 'trash'";
+			} elseif ( isset( $_GET['post_status'] ) ) {
+				$extra_checks = $wpdb->prepare( ' AND post_status = %s', $_GET['post_status'] );
+			}
+
+			$months = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT DISTINCT YEAR( post_date ) AS year, MONTH( post_date ) AS month
+					FROM $wpdb->posts
+					WHERE post_type = %s
+					$extra_checks
+					ORDER BY post_date DESC",
+					$post_type
+				)
+			);
+
+			$this->current_screen_months[ $post_type ] = $months;
+		}
+
+		// Not enough months to bother with.
+		if ( count( $months ) <= self::limit ) {
+			return;
+		}
+
+		if ( ! empty( $query->query['year'] ) ) {
+			// Deal with the "All years" option.
+			if ( 'all' === $query->query['year'] ) {
 				$query->set( 'date_query', false );
 			}
+
+		} else {
+			$query->set( 'date_query', array(
+				array(
+					'after' => '12 months ago'
+				)
+			) );
 		}
 	}
 
@@ -44,9 +110,8 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 	 * Displays a dropdown for filtering items in the list table by year.
 	 *
 	 * Created from the core WordPress months_dropdown() function, but in our case:
-	 * - we default to "Select year" instead of "All years"
+	 * - we default to "Last 12 years" instead of "All years"
 	 * - "All years" has a value of "all"
-	 * - we add "Last 12 years" too
 	 *
 	 * @global wpdb      $wpdb      WordPress database abstraction object.
 	 *
@@ -107,14 +172,12 @@ class BusinessPress_Admin_Posts_Yearly_Dropdowns {
 			return;
 		}
 
-		$year              = isset( $_GET['year'] ) ? (int) $_GET['year'] : 0;
-		$is_last_12_months = isset( $_GET['year'] ) && 'last-12-months' === $_GET['year'];
-		$is_all_years      = isset( $_GET['year'] ) && 'all' === $_GET['year'];
+		$year         = isset( $_GET['year'] ) ? (int) $_GET['year'] : 0;
+		$is_all_years = isset( $_GET['year'] ) && 'all' === $_GET['year'];
 		?>
 		<label for="filter-by-year" class="screen-reader-text"><?php echo get_post_type_object( $post_type )->labels->filter_by_date; ?></label>
 		<select name="year" id="filter-by-year">
-			<option<?php selected( $is_all_years ); ?> value=""><?php _e( 'Select year' ); ?></option>
-			<option<?php selected( $is_last_12_months ); ?> value="last-12-months"><?php _e( 'Last 12 months' ); ?></option>
+			<option value=""><?php _e( 'Last 12 months' ); ?></option>
 			<?php
 			foreach ( $years as $arc_row ) {
 				if ( 0 === (int) $arc_row->year ) {

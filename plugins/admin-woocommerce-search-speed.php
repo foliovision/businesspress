@@ -55,7 +55,7 @@ class BusinessPress_Admin_WooCommerce_Seach_Speed {
      * BusinessPress 'Yearly dropdowns for posts filtering' setting is on,
      * we search in last year by default.
      *
-     * We also give use an easy button to search in all years. 
+     * So we give user an easy button to search in all years. 
      */
     if ( ! empty( $_GET['post_type'] ) && in_array( $_GET['post_type'], array( 'shop_order', 'shop_subscription' ) ) ) {
       add_action(
@@ -64,10 +64,8 @@ class BusinessPress_Admin_WooCommerce_Seach_Speed {
           global $businesspress;
 
           // If BusinessPress 'Yearly dropdowns for posts filtering' is on
-          if ( $businesspress->get_setting('admin-posts-yearly-dropdowns') ) {
+          if ( $businesspress->get_setting( 'admin-posts-yearly-dropdowns' ) ) {
             if ( ! empty( $_GET['s'] ) && empty( $_GET['year'] ) ) {
-              $_GET['year'] = 'last-12-months';
-
               add_action( 'admin_footer', array( $this, 'search_notice' ) );
             }
           }
@@ -100,7 +98,7 @@ class BusinessPress_Admin_WooCommerce_Seach_Speed {
    * @return array
    */
   function search_results( $post_type, $term ) {
-    global $wpdb;
+    global $wpdb, $businesspress;
 
     $search_fields = array( '_billing_email' );
 
@@ -110,14 +108,15 @@ class BusinessPress_Admin_WooCommerce_Seach_Speed {
     if ( ! empty( $_GET['year'] ) ) {
       if ( 'all' === $_GET['year'] ) {
 
-      } else if ( 'last-12-months' === $_GET['year'] ) {
-        $date_query_meta = " AND p.post_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
-        $date_query      = " AND p1.post_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
-
       } else {
         $date_query_meta = $wpdb->prepare( " AND DATE_FORMAT(p.post_date, '%%Y') = %s", $_GET['year'] );
         $date_query      = $wpdb->prepare( " AND DATE_FORMAT(p1.post_date, '%%Y') = %s", $_GET['year'] );
       }
+
+    // If BusinessPress 'Yearly dropdowns for posts filtering' is on and no year is selected we search last 12 months only.
+    } elseif ( $businesspress->get_setting( 'admin-posts-yearly-dropdowns' ) ) {
+      $date_query_meta = " AND p.post_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
+      $date_query      = " AND p1.post_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)";
     }
 
     $ids = array_unique( array_merge(

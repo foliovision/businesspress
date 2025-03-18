@@ -34,6 +34,11 @@ class FV_User_Lock_Out {
     
     $this->remove_lock( $_POST['user_id'] );
 
+    if( function_exists("SimpleLogger") ) {
+      $user = get_user( $_POST['user_id'] );
+      SimpleLogger()->info( 'Admin unlocked locked out user account for: ' . $user->user_email );
+    }
+
     wp_send_json( array( 'message' => 'Done, user will be able to log in again.' ) );
   }
 
@@ -46,7 +51,7 @@ class FV_User_Lock_Out {
 
     if( $column_name == 'fv_user_lock_out' && $data = $this->is_user_locked_out( $user_id ) ) {
       $content = '<div data-fv_user_lock_out_unlock_wrap="'.$user_id.'">';
-      $content .= '<abbr title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account.">Yes</abbr>';
+      $content .= '<span title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account." style="display: inline-flex; color: #fff; border-radius: 3px; line-height: 30px; padding: 0 0.75rem; margin-right: 0.35rem; background: #AF4c50">Locked Out</span>';
       $content .= '<div class="row-actions"><a href="#" data-fv_user_lock_out_unlock="'.$user_id.'" data-nonce="'.wp_create_nonce('fv_user_lock_out_unlock='.$user_id).'">Unlock</a></div>';
       $content .= '</div>';
 
@@ -168,6 +173,10 @@ All at %4$s
     $user_id = $user->ID;
   
     $this->remove_lock( $user_id );
+
+    if( function_exists("SimpleLogger") ) {
+      SimpleLogger()->info( 'User unlocked his locked out user account: ' . $user->user_email );
+    }
   
     wp_redirect( add_query_arg( 'unlocked', true, wp_login_url() ) );
     exit;
@@ -175,6 +184,10 @@ All at %4$s
 
   function password_reset( $user ) {
     $this->remove_lock( $user->ID );
+
+    if( function_exists("SimpleLogger") ) {
+      SimpleLogger()->info( 'Password reset unlocked locked out user account for: ' . $user->user_email );
+    }
   }
 
   function password_reset_expiration( $expiration_duration ) {
@@ -195,7 +208,7 @@ All at %4$s
 
         $this->lockout_email($user);
 
-        return new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Too many failed attempts.' ) );
+        return new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Too many failed attempts. Please check your email to log in again.' ) );
       }
     }
 

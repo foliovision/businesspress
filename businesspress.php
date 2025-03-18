@@ -218,14 +218,6 @@ class BusinessPress extends BusinessPress_Plugin {
      */
     add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
 
-    /**
-     * User login sessions
-     */
-
-    // Show on wp-admin user profile screen
-    add_action( 'show_user_profile', array( $this, 'user_session_tokens' ) );
-    add_action( 'edit_user_profile', array( $this, 'user_session_tokens' ) );
-
     parent::__construct();
     
   }
@@ -1358,6 +1350,8 @@ JSH;
 
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
 
+    include( dirname(__FILE__).'/plugins/fv-user-login-sessions.php' );
+
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
   }
   
@@ -2154,58 +2148,6 @@ JSR;
     });
     </script>
     <?php
-    
-  }
-  
-  function user_session_tokens( $user ) {
-    if ( !current_user_can( 'edit_users', $user->ID ) ) {
-      return;
-    }
-
-    ?>
-    <h3 id="login-sessions"><?php esc_html_e( 'Login Sessions', 'businesspress' ); ?></h3>
-    <?php
-
-    $session_tokens = get_user_meta( $user->ID, 'session_tokens', true );
-
-    $active_tokens = array_filter( $session_tokens, function( $item ) {
-      return $item['expiration'] > time();
-    } );
-
-    $expired_tokens = array_filter( $session_tokens, function( $item ) {
-      return $item['expiration'] <= time();
-    } );
-
-    if ( $session_tokens ) : ?>
-      <p><span class="description"><?php printf( __( 'Found %d active and %d expired login sessions.', 'genesis' ), count( $active_tokens ), count( $expired_tokens ) ); ?></span></p>
-
-      <table class="widefat">
-        <thead>
-          <tr>
-            <td>Login Time</td>
-            <td>Expiration Time</td>
-            <td>IP Address</td>
-            <td>User Agent</td>
-          </tr>
-        </thead>
-        <?php foreach( array(
-          $active_tokens,
-          $expired_tokens
-        ) as $tokens ) : ?>
-          <?php foreach ( $tokens as $k => $v ) : ?>
-            <tr>
-              <td><abbr title="<?php echo date( 'r', $v['login'] ); ?>"><?php echo date( 'Y-m-d', $v['login'] ); ?></abbr></td>
-              <td style="background: <?php echo $v['expiration'] > time() ? '#bfb' : '#fbb'; ?>"><abbr title="<?php echo date( 'r', $v['expiration'] ); ?>"><?php echo date( 'Y-m-d', $v['expiration'] ); ?></abbr></td>
-              <td><?php echo $v['ip']; ?></td>
-              <td><?php echo $v['ua']; ?></td>
-            </tr>
-          <?php endforeach; ?>
-        <?php endforeach; ?>
-      </table>
-
-    <?php else : ?>
-      <p><span class="description"><?php esc_html_e( 'No login sessions found.', 'genesis' ); ?></span></p>
-    <?php endif;
 
   }
   
