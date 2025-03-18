@@ -1357,6 +1357,8 @@ JSH;
     }
 
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
+
+    include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
   }
   
   
