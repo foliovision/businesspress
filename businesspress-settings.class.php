@@ -183,7 +183,11 @@ class BusinessPress_Settings {
       e.preventDefault();
       
       var anchor = $(this).attr('href').substring(1);
-      window.location.hash = anchor;
+      if ( history.pushState ) {
+        history.pushState( null, null, '#' + anchor );
+      } else {
+        location.hash = '#' + anchor;
+      }
       tab_switch(anchor);
     });
     
