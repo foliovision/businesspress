@@ -786,6 +786,18 @@ class BusinessPress extends BusinessPress_Plugin {
       }
     }
 
+    // Check HTTP_X_FORWARDED_FOR header for non-IP addresses
+    if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+      $forwarded_ips = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+      foreach ( $forwarded_ips as $ip ) {
+        $ip = trim( $ip );
+        if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 ) ) {
+          $match = 'invalid_ip_in_x_forwarded_for';
+          break;
+        }
+      }
+    }
+
     if( $match ) {
       $this->fail2ban_openlog();
       syslog( LOG_INFO,'BusinessPress WAF - '.$match.' request - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
