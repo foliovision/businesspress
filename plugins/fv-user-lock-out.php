@@ -241,11 +241,29 @@ All at %4$s
     return $errors;
   }
 
+  /**
+   * Record number of bad login attempts and last time of bad login attempt.
+   * Not if user just provided the username while the email address is required.
+   * 
+   * @param string $username
+   * @param WP_Error $error Only available with WordPress 5.4 and later.
+   *
+   * @return void
+   */
   function wp_login_failed( $username, $error = false ) {
 
     // Ignore if using "Require Email Address for Login"
     if( $error && $error->get_error_code() == 'email_required' ) {
       return;
+    }
+
+    // If using WordPress before 5.4, we need to check if $_POST['log'] is not an email address
+    if ( ! is_email( $_POST['log'] ) ) {
+      global $businesspress;
+      // And if we have "Require Email Address for Login" enabled, then we don't need to record anything as it's a login attempt that cannot succeed
+      if ( $businesspress->get_setting( 'login-email-address' ) ) {
+        return;
+      }
     }
 
     $user = get_user_by( 'login', $username );
