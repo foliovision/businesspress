@@ -1592,11 +1592,7 @@ JSH;
       
       if( empty($this->aOptions['admin-dropdown']) ) {
         $this->aOptions['admin-dropdown'] = true;
-      }
-
-      if( empty($this->aOptions['admin-woocommerce-search-speed']) ) {
-        $this->aOptions['admin-woocommerce-search-speed'] = true;
-      }      
+      }    
 
       $this->aOptions['version'] = BusinessPress::VERSION;
       if( is_multisite() ){
