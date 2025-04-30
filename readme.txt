@@ -45,6 +45,8 @@ Plugin by default moves the admin notices into Dashboard -> Notices screen where
 
 Plugin also supports fail2ban, see install instructions.
 
+Login Lockout makes sure any user account that gets repeated bad login attempts (even from different IP addresses) gets locked down to ensure the password does not get guessed. User then gets an "Failed login attempts detected" email letting him unlock the account and reminding him to use a strong password.
+
 **Tweaks**
 
 * Enable Google style results - Gives you similar layout and keyword highlight.
@@ -56,6 +58,12 @@ Plugin also supports fail2ban, see install instructions.
 * Disables the "Password Changed" admin email notifications when a Subscriber level user changes email address
 * Alphabetically sorting the wp-admin -> Settings menu, making it much easier to find any settings screen!
 * Hide Password Protected Posts - Password protected posts won't show up anywhere unless you have the direct link or your are the admin or editor.
+* WooCommerce Search Speed - Speed up the search by only searching the billing email address and not shipping nor billing address.
+* Yearly dropdowns for posts filtering - If the standard list of months in wp-admin -> Posts or WooCommerce Orders and Subscriptions is going to show more than 10 months, the years will show instead. Will show only "Last 12 months" by default.
+
+**WAF**
+
+Detect bad requests and log the issue for fail2ban to take action: https://foliovision.com/wordpress/plugins/businesspress/malicious-requests-businesspress
 
 **Credits**
 
@@ -92,6 +100,20 @@ Guides:
 * [How to block malicious web requests with BusinessPress](https://foliovision.com/wordpress/plugins/businesspress/malicious-requests-businesspress)
 
 == Changelog ==
+
+= 1.2 - 2025-04-30 =
+
+* Tested up to: 6.8
+* New Setting: WooCommerce Search Speed: Speed up the search by only searching the billing email address and not shipping nor billing address.
+* New Setting: Yearly dropdowns for posts filtering: If the standard list of months in wp-admin -> Posts or WooCommerce Orders and Subscriptions is going to show more than 10 months, the years will show instead. Will show only "Last 12 months" by default.
+* Login Lockout: Admin interface: Make the flag in users table red to not go unnoticed
+* Login Lockout: Ignore HEAD requests which are used by Outlook to check links in emails
+* Login Lockout: Simple History support
+* Simple History: Remove wp-admin add-on ads etc.
+* User login sessions: Limit to last 10 rows, add button to show the rest
+* WAF: Ignore bad entries in X-Forwarded-For HTTP header
+* Bugfix: Login Lockout: Fix for WordPress < 5.4
+* Bugfix: Login Lockout: Should occur on 21th bad login attempt, it would happen on 22th
 
 = 1.1 - 2024-12-31 =
 
