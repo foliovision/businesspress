@@ -288,6 +288,10 @@ All at %4$s
       update_user_meta( $user->ID, '_fv_bad_logins_count', $count );
       update_user_meta( $user->ID, '_fv_bad_logins_last', time() );
     }
+
+    if( $this->is_user_locked_out( $user->ID ) ) {
+      $this->lockout_email($user);
+    }
   }
 
 }
