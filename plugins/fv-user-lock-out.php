@@ -144,6 +144,12 @@ All at %4$s
 
   function login_form_unlock() {
 
+    // Stop processing HEAD request which might come from Outlook
+    if ( ! empty( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
+      wp_redirect( wp_login_url() );
+      exit;
+    }
+
     if ( isset( $_GET['error'] ) ) {
       $errors = new WP_Error();
       if ( 'invalidkey' === $_GET['error'] ) {
