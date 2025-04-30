@@ -1594,10 +1594,6 @@ JSH;
         $this->aOptions['admin-dropdown'] = true;
       }
 
-      if( empty($this->aOptions['admin-posts-yearly-dropdowns']) ) {
-        $this->aOptions['admin-posts-yearly-dropdowns'] = true;
-      }
-
       if( empty($this->aOptions['admin-woocommerce-search-speed']) ) {
         $this->aOptions['admin-woocommerce-search-speed'] = true;
       }      
