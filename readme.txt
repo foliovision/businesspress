@@ -101,6 +101,12 @@ Guides:
 
 == Changelog ==
 
+= 1.3 - 2025-05-21 =
+
+* Simple History: "History menu position" should be "Inside dashboard menu item" as by default it's above "Posts", so we force this setting
+* Simple History: Settings -> "Show history" -> "in the admin bar" should be disabled for performance reasons, so we force this setting
+* Simple History: Clean-up settings screen for version 5.11.0
+
 = 1.2 - 2025-04-30 =
 
 * Tested up to: 6.8
