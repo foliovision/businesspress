@@ -45,3 +45,11 @@ add_action(
 		}
 	}
 );
+
+// Settings -> "History menu position" should be "Inside dashboard menu item" as by default it's above "Posts"
+add_filter(
+	'simple_history/admin_menu_location',
+	function( $location ) {
+		return 'inside_dashboard';
+	}
+);
