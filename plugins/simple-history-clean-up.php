@@ -53,3 +53,7 @@ add_filter(
 		return 'inside_dashboard';
 	}
 );
+
+// Settings -> "Show history" -> "in the admin bar" should be disabled for performance reasons
+add_filter( 'simple_history_show_in_admin_bar', '__return_false' );
+
