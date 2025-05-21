@@ -34,10 +34,32 @@ add_filter(
 add_action(
 	'admin_head',
 	function() {
+		// Target Simple History dashboard page
 		if ( ! empty( $_GET['page'] ) && 'simple_history_admin_menu_page' === $_GET['page'] ) {
+			businesspress_remove_simple_history_texts();
+
 			?>
 			<style>
-				.sh-PageHeader {
+				.sh-PageHeader, .sh-NotificationBar, .sh-PremiumFeaturesPostbox-button {
+					display: none;
+				}
+			</style>
+			<?php
+
+		// Target Simple History settings page
+		} else if ( ! empty( $_GET['page'] ) && 'simple_history_settings_page' === $_GET['page'] ) {
+			businesspress_remove_simple_history_texts();
+
+			?>
+			<style>
+				.sh-PageHeader-rightLink a[href*=premium], /* Add-ons link in header */
+				.sh-NotificationBar, /* Yellow bar on top of the page */
+				.sh-PremiumFeaturesPostbox, /* Right sidebar ad boxes */
+				.sh-StatsDashboard-dateRangeControls-description, /* Upgrade to Premium to get access to more date ranges. */
+				.sh-StatsDashboard-card:has(.is-blurred), /* blurred graphs on "Stats & Summaries" page */
+				.sh-PremiumFeatureBadge, /* Greed "New" badge in header links */
+				a.sh-ExternalLink[href*=premium_upsell], /* "Upgrade to Simple History Premium to set this to any number of days." link */
+				.sh-PageNav a[href*=promo_upsell] /* "Upgrade to Premium for more features" link in header */{
 					display: none;
 				}
 			</style>
@@ -46,6 +68,23 @@ add_action(
 	}
 );
 
+function businesspress_remove_simple_history_texts() {
+	add_filter(
+		'gettext',
+		function( $translation, $text, $domain ) {
+			if ( 'simple-history' === $domain ) {
+				if (
+					stripos( $text, 'a nice review at WordPress.org' ) !== false
+				) {
+					return '';
+				}
+			}
+			return $translation;
+		},
+		10,
+		3
+	);
+}
 
 /**
  * Force Simple History settings to BusinessPress defaults.
