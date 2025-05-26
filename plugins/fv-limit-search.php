@@ -52,6 +52,9 @@ class FV_Limit_Search {
         if ( $businesspress->get_setting('search-results') ) {
           add_filter( 'pre_handle_404', array( $this, 'status_header' ) );
 
+          // Block SearchWP 3 search query.
+          add_filter( 'searchwp_short_circuit', '__return_true' );
+
           // Block core WordPress search query.
           add_filter( 'posts_search', array( $this, 'modify_search_query' ), 10, 2 );
 
