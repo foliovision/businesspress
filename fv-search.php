@@ -52,6 +52,7 @@ class FV_Search {
       $objPost->post_status = 'publish';
       $objPost->comment_status = 'closed';
       $objPost->ping_status = 'closed';
+      $objPost->post_author = 0;
       
       $wp_query->posts = 1;
       $wp_query->post_count = 1;
