@@ -101,6 +101,10 @@ Guides:
 
 == Changelog ==
 
+= 1.4 - 2025-05-22 =
+
+* Reverting: WAF: Ignore bad entries in X-Forwarded-For HTTP header: It would cause issues with the CCBill payment gateway
+
 = 1.3 - 2025-05-21 =
 
 * Simple History: "History menu position" should be "Inside dashboard menu item" as by default it's above "Posts", so we force this setting

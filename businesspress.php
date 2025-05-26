@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 1.3
+Version: 1.4
 Author: Foliovision
 Author URI: http://foliovision.com
 Requires PHP: 5.6
@@ -14,7 +14,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '1.3';
+  const VERSION = '1.4';
   
   
   private $disallowed_caps_default = array( 
@@ -782,18 +782,6 @@ class BusinessPress extends BusinessPress_Plugin {
           if( stripos( $vars, $keyword ) !== false ) {
             $match = 'call_user_func_array with '.$keyword;
           }
-        }
-      }
-    }
-
-    // Check HTTP_X_FORWARDED_FOR header for non-IP addresses
-    if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-      $forwarded_ips = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
-      foreach ( $forwarded_ips as $ip ) {
-        $ip = trim( $ip );
-        if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 ) ) {
-          $match = 'invalid_ip_in_x_forwarded_for';
-          break;
         }
       }
     }
