@@ -97,3 +97,8 @@
 .fv-searchwp-taxonomy-results .businesspress-search-result:last-child {
     margin-bottom: 0;
 }
+
+/* Hide common entry footer content elements */
+.entry-meta {
+    display: none;
+}
