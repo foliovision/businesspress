@@ -548,6 +548,13 @@ class BusinessPress_Settings {
                     'search-results-domain',
                     'Enable domain name',
                     sprintf( __('Include domain name of searched website in the search results', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
+
+              $this->admin_show_setting(
+                    'businesspress-limit-search-requests-by-ip',
+                    'limit-search-requests-by-ip',
+                    __('Limit Search requests by IP', 'businesspress' ),
+                    __('Allows up to 5 search requests per minute per IP', 'businesspress' )
+              );
         ?>
       </table>
       <?php

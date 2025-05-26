@@ -12,6 +12,9 @@ class FV_Search {
 
   var $iSearch_max_num_pages = 0;
 
+  // Used if "Limit Search requests by IP" settings is enabled and IP address makes too many search requests.
+  var $rate_limited = false;
+
   function __construct() {
     if( is_admin() ) return;
     
@@ -228,6 +231,9 @@ class FV_Search {
         };
       }
       
+    } else if ( $this->rate_limited ) {
+      $html .= '<div class="businesspress-search-no-result"><p>'.__('Too many search requests. Please wait a minute before trying again.', 'businesspress').'</p></div>';
+
     } else {
       $html .= '<div class="businesspress-search-no-result"><p>'.__('Your search did not match any documents.','businesspress').'</p>';
       $html .= '<p>'.__('Suggestions:','businesspress').'</p>';
@@ -287,6 +293,7 @@ class FV_Search {
 
 }
 
+global $FV_Search;
 $FV_Search = new FV_Search;
 
 endif;

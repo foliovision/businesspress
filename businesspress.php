@@ -1136,6 +1136,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['disable-user-login-scanning'] = isset($_POST['businesspress-disable-user-login-scanning']) && $_POST['businesspress-disable-user-login-scanning'] == 1 ? true : false;
 
+      $this->aOptions['limit-search-requests-by-ip'] = isset($_POST['businesspress-limit-search-requests-by-ip']) && $_POST['businesspress-limit-search-requests-by-ip'] == 1 ? true : false;
+
       $this->aOptions['login-lockout'] = isset($_POST['businesspress-login-lockout']) && $_POST['businesspress-login-lockout'] == 1 ? true : false;
 
       $this->aOptions['login-email-address'] = isset($_POST['businesspress-login-email-address']) && $_POST['businesspress-login-email-address'] == 1 ? true : false;
@@ -1363,6 +1365,10 @@ JSH;
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
 
     include( dirname(__FILE__).'/plugins/fv-user-login-sessions.php' );
+
+    if ( $this->get_setting('limit-search-requests-by-ip') ) {
+      include( dirname(__FILE__).'/plugins/fv-limit-search.php' );
+    }
 
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
   }
