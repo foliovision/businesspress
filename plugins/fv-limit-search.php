@@ -89,7 +89,7 @@ class FV_Limit_Search {
       $one_minute_ago
     ) );
     
-    return $count >= 7;
+    return $count >= 10;
   }
 
   function log_search( $search_term, $ip_address, $blocked = false ) {
