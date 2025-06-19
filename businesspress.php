@@ -214,6 +214,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'pre_get_posts', array( $this, 'hide_password_protected_posts' ) );
 
     /**
+     * Change "Site Health Status" label to indicate that only BusinessPress admins see this
+     */
+    add_filter( 'gettext', array( $this, 'admin_site_health_title_change' ), 100, 3 );
+
+    /**
      * Error reporting
      */
     add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
@@ -288,8 +293,15 @@ class BusinessPress extends BusinessPress_Plugin {
     <?php
   }
   
-  
-  
+  function admin_site_health_title_change( $translation, $text, $domain ) {
+    if ( $this->get_setting('restrictions_enabled') ) {
+      if ( 'Site Health Status' === $text ) {
+        return $translation . '<small>(BusinessPress admins only)</small>';
+      }
+    }
+
+    return $translation;
+  }
   
   function admin_style() {
     if( is_admin() && isset($_GET['page']) && $_GET['page'] == 'businesspress' ) {
