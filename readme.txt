@@ -101,6 +101,10 @@ Guides:
 
 == Changelog ==
 
+= 1.4.1 - 2025-06-19 =
+
+* Site Health Status: It only shows to allowed admins, if restrictions are on, so make a note of it
+
 = 1.4 - 2025-05-22 =
 
 * Reverting: WAF: Ignore bad entries in X-Forwarded-For HTTP header: It would cause issues with the CCBill payment gateway
