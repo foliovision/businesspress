@@ -315,10 +315,10 @@ class BusinessPress_Notices {
         // EDD
         'The purchase receipt has been resent.',
         'The reports have been refreshed.',
-        'The payment has been created.',
-        'The payment has been deleted.',
-        'The payment has been successfully updated.',
-        'Customer successfully deleted',
+        'The order has been ',
+        'The payment has been ',
+        'Customer successfully ',
+        'Order successfully ',
 
         // edd-per-product-emails
         'Email added.',
