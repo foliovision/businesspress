@@ -320,6 +320,18 @@ class BusinessPress_Notices {
         'Customer successfully ',
         'Order successfully ',
 
+        // EDD Recurring Billing
+        'Subscription cancelled successfully.',
+        'Subscription created successfully.',
+        'Subscription deleted successfully.',
+        'Subscription reactivated successfully.',
+        'Subscription updated successfully.',
+        'Subscription note added successfully.',
+        'Subscription note could not be added.',
+        'Renewal payment recorded successfully.',
+        'Renewal payment could not be recorded.',
+        'Retry succeeded! The subscription has been renewed successfully.',
+
         // edd-per-product-emails
         'Email added.',
         'Email updated.',
