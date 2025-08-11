@@ -344,9 +344,9 @@ class BusinessPress extends BusinessPress_Plugin {
         if(
           // this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
           count($roles) == 2 && ( $roles[0] == 'subscriber' && $roles[1] == 'bbp_participant' || $roles[0] == 'bbp_participant' && $roles[1] == 'subscriber' ) ||
-          count($roles) > 0 && $roles[0] == 'subscriber' ||
+          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'subscriber' ||
           // Easy Digital Downloads with subscriptions
-          count($roles) > 0 && $roles[0] == 'edd_subscriber' ||
+          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'edd_subscriber' ||
           count($roles) == 0
         ) {
           add_filter('show_admin_bar', '__return_false');
