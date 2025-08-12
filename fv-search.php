@@ -8,7 +8,11 @@ if( !class_exists('FV_Search') ) :
 
 class FV_Search {
   
-  var $aSearchResults = false;
+  var $aSearchResults = array();
+
+  var $iSearch_found_posts = 0;
+
+  var $iSearch_post_count = 0;
 
   var $iSearch_max_num_pages = 0;
 
