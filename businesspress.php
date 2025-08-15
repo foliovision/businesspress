@@ -1371,6 +1371,10 @@ JSH;
     }
 
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
+
+    include( dirname(__FILE__) . '/plugins/improve-user-activation.php' );
+
+    include( dirname(__FILE__) . '/plugins/login-after-password-reset.php' );
   }
   
   
