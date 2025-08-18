@@ -288,8 +288,9 @@ All at %4$s
       update_user_meta( $user->ID, '_fv_bad_logins_count', $count );
       update_user_meta( $user->ID, '_fv_bad_logins_last', time() );
     }
-
-    if( $this->is_user_locked_out( $user->ID ) ) {
+    
+    // user_status is 0 if the user is active, otherwise do not send the email
+    if ( $this->is_user_locked_out( $user->ID ) && 0 === intval( $user->user_status ) ) {
       $this->lockout_email($user);
     }
   }
