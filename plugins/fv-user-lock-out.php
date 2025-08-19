@@ -212,7 +212,10 @@ All at %4$s
     if( $user ) {
       if( $this->is_user_locked_out( $user->ID ) ) {
 
-        $this->lockout_email($user);
+        // user_status is 0 if the user is active, otherwise do not send the email
+        if ( 0 === intval( $user->user_status ) ) {
+          $this->lockout_email($user);
+        }
 
         return new WP_Error( 'authentication_failed', __( '<strong>Error</strong>: Too many failed attempts. Please check your email to log in again.' ) );
       }
