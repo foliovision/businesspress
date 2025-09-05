@@ -317,8 +317,10 @@ class BusinessPress_Notices {
         'The reports have been refreshed.',
         'The order has been ',
         'The payment has been ',
+        'Customer email ',
         'Customer successfully ',
         'Order successfully ',
+        'Primary email updated for customer.',
 
         // EDD Recurring Billing
         'Subscription cancelled successfully.',
