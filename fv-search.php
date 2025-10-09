@@ -198,7 +198,10 @@ class FV_Search {
 
           $sExcerpt = trim(implode('&hellip; ',$aExcerpt));
           if( strlen($sExcerpt) == 0 ) {
-            $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+            $sExcerpt = get_post_meta( $post->ID, '_aioseo_description', true );
+            if ( ! $sExcerpt ) {
+              $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+            }
             $sExcerpt = apply_filters( 'businesspress_fv_search_seo_description', $sExcerpt, $post->ID );
 
           } else if( stripos($sExcerpt,'&hellip;') === false && $sExcerpt[strlen($sExcerpt)-1] != '.' ) {
