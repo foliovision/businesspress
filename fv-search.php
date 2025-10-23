@@ -60,7 +60,8 @@ class FV_Search {
       $objPost->comment_status = 'closed';
       $objPost->ping_status = 'closed';
       $objPost->post_author = 0;
-      
+      $objPost->post_parent = 0;
+
       $wp_query->posts = 1;
       $wp_query->post_count = 1;
       $wp_query->found_posts = 1;
