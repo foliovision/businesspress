@@ -450,13 +450,16 @@ class BusinessPress_Notices {
         //echo "-->\n";
         
       }
-      
+
+      // Do not store new notices if we are dismissing a notice.
+      if ( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'businesspress_notice_dismiss' ) ) {
+        if ( isset( $_GET['dismiss'] ) ) {
+          return;
+        }
+      }
+
       $this->save($aNew);
     }
-    
-    //$html->find('div.updated');
-    //$html->find('div.notice');
-
   }
   
 
@@ -464,7 +467,6 @@ class BusinessPress_Notices {
   
   function trap() {
     echo "<!--BusinessPress_Notices::trap()-->\n";
-    //echo "<p>BusinessPress_Notices::trap()</p>";
     
     ob_start();
     add_action( 'all_admin_notices', array( $this, 'store'), 999999 );
