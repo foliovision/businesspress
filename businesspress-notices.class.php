@@ -183,7 +183,22 @@ class BusinessPress_Notices {
     <?php
   }
   
-  
+  private function show_notice( $html ) {
+    // Show the EDD notices as they are set to be revealed by edd-admin.js.
+    $html = str_replace( ' edd-hidden', '', $html );
+
+    // Add .inline to notice class attribute as otherwise edd-admin.js would hide them and then reveal again.
+    $html = preg_replace_callback(
+      '~(class=[\'"][^\'"]+)([\'"])~',
+      function( $matches ) {
+        $matches[0] = str_replace( $matches[1] . $matches[2], $matches[1] . ' inline' . $matches[2], $matches[0] );
+        return $matches[0];
+      },
+      $html
+    );
+
+    echo $html;
+  }
   
   
   function screen() {
@@ -226,7 +241,8 @@ class BusinessPress_Notices {
           <?php if( $sDismiss ) : ?></strong><?php endif; ?>
           <?php echo $sDismiss; ?>
         </p>
-        <?php echo $aNotice['html'];
+        <?php
+        $this->show_notice( $aNotice['html'] );
       }
       
       if( $iNew == 0) _e('No new notices.', 'businesspress' )
@@ -244,7 +260,8 @@ class BusinessPress_Notices {
         <p>
           <?php echo date('Y-m-d h:m:s',$aNotice['time']); ?>
         </p>
-        <?php echo $aNotice['html'];
+        <?php
+        $this->show_notice( $aNotice['html'] );
       }
       
       if( $iViewed == 0) _e('No dismissed notices.', 'businesspress' )
