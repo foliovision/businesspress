@@ -553,7 +553,7 @@ class BusinessPress_Settings {
                     'businesspress-limit-search-requests-by-ip',
                     'limit-search-requests-by-ip',
                     __('Limit Search requests by IP', 'businesspress' ),
-                    __('Allows up to 5 search requests per minute per IP', 'businesspress' )
+                    __('Allows up to 10 search requests per minute per IP', 'businesspress' )
               );
         ?>
       </table>

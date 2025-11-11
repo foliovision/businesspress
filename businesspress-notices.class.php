@@ -183,7 +183,22 @@ class BusinessPress_Notices {
     <?php
   }
   
-  
+  private function show_notice( $html ) {
+    // Show the EDD notices as they are set to be revealed by edd-admin.js.
+    $html = str_replace( ' edd-hidden', '', $html );
+
+    // Add .inline to notice class attribute as otherwise edd-admin.js would hide them and then reveal again.
+    $html = preg_replace_callback(
+      '~(class=[\'"][^\'"]+)([\'"])~',
+      function( $matches ) {
+        $matches[0] = str_replace( $matches[1] . $matches[2], $matches[1] . ' inline' . $matches[2], $matches[0] );
+        return $matches[0];
+      },
+      $html
+    );
+
+    echo $html;
+  }
   
   
   function screen() {
@@ -226,7 +241,8 @@ class BusinessPress_Notices {
           <?php if( $sDismiss ) : ?></strong><?php endif; ?>
           <?php echo $sDismiss; ?>
         </p>
-        <?php echo $aNotice['html'];
+        <?php
+        $this->show_notice( $aNotice['html'] );
       }
       
       if( $iNew == 0) _e('No new notices.', 'businesspress' )
@@ -244,7 +260,8 @@ class BusinessPress_Notices {
         <p>
           <?php echo date('Y-m-d h:m:s',$aNotice['time']); ?>
         </p>
-        <?php echo $aNotice['html'];
+        <?php
+        $this->show_notice( $aNotice['html'] );
       }
       
       if( $iViewed == 0) _e('No dismissed notices.', 'businesspress' )
@@ -315,10 +332,24 @@ class BusinessPress_Notices {
         // EDD
         'The purchase receipt has been resent.',
         'The reports have been refreshed.',
-        'The payment has been created.',
-        'The payment has been deleted.',
-        'The payment has been successfully updated.',
-        'Customer successfully deleted',
+        'The order has been ',
+        'The payment has been ',
+        'Customer email ',
+        'Customer successfully ',
+        'Order successfully ',
+        'Primary email updated for customer.',
+
+        // EDD Recurring Billing
+        'Subscription cancelled successfully.',
+        'Subscription created successfully.',
+        'Subscription deleted successfully.',
+        'Subscription reactivated successfully.',
+        'Subscription updated successfully.',
+        'Subscription note added successfully.',
+        'Subscription note could not be added.',
+        'Renewal payment recorded successfully.',
+        'Renewal payment could not be recorded.',
+        'Retry succeeded! The subscription has been renewed successfully.',
 
         // edd-per-product-emails
         'Email added.',
@@ -436,13 +467,16 @@ class BusinessPress_Notices {
         //echo "-->\n";
         
       }
-      
+
+      // Do not store new notices if we are dismissing a notice.
+      if ( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ), 'businesspress_notice_dismiss' ) ) {
+        if ( isset( $_GET['dismiss'] ) ) {
+          return;
+        }
+      }
+
       $this->save($aNew);
     }
-    
-    //$html->find('div.updated');
-    //$html->find('div.notice');
-
   }
   
 
@@ -450,7 +484,6 @@ class BusinessPress_Notices {
   
   function trap() {
     echo "<!--BusinessPress_Notices::trap()-->\n";
-    //echo "<p>BusinessPress_Notices::trap()</p>";
     
     ob_start();
     add_action( 'all_admin_notices', array( $this, 'store'), 999999 );

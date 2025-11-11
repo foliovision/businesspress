@@ -37,13 +37,15 @@ function DRA_Force_Auth_Error() {
  */
 function DRA_Disable_Via_Filters() {
     
-	// Filters for WP-API version 1.x
-    add_filter( 'json_enabled', '__return_false' );
-    add_filter( 'json_jsonp_enabled', '__return_false' );
+    if ( ! fv_DRA_is_allowed_endpoint() ) {
+        // Filters for WP-API version 1.x
+        add_filter( 'json_enabled', '__return_false' );
+        add_filter( 'json_jsonp_enabled', '__return_false' );
 
-    // Filters for WP-API version 2.x
-    add_filter( 'rest_enabled', '__return_false' );
-    add_filter( 'rest_jsonp_enabled', '__return_false' );
+        // Filters for WP-API version 2.x
+        add_filter( 'rest_enabled', '__return_false' );
+        add_filter( 'rest_jsonp_enabled', '__return_false' );
+    }
 
     // Remove REST API info from head and headers
     remove_action( 'xmlrpc_rsd_apis', 'rest_output_rsd' );
@@ -59,10 +61,23 @@ function DRA_Disable_Via_Filters() {
  */
 function DRA_only_allow_logged_in_rest_access( $access ) {
 
-	if( ! is_user_logged_in() ) {
+	if( ! fv_DRA_is_allowed_endpoint() && ! is_user_logged_in() ) {
         return new WP_Error( 'rest_cannot_access', __( 'Only authenticated users can access the REST API.', 'disable-json-api' ), array( 'status' => rest_authorization_required_code() ) );
     }
 
     return $access;
 	
+}
+
+function fv_DRA_is_allowed_endpoint() {
+    foreach(
+        array(
+            '/wp-json/edd/webhook'
+        ) as $path
+    );
+    if ( stripos( $_SERVER['REQUEST_URI'], $path ) === 0 ) {
+        return true;
+    }
+
+    return false;
 }

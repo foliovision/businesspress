@@ -3,7 +3,7 @@
 Plugin Name: BusinessPress
 Plugin URI: http://www.foliovision.com
 Description: This plugin secures your site
-Version: 1.4
+Version: 1.4.1
 Author: Foliovision
 Author URI: http://foliovision.com
 Requires PHP: 5.6
@@ -14,7 +14,7 @@ require_once( dirname(__FILE__) . '/fp-api.php' );
 class BusinessPress extends BusinessPress_Plugin {
   
   
-  const VERSION = '1.4';
+  const VERSION = '1.4.1';
   
   
   private $disallowed_caps_default = array( 
@@ -214,6 +214,11 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'pre_get_posts', array( $this, 'hide_password_protected_posts' ) );
 
     /**
+     * Change "Site Health Status" label to indicate that only BusinessPress admins see this
+     */
+    add_filter( 'gettext', array( $this, 'admin_site_health_title_change' ), 100, 3 );
+
+    /**
      * Error reporting
      */
     add_filter( 'recovery_mode_email', array($this , 'recovery_email') );
@@ -288,8 +293,15 @@ class BusinessPress extends BusinessPress_Plugin {
     <?php
   }
   
-  
-  
+  function admin_site_health_title_change( $translation, $text, $domain ) {
+    if ( $this->get_setting('restrictions_enabled') ) {
+      if ( 'Site Health Status' === $text ) {
+        return $translation . '<small>(BusinessPress admins only)</small>';
+      }
+    }
+
+    return $translation;
+  }
   
   function admin_style() {
     if( is_admin() && isset($_GET['page']) && $_GET['page'] == 'businesspress' ) {
@@ -332,9 +344,9 @@ class BusinessPress extends BusinessPress_Plugin {
         if(
           // this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
           count($roles) == 2 && ( $roles[0] == 'subscriber' && $roles[1] == 'bbp_participant' || $roles[0] == 'bbp_participant' && $roles[1] == 'subscriber' ) ||
-          count($roles) > 0 && $roles[0] == 'subscriber' ||
+          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'subscriber' ||
           // Easy Digital Downloads with subscriptions
-          count($roles) > 0 && $roles[0] == 'edd_subscriber' ||
+          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'edd_subscriber' ||
           count($roles) == 0
         ) {
           add_filter('show_admin_bar', '__return_false');
@@ -1359,6 +1371,10 @@ JSH;
     }
 
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
+
+    include( dirname(__FILE__) . '/plugins/improve-user-activation.php' );
+
+    include( dirname(__FILE__) . '/plugins/login-after-password-reset.php' );
   }
   
   

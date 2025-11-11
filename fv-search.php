@@ -8,7 +8,11 @@ if( !class_exists('FV_Search') ) :
 
 class FV_Search {
   
-  var $aSearchResults = false;
+  var $aSearchResults = array();
+
+  var $iSearch_found_posts = 0;
+
+  var $iSearch_post_count = 0;
 
   var $iSearch_max_num_pages = 0;
 
@@ -59,7 +63,8 @@ class FV_Search {
       $objPost->comment_status = 'closed';
       $objPost->ping_status = 'closed';
       $objPost->post_author = 0;
-      
+      $objPost->post_parent = 0;
+
       $wp_query->posts = 1;
       $wp_query->post_count = 1;
       $wp_query->found_posts = 1;
@@ -197,7 +202,10 @@ class FV_Search {
 
           $sExcerpt = trim(implode('&hellip; ',$aExcerpt));
           if( strlen($sExcerpt) == 0 ) {
-            $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+            $sExcerpt = get_post_meta( $post->ID, '_aioseo_description', true );
+            if ( ! $sExcerpt ) {
+              $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+            }
             $sExcerpt = apply_filters( 'businesspress_fv_search_seo_description', $sExcerpt, $post->ID );
 
           } else if( stripos($sExcerpt,'&hellip;') === false && $sExcerpt[strlen($sExcerpt)-1] != '.' ) {

@@ -55,6 +55,10 @@ class FV_Limit_Search {
           // Block SearchWP 3 search query.
           add_filter( 'searchwp_short_circuit', '__return_true' );
 
+          // Block SearchWP 4 search query.
+          // TODO: Test with SearchWP 4 and FV SearchWP plugins.
+          // add_filter( 'searchwp\native\short_circuit', '__return_true' );
+
           // Block core WordPress search query.
           add_filter( 'posts_search', array( $this, 'modify_search_query' ), 10, 2 );
 
@@ -89,7 +93,7 @@ class FV_Limit_Search {
       $one_minute_ago
     ) );
     
-    return $count >= 5;
+    return $count >= 10;
   }
 
   function log_search( $search_term, $ip_address, $blocked = false ) {
