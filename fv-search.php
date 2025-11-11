@@ -29,6 +29,9 @@ class FV_Search {
     add_filter( 'swiftype_search_params', array( $this, 'swiftype_search_params_filter' ) );
 
     add_filter( 'rocket_rucss_external_exclusions', array( $this, 'wp_rocket_rucss_exclude' ) );
+
+    // SEOPress does not understand our special page is a search results page
+    add_filter( 'seopress_titles_robots_attrs', array( $this, 'seopress_titles_robots_attrs' ) );
   }
   
   function css() {
@@ -279,7 +282,48 @@ class FV_Search {
     if( $query->is_main_query() && !empty($query->query_vars['s']) ) {
       $query->set( 'posts_per_page', 25 );
     }
-  }  
+  }
+
+  /**
+   * SEOPress does not understand our special page is a search results page, so if noindex is enabled for search pages,
+   * we need to add it.
+   *
+   * @param array $attrs Array of robots attributes, each item is a string like "index, follow"
+   *
+   * @return array
+   */
+  public function seopress_titles_robots_attrs( $attrs ) {
+    if ( ! empty( $_GET['s'] ) ) {
+      $seopress_titles_option_name = get_option( 'seopress_titles_option_name', array() );
+      if ( ! empty( $seopress_titles_option_name['seopress_titles_archives_search_title_noindex'] ) ) {
+
+        // Since $attrs is an array, we only need to add 'noindex' to the first item.
+        $noindex_added = false;
+
+        if ( is_array( $attrs ) ) {
+          foreach( $attrs as $k => $attr ) {
+            $elements = explode( ',', $attr );
+            $elements = array_map( 'trim', $elements );
+
+            foreach( $elements as $i => $element ) {
+              if ( 'index' === $element ) {
+                $elements[ $i ] = 'noindex';
+                $noindex_added = true;
+              }
+            }
+
+            if ( ! $noindex_added ) {
+              $elements[]    = 'noindex';
+              $noindex_added = true;
+            }
+
+            $attrs[ $k ] = implode( ', ', $elements );
+          }
+        }
+      }
+    }
+    return $attrs;
+  }
   
   function swiftype_search_params_filter($params) {
     $params['per_page'] = 25;
