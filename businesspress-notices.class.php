@@ -369,6 +369,9 @@ class BusinessPress_Notices {
         // Shield Security
         '[Shield]',
 
+        // SEOPress
+        'We have detected that you have deleted a post',
+
         // User Switching
         'switch_to_olduser',
         'Switched back to ',
