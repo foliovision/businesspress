@@ -359,6 +359,9 @@ class BusinessPress_Notices {
         // FV Swiftype
         'Swiftype',
 
+        // MemberPress
+        'mepr_post_rules',
+
         // Restrict Content Pro
         'Customer updated',
         'Membership has been',
