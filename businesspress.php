@@ -1372,8 +1372,13 @@ JSH;
 
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
 
+    /**
+     * By default WordPress lets you enter the password for the new user and also check "Send User Notification" to send an email to the user
+     * to pick his desired password. We avoid this ambiguity by letting admin know about this.
+     */
     include( dirname(__FILE__) . '/plugins/improve-user-activation.php' );
 
+    // Auto login user after password reset.
     include( dirname(__FILE__) . '/plugins/login-after-password-reset.php' );
   }
   

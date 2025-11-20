@@ -79,7 +79,27 @@ add_action( 'user_new_form', 'fv_businesspress_user_activation_admin_notice' );
 function fv_businesspress_user_activation_admin_notice() {
   ?>
     <script>
-    jQuery( 'label[for=send_user_notification]' ).append( '<p>Email will contain a <strong>link</strong> to set user password. User will <strong>not</strong> be able to log in until he sets the password <span class="dashicons dashicons-info" title="This improvement is done by BusinessPress plugin."></span>.</p>' );
+    jQuery( function( $ ) {
+      let send_user_notification_checkbox = $( '#send_user_notification' ),
+        send_user_notification_note = $( '<div id="send_user_notification_note"><p>WordPress will include a link to set the user password in the this email notification.</p><p>The above password will <strong>not</strong> work, user will <strong>not</strong> be able to log in until he sets the password using the link in that email <span class="dashicons dashicons-info" title="This improvement is done by BusinessPress plugin to avoid any confusion. Making sure the user actually gets your emails before he can log in."></span>.</p></div>' ),
+        user_pass1_wrap = $( '.user-pass1-wrap' );
+
+      $( 'label[for=send_user_notification]' ).after( send_user_notification_note );
+
+      send_user_notification_checkbox.on( 'change', send_user_notification_checkbox_worker );
+
+      function send_user_notification_checkbox_worker() {
+        if ( $( send_user_notification_checkbox ).prop( 'checked' ) ) {
+          send_user_notification_note.show();
+          user_pass1_wrap.css( 'opacity', 0.5 );
+        } else {
+          send_user_notification_note.hide();
+          user_pass1_wrap.css( 'opacity', 1 );
+        }
+      }
+
+      send_user_notification_checkbox_worker();
+    } );
     </script>
   <?php
 }
