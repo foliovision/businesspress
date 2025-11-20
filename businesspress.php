@@ -1380,6 +1380,9 @@ JSH;
 
     // Auto login user after password reset.
     include( dirname(__FILE__) . '/plugins/login-after-password-reset.php' );
+    if ( defined( 'POLYLANG_VERSION' ) ) {
+      include( dirname(__FILE__) . '/plugins/remove-polylang-review-nag.php' );
+    }
   }
   
   
