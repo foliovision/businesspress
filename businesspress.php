@@ -835,16 +835,28 @@ class BusinessPress extends BusinessPress_Plugin {
     return preg_replace( '~.+@~', '', $email );
   }
   
-  
-  
-  
+  /**
+   * Get the client IP address.
+   *
+   * Uses either just the REMOTE_ADDR
+   * or the HTTP_X_FORWARDED_FOR header if it exists and is valid
+   * and if either the X-Pull header is configured and the HTTP_X_PULL header matches.
+   * or if the REMOTE_ADDR is one of the known Cloudflare IPs.
+   *
+   * @return string The client IP address.
+   */
   public function get_remote_addr() {
-    if( isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
-      return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
-              ? $_SERVER['HTTP_X_FORWARDED_FOR']
-              : substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+
+    $sanitized_ip_from_x_forwarded_for = $this->get_remote_addr_from_x_forwarded_for();
+
+    /**
+     * If X-Pull header is configured, we check the HTTP_X_PULL header to see if it matches.
+     * If it does we know we can trust the HTTP_X_FORWARDED_FOR header and get the client IP address.
+     */
+    if ( ! empty( $this->aOptions['xpull-key'] ) &&isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
+      return $sanitized_ip_from_x_forwarded_for;
     }
-    
+
     $aProxies = array();
     
     // https://www.cloudflare.com/ips-v4
@@ -884,8 +896,8 @@ class BusinessPress extends BusinessPress_Plugin {
     if ( defined( 'WP_FAIL2BAN_PROXIES' ) ) { //  todo: check this out      
       $aProxies = array_merge( $aProxies, explode( ',' ,WP_FAIL2BAN_PROXIES ) );
     }
-    
-    if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
+
+    if ( $sanitized_ip_from_x_forwarded_for ) {
       $ip = ip2long($_SERVER['REMOTE_ADDR']);
       foreach( $aProxies as $proxy ) {
         if (2 == count($cidr = explode('/',$proxy))) {
@@ -896,18 +908,49 @@ class BusinessPress extends BusinessPress_Plugin {
           $mask = -1;
         }
         if ($net == ($ip & $mask)) {
-          return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
-              ? $_SERVER['HTTP_X_FORWARDED_FOR']
-              : substr($_SERVER['HTTP_X_FORWARDED_FOR'],0,$len);
+          return $sanitized_ip_from_x_forwarded_for;
         }
       }
     }
 
     return $_SERVER['REMOTE_ADDR'];    
   }
-  
-  
-  
+
+  /**
+   * Get the client IP address from the HTTP_X_FORWARDED_FOR header if it exists and is valid.
+   *
+   * Make sure you do not use the REMOTE_ADDR IP though. The last IP in the X-Forwarded-For header might be the CDN IP.
+   *
+   * @return string The client IP address.
+   */
+  private function get_remote_addr_from_x_forwarded_for() {
+    // Get the client IP from the HTTP_X_FORWARDED_FOR header if it exists and is valid.
+    $sanitized_ip_from_x_forwarded_for = false;
+
+    if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+
+      $ips = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+
+      $ips = array_map( 'trim', $ips );
+
+      // Filter $ips with filter_var() to include only valid IPs
+      $ips = array_filter( $ips, function( $ip ) {
+
+        // Never use the CDN IP
+        if ( $_SERVER['REMOTE_ADDR'] === $ip ) {
+          return false;
+        }
+
+        return filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 );
+      });
+
+      $ips = array_values( $ips );
+
+      $sanitized_ip_from_x_forwarded_for = $ips[0];
+    }
+
+  return $sanitized_ip_from_x_forwarded_for;
+  }
   
   function get_contact_email() {
     if( $this->get_setting('contact_email') ) {
