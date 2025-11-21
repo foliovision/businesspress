@@ -155,11 +155,6 @@ class BusinessPress extends BusinessPress_Plugin {
       }
     }
 
-    /*
-     * WAF
-     */
-    $this->fail2ban_waf();
-    
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
     add_filter( 'logout_redirect', array( $this, 'tweak_login_redirect' ) );
 
@@ -734,79 +729,10 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
-  function fail2ban_openlog($log = LOG_AUTH, $daemon = 'wordpress') {
+  public function fail2ban_openlog($log = LOG_AUTH, $daemon = 'wordpress') {
 		$host	= array_key_exists('WP_FAIL2BAN_HTTP_HOST',$_ENV) ? $_ENV['WP_FAIL2BAN_HTTP_HOST'] : $_SERVER['HTTP_HOST'];
 		openlog($daemon."($host)", LOG_NDELAY|LOG_PID, $log);
 	}
-    
-  
-  
-  
-  function fail2ban_waf() {
-    // If a phrase starts with / it means it only triggers if it's the start of the request URL or requested from a folder, but it will work if used in query string without /
-    // This way you can search for .ssh or phpmyadmin in articles using site.com/?s=phpmyadmin and not get banned
-    // TODO: What if I search for phpmyadmin in bbPress ? site.com/support/search/phpmyadmin
-    $rules = array(
-      '/.env',
-      '/.github/COMMIT_EDITMSG',
-      '/.github/config',
-      '/.github/description',
-      '/.github/HEAD',
-      '/.github/index',
-      '/.github/workflows',
-      '/.ssh',
-      '/boot.ini',
-      '/data/admin/allowurl.txt',
-      'etc/passwd',
-      '/ftpsync.settings',
-      ' onerror=',
-      ' onload=',
-      '/phpMyAdmin/server_import.php',
-      '/phpmyadmin/scripts/setup.php',
-      'ueditor/net/controller.ashx',
-      '/win.ini',
-      '/wp-config.php',
-      's=/admin/index/dologin',
-    );
-
-    $match = false;
-
-    foreach( $rules AS $rule ) {
-      if(
-        stripos( $_SERVER['REQUEST_URI'], $rule ) !== false ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode($rule) ) !== false ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode($rule) ) ) !== false ||
-        stripos( $_SERVER['REQUEST_URI'], urlencode( urlencode( urlencode($rule) ) ) ) !== false
-      ) {
-        $match = $rule;
-      }
-    }
-
-    // Requests like:
-    // /?s=/index/%5Cthink%5Capp/invokefunction&function=call_user_func_array&vars[0]=file_put_contents&vars[1][]=xml1.php&vars[1][]=%3C?php%20@eval(_POST[terry]);print(md5(123));?%3E
-    if( !empty($_GET['function']) && $_GET['function'] == 'call_user_func_array' ) {
-      if( !empty($_GET['vars']) ) {
-        $vars = json_encode($_GET['vars']);
-        foreach( array(
-          'eval',
-          'file_put_contents',
-        ) AS $keyword ) {
-          if( stripos( $vars, $keyword ) !== false ) {
-            $match = 'call_user_func_array with '.$keyword;
-          }
-        }
-      }
-    }
-
-    if( $match ) {
-      $this->fail2ban_openlog();
-      syslog( LOG_INFO,'BusinessPress WAF - '.$match.' request - '.$_SERVER['REQUEST_URI'].' from '.$this->get_remote_addr() );
-      exit;
-    }
-  }
-
-
-
 
   function fail2ban_xmlrpc( $error ) {
     $this->fail2ban_openlog();
@@ -912,7 +838,7 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
-  function get_remote_addr() {
+  public function get_remote_addr() {
     if( isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
       return (false===($len = strpos($_SERVER['HTTP_X_FORWARDED_FOR'],',')))
               ? $_SERVER['HTTP_X_FORWARDED_FOR']
@@ -2247,3 +2173,10 @@ JSR;
 
 global $businesspress;
 $businesspress = new BusinessPress();
+
+/**
+ * Load WAF
+ */
+include( dirname(__FILE__).'/businesspress-waf.class.php' );
+
+new BusinessPress_WAF( $businesspress );
