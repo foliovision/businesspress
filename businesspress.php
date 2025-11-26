@@ -853,7 +853,7 @@ class BusinessPress extends BusinessPress_Plugin {
      * If X-Pull header is configured, we check the HTTP_X_PULL header to see if it matches.
      * If it does we know we can trust the HTTP_X_FORWARDED_FOR header and get the client IP address.
      */
-    if ( ! empty( $this->aOptions['xpull-key'] ) &&isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
+    if ( $sanitized_ip_from_x_forwarded_for && ! empty( $this->aOptions['xpull-key'] ) &&isset($_SERVER['HTTP_X_PULL']) && strlen($_SERVER['HTTP_X_PULL']) > 0 && $_SERVER['HTTP_X_PULL'] == $this->aOptions['xpull-key'] ) {
       return $sanitized_ip_from_x_forwarded_for;
     }
 
@@ -946,7 +946,9 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $ips = array_values( $ips );
 
-      $sanitized_ip_from_x_forwarded_for = $ips[0];
+      if ( ! empty( $ips[0] ) ) {
+        $sanitized_ip_from_x_forwarded_for = $ips[0];
+      }
     }
 
   return $sanitized_ip_from_x_forwarded_for;
