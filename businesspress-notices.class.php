@@ -356,6 +356,11 @@ class BusinessPress_Notices {
         'Email added.',
         'Email updated.',
         'Test Email Sent.',
+
+        // FV Approve User
+        'User approved.',
+        'User declined.',
+        'User unapproved.',
         
         // FV Swiftype
         'Swiftype',
