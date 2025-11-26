@@ -338,6 +338,7 @@ class BusinessPress_Notices {
         'Customer successfully ',
         'Order successfully ',
         'Primary email updated for customer.',
+        'The email was successfully ',
 
         // EDD Recurring Billing
         'Subscription cancelled successfully.',
