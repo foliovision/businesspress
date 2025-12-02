@@ -70,13 +70,20 @@ function DRA_only_allow_logged_in_rest_access( $access ) {
 }
 
 function fv_DRA_is_allowed_endpoint() {
-    foreach(
-        array(
-            '/wp-json/edd/webhook'
-        ) as $path
+
+    $allowed_endpoints = array(
+        wp_parse_url( get_rest_url( null, 'edd/webhook'), PHP_URL_PATH ),
     );
-    if ( stripos( $_SERVER['REQUEST_URI'], $path ) === 0 ) {
-        return true;
+
+    global $businesspress;
+    if ( ! $businesspress->get_setting('disable-oembed' ) ) {
+        $allowed_endpoints[] = wp_parse_url( get_rest_url( null, 'oembed'), PHP_URL_PATH );
+    }
+
+    foreach( $allowed_endpoints as $path ) {
+        if ( stripos( $_SERVER['REQUEST_URI'], $path ) === 0 ) {
+            return true;
+        }
     }
 
     return false;
