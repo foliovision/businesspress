@@ -202,10 +202,21 @@ class FV_Search {
 
           $sExcerpt = trim(implode('&hellip; ',$aExcerpt));
           if( strlen($sExcerpt) == 0 ) {
-            $sExcerpt = get_post_meta( $post->ID, '_aioseo_description', true );
-            if ( ! $sExcerpt ) {
-              $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+
+            // SEOPress
+            if ( defined( 'SEOPRESS_VERSION' ) ) {
+              $sExcerpt = get_post_meta( $post->ID, '_seopress_titles_desc', true );
+
+            // All-in-one SEO or FV Simpler SEO
+            } else {
+              $sExcerpt = get_post_meta( $post->ID, '_aioseo_description', true );
+
+              // Older versions of FV Simpler SEO
+              if ( ! $sExcerpt ) {
+                $sExcerpt = get_post_meta( $post->ID, '_aioseop_description', true );
+              }
             }
+
             $sExcerpt = apply_filters( 'businesspress_fv_search_seo_description', $sExcerpt, $post->ID );
 
           } else if( stripos($sExcerpt,'&hellip;') === false && $sExcerpt[strlen($sExcerpt)-1] != '.' ) {
