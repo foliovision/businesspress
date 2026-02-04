@@ -5,7 +5,7 @@
  *
  * Make sure user will not be able to log in until he sets the password, if sending out the "Login Details" email.
  *
- * Increases the lifetime of the activation link to 6 months from 1 day.
+ * Increases the lifetime of the activation link to 1 week from 1 day.
  *
  * @package BusinessPress
  */
@@ -67,7 +67,7 @@ function fv_businesspress_user_activation__login_check( $user, $username ) {
 add_filter( 'password_reset_expiration', 'fv_businesspress_user_activation__expiration' );
 
 function fv_businesspress_user_activation__expiration( $expiration ) {
-  return 6 * MONTH_IN_SECONDS;
+  return WEEK_IN_SECONDS;
 }
 
 /**
