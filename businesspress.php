@@ -72,8 +72,6 @@ class BusinessPress extends BusinessPress_Plugin {
     register_activation_hook( __FILE__, array( $this , 'activate') );
     register_deactivation_hook( __FILE__, array( $this, 'deactivate') );
     
-
-    add_action( 'wp', array( $this, 'anti_clickjacking_headers') );
     add_action( 'admin_init', array( $this, 'pointer_defaults') );
     add_action( 'admin_init', array( $this, 'plugin_update_hook' ) );
     add_action( 'admin_init', array( $this, 'apply_restrictions') );
@@ -1135,13 +1133,9 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['login-email-address'] = isset($_POST['businesspress-login-email-address']) && $_POST['businesspress-login-email-address'] == 1 ? true : false;
 
-      if( is_multisite() ) {
-        update_site_option( 'businesspress', $this->aOptions );
-      } else {
-        update_option( 'businesspress', $this->aOptions );
-      }
-      
-      $this->prevent_clickjacking();
+      $this->save_settings();
+
+      FV_Clickjacking_Protection::process();
 
       wp_redirect( $this->get_settings_url() );
       die();
@@ -1365,6 +1359,8 @@ JSH;
 
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
 
+    include( dirname(__FILE__).'/plugins/fv-clickjacking-protection.php' );
+
     /**
      * By default WordPress lets you enter the password for the new user and also check "Send User Notification" to send an email to the user
      * to pick his desired password. We avoid this ambiguity by letting admin know about this.
@@ -1479,97 +1475,6 @@ JSH;
     if( !empty($this->aOptions['multisite-tracking']) ) echo $this->aOptions['multisite-tracking'];
   }
 
-
-
-
-  function anti_clickjacking_headers() {
-    $options = get_option('businesspress');
-
-    if( $this->get_setting('clickjacking-protection') && empty(get_query_var('fv_player_embed')) && empty($options['anticlickjack_rewrite']) ) {
-      header( 'X-Frame-Options: SAMEORIGIN' );
-      header( "Content-Security-Policy: frame-ancestors 'self'" );
-    }
-  }
-
-
-
-
-  function prevent_clickjacking() {
-    global $wp_rewrite;
-
-    if ( is_multisite() ) {
-      return;
-    }
-
-    $options = get_option('businesspress');
-
-    if( strpos( $_SERVER['SERVER_SOFTWARE'], 'Apache') === false) {
-      $options['anticlickjack_rewrite_result'] = __('Not using Apache, using header() fallback.', 'businesspress');
-      update_option('businesspress', $options);
-      return;
-    }
-
-    require_once ABSPATH . 'wp-admin/includes/file.php';
-    require_once ABSPATH . 'wp-admin/includes/misc.php';
-
-    $home_path     = get_home_path();
-    $htaccess_file = $home_path . '.htaccess';
-
-    $can_edit_htaccess = file_exists( $htaccess_file ) && is_writable( $home_path ) && $wp_rewrite->using_mod_rewrite_permalinks()
-    || is_writable( $htaccess_file );
-
-    $anti_clickjacking_rule = array(
-      '# BEGIN Businesspress',
-      '<IfModule mod_headers.c>',
-      'Header set X-Frame-Options "SAMEORIGIN"',
-      'Header set Content-Security-Policy "frame-ancestors \'self\'"',
-      '</IfModule>',
-      '# END Businesspress'
-    );
-
-    if( $this->get_setting('clickjacking-protection') ) {
-      if ( $can_edit_htaccess && got_mod_rewrite() ) {
-        if( empty($options['anticlickjack_rewrite']) ) {
-          $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
-          $rules =  array_merge($rules, $anti_clickjacking_rule);
-  
-          $result = insert_with_markers( $htaccess_file, 'WordPress', $rules );
-          if($result) {
-            $options['anticlickjack_rewrite'] = true;
-            $options['anticlickjack_rewrite_result'] = __('Success: .htaccess modified.', 'businesspress');
-          } else {
-            $options['anticlickjack_rewrite'] = false;
-            $options['anticlickjack_rewrite_result'] = __('Error: failed to modify .htaccess.', 'businesspress');
-          }
-
-          update_option('businesspress', $options);
-        }
-      } else {
-        if(!$can_edit_htaccess) {
-          $options['anticlickjack_rewrite_result'] = __('Error: .htaccess is not writable.', 'businesspress');
-        } else {
-          $options['anticlickjack_rewrite_result'] = __('Error: mod_rewrite is not loaded.', 'businesspress');
-        }
-
-        $options['anticlickjack_rewrite'] = false;
-
-        update_option('businesspress', $options);
-      }
-    } else if ( !empty($options['anticlickjack_rewrite']) ) {
-      $this->store_setting_db('anticlickjack_rewrite', false);
-
-      $rules = explode( "\n", $wp_rewrite->mod_rewrite_rules() );
-
-      $options['anticlickjack_rewrite'] = false;
-      update_option('businesspress', $options);
-
-      insert_with_markers( $htaccess_file, 'WordPress', $rules );
-    }
-  }
-
-
-
-
   function oembed_template() {
     if( get_query_var('embed') ) {
       add_filter( 'template_include', '__return_false' );
@@ -1617,9 +1522,11 @@ JSH;
         update_option( 'businesspress', $this->aOptions );
       }
 
-      $this->prevent_clickjacking();
+      FV_Clickjacking_Protection::process();
     }
     
+    // Try to force put in "Clickjacking Protection" once per hour
+    FV_Clickjacking_Protection::maybe_process();
   }
   
   
@@ -1751,8 +1658,13 @@ JSH;
     $wp_admin_bar->remove_menu('customize');
   }
   
-  
-  
+  public function save_settings() {
+    if ( is_multisite() ){
+      update_site_option( 'businesspress', $this->aOptions );
+    } else {
+      update_option( 'businesspress', $this->aOptions );
+    }
+  }
   
   function script_reload( $arg = null ) {
     if( isset( $arg ) ) {
@@ -1839,31 +1751,6 @@ JSR;
       }
     }
   }
-  
-  
-  
-  
-  function store_setting( $key, $value ) {return false;
-    $data = $this->get_setting('all') ? $this->get_setting('all') : array();
-    if( $this->is_allowed_setting($key) === false ) return -1;
-
-    $data[$key] = $value;
-    $this->store_setting_db('fvsb_genSettings', $data);
-  }  
-
-
-  
-  
-  function store_setting_db( $key, $value ) {
-    if( is_multisite() ){
-      update_site_option($key, $value);
-    } else{
-      update_option($key, $value);
-    }
-  }
-  
-  
-  
   
   function talk_no_permissions( $what ) {
     $contact_form = ' <a href="'.$this->get_settings_url().'&contact_form">'.__("Contact form",'businesspress').'</a>';
