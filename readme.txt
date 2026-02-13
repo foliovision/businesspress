@@ -101,6 +101,16 @@ Guides:
 
 == Changelog ==
 
+= 1.5 - 2026-02-13 =
+
+* Bugfix: Clickjacking Protection: Avoid loosing .htaccess rules
+* Bugfix: Disable REST API: Allow oEmbed endpoint if allowed in BusinessPress
+* Disable REST API: Allow EDD webhoks
+* Hide Admin Notices: Remove Polylang review nag
+* Hide Admin Notices: Remove YARPP rating nag
+* IP Detect: Update Cloudflare IP ranges
+* Search template: SEOPress noindex fix
+
 = 1.4.1 - 2025-06-19 =
 
 * Site Health Status: It only shows to allowed admins, if restrictions are on, so make a note of it
