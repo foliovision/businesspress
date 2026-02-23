@@ -16,7 +16,7 @@ add_action('after_password_reset', 'fv_businesspress__login_after_password_reset
 function fv_businesspress__login_after_password_reset( $user, $new_pass ) {
 
   // Do not login if the user is not active, for FV Approve User plugin.
-  if ( $user->user_status !== 0 ) {
+  if ( intval( $user->user_status ) !== 0 ) {
     return;
   }
 
