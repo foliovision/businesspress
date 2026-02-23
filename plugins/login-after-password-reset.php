@@ -14,6 +14,12 @@
 add_action('after_password_reset', 'fv_businesspress__login_after_password_reset', 10, 2);
 
 function fv_businesspress__login_after_password_reset( $user, $new_pass ) {
+
+  // Do not login if the user is not active, for FV Approve User plugin.
+  if ( $user->user_status !== 0 ) {
+    return;
+  }
+
   // Clear any existing auth cookies
   wp_clear_auth_cookie();
 
