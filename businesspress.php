@@ -342,9 +342,13 @@ class BusinessPress extends BusinessPress_Plugin {
           count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'edd_subscriber' ||
           count($roles) == 0
         ) {
-          add_filter('show_admin_bar', '__return_false');
-          add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
-          add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
+          if (
+            ! current_user_can( 'edit_ads_txt' )
+          ) {
+            add_filter('show_admin_bar', '__return_false');
+            add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
+            add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
+          }
         }
       }
     }  
@@ -709,7 +713,7 @@ class BusinessPress extends BusinessPress_Plugin {
     $msg = (wp_cache_get($username, 'userlogins'))
 							? "Authentication failure for $username from "
 							: "Authentication attempt for unknown user $username from ";
-    
+
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }
@@ -1694,7 +1698,7 @@ JSR;
     if( defined('DOING_AJAX') ) {
       return;
     }
-    
+
     if( $this->get_setting('wp_admin_redirect_subscribers') ) {
       wp_redirect( home_url() );
       exit;
