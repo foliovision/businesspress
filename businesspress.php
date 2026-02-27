@@ -589,13 +589,22 @@ class BusinessPress extends BusinessPress_Plugin {
       add_filter('xmlrpc_enabled', '__return_false');
       remove_action( 'wp_head', 'rsd_link' );
       remove_action( 'wp_head', 'wlwmanifest_link' );
-      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false ) die();
+
+      if ( stripos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) !== false ) {
+        $this->fail2ban_openlog(LOG_AUTH);
+        syslog( LOG_INFO, 'BusinessPress fail2ban XML-RPC is disabled, request from ' . $this->get_remote_addr() );
+        die();
+      }
     }
     
     if( $this->get_setting('xml-rpc-key') ) {
       remove_action( 'wp_head', 'rsd_link' );
       remove_action( 'wp_head', 'wlwmanifest_link' );
-      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) die();
+      if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) {
+        $this->fail2ban_openlog(LOG_AUTH);
+        syslog( LOG_INFO, 'BusinessPress fail2ban XML-RPC requires access key, missing in request from ' . $this->get_remote_addr() );
+        die();
+      }
     }      
   }
   
