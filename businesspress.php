@@ -592,7 +592,7 @@ class BusinessPress extends BusinessPress_Plugin {
 
       if ( stripos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) !== false ) {
         $this->fail2ban_openlog(LOG_AUTH);
-        syslog( LOG_INFO, 'BusinessPress fail2ban XML-RPC is disabled, request from ' . $this->get_remote_addr() );
+        syslog( LOG_INFO, 'BusinessPress WAF - XML-RPC is disabled, request from ' . $this->get_remote_addr() );
         die();
       }
     }
