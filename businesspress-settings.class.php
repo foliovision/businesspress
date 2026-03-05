@@ -549,11 +549,13 @@ class BusinessPress_Settings {
                     'Enable domain name',
                     sprintf( __('Include domain name of searched website in the search results', 'businesspress' ), plugin_dir_path(__FILE__).'fv-search.php' ) );
 
+              $limit_search_requests_by_ip_stats = method_exists( 'FV_Limit_Search', 'get_stats' ) ? FV_Limit_Search::get_stats() : '';
+
               $this->admin_show_setting(
                     'businesspress-limit-search-requests-by-ip',
                     'limit-search-requests-by-ip',
                     __('Limit Search requests by IP', 'businesspress' ),
-                    __('Allows up to 10 search requests per minute per IP', 'businesspress' )
+                    __('Allows up to 10 search requests per minute per IP. ' . $limit_search_requests_by_ip_stats, 'businesspress' )
               );
         ?>
       </table>

@@ -36,6 +36,35 @@ class FV_Limit_Search {
     }
   }
 
+  public static function get_stats() {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'businesspress_search_logs';
+
+    if ( $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $table_name) ) === $table_name ) {
+      $results = $wpdb->get_results( "SELECT `blocked`, COUNT(*) as count FROM `{$table_name}` GROUP BY blocked" );
+      $total_allowed = 0;
+      $total_blocked = 0;
+      foreach( $results as $result ) {
+        if ( $result->blocked ) {
+          $total_blocked = $result->count;
+        } else {
+          $total_allowed = $result->count;
+        }
+      }
+
+      if ( $total_blocked > $total_allowed ) {
+        $total_blocked = '<span style="background-color: #f88;">' . $total_blocked . '</span>';
+      } else if ( $total_blocked > 0.5 * $total_allowed ) {
+        $total_blocked = '<span style="background-color: yellow;">' . $total_blocked . '</span>';
+      }
+
+      return 'Total allowed: ' . $total_allowed . ' Total blocked: ' . $total_blocked . ', in last 24 hours.';
+    }
+
+    return false;
+  }
+
   function limit_search( $query ) {
     if ( $query->is_main_query() && $query->is_search() ) {
       $search_term = get_search_query();
