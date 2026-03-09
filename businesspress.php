@@ -1374,6 +1374,8 @@ JSH;
 
     include( dirname(__FILE__).'/plugins/fv-clickjacking-protection.php' );
 
+    include( dirname(__FILE__).'/plugins/fv-wp_new_user_notification_email.php' );
+
     /**
      * By default WordPress lets you enter the password for the new user and also check "Send User Notification" to send an email to the user
      * to pick his desired password. We avoid this ambiguity by letting admin know about this.
