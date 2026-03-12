@@ -6,7 +6,15 @@ class BusinessPress_Notices {
   
   public function __construct() {
     if( !class_exists('DOMDocument') ) return;
-    
+
+    if ( ! empty( $_GET['page'] ) ) {
+
+      // If it's one of the Gravity Forms pages, do not try to remove notices as it would break their UI
+      if ( stripos( sanitize_text_field($_GET['page'] ), 'gf_' ) === 0 ) {
+        return;
+      }
+    }
+
     add_action( 'admin_notices', array( $this, 'trap'), 0 );
     add_action( 'network_admin_notices', array( $this, 'trap'), 0 );
     add_action( 'admin_footer', array( $this, 'show_count'), 0 );
