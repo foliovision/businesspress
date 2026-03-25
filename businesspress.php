@@ -722,7 +722,7 @@ class BusinessPress extends BusinessPress_Plugin {
     $msg = (wp_cache_get($username, 'userlogins'))
 							? "Authentication failure for $username from "
 							: "Authentication attempt for unknown user $username from ";
-
+    
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }
@@ -1373,6 +1373,8 @@ JSH;
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
 
     include( dirname(__FILE__).'/plugins/fv-clickjacking-protection.php' );
+
+    include( dirname(__FILE__).'/plugins/fv-safe-user_nicename.php' );
 
     include( dirname(__FILE__).'/plugins/fv-wp_new_user_notification_email.php' );
 
