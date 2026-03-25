@@ -11,9 +11,8 @@ add_filter( 'wp_pre_insert_user_data', 'fv_fix_new_user_nicenames', PHP_INT_MAX,
 
 function fv_fix_new_user_nicenames( $data, $update, $user_id ) {
 
-  $user_email = $data['user_email'];
-  $user_login = $data['user_login'];
-  $user_nicename = $data['user_nicename'];
+  $user_email    = sanitize_email( $data['user_email'] );
+  $user_nicename = sanitize_text_field( $data['user_nicename'] );
 
   $email_parts = explode( '@', $user_email );
 
@@ -38,7 +37,7 @@ function fv_fix_new_user_nicenames( $data, $update, $user_id ) {
     global $wpdb;
 
     // Coppied from wp_insert_user() of wp-includes/user.php
-    $user_nicename_check = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->users WHERE user_nicename = %s AND user_login != %s LIMIT 1", $user_nicename, $user_login ) );
+    $user_nicename_check = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->users WHERE user_nicename = %s AND ID != %d LIMIT 1", $user_nicename, $user_id ) );
 
     if ( $user_nicename_check ) {
       $suffix = 2;
@@ -46,7 +45,7 @@ function fv_fix_new_user_nicenames( $data, $update, $user_id ) {
         // user_nicename allows 50 chars. Subtract one for a hyphen, plus the length of the suffix.
         $base_length         = 49 - mb_strlen( $suffix );
         $alt_user_nicename   = mb_substr( $user_nicename, 0, $base_length ) . "-$suffix";
-        $user_nicename_check = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->users WHERE user_nicename = %s AND user_login != %s LIMIT 1", $alt_user_nicename, $user_login ) );
+        $user_nicename_check = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->users WHERE user_nicename = %s AND ID != %d LIMIT 1", $alt_user_nicename, $user_id ) );
         $suffix++;
       }
       $user_nicename = $alt_user_nicename;
