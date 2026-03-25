@@ -68,6 +68,7 @@ class BusinessPress_Settings {
         <?php if( $businesspress->check_user_permission() ) : ?>
           <a class="nav-tab nav-tab-updates" href="#updates"><span><?php _e('Updates', 'businesspress' ); ?></span></a>
           <a class="nav-tab nav-tab-prefs" href="#preferences"><span><?php _e('Preferences', 'businesspress' ); ?></span></a>
+          <a class="nav-tab nav-tab-tweaks" href="#tweaks"><span><?php _e('Tweaks', 'businesspress' ); ?></span></a>
           <a class="nav-tab nav-tab-branding" href="#branding"><span><?php _e('Branding', 'businesspress' ); ?></span></a>
           <?php if( is_multisite() ) : ?>
             <a class="nav-tab nav-tab-multisite" href="#multisite"><span><?php _e('Multisite', 'businesspress' ); ?></span></a>
@@ -89,15 +90,15 @@ class BusinessPress_Settings {
           add_meta_box( 'businesspress_updates', __('Restrictions', 'businesspress'), array( $this, 'settings_box_updates' ), 'businesspress_settings_updates', 'normal' );
           
           add_meta_box( 'businesspress_security', __('Security Preferences', 'businesspress'), array( $this, 'settings_box_security' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_performance', __('Performance Preferences', 'businesspress'), array( $this, 'settings_box_performance' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_', __('Search settings', 'businesspress'), array( $this, 'settings_results_style' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_cdn', __('CDN', 'businesspress'), array( $this, 'settings_box_cdn' ), 'businesspress_settings_preferences', 'normal' );  
           add_meta_box( 'businesspress_emails', __('Email Preferences', 'businesspress'), array( $this, 'settings_box_email' ), 'businesspress_settings_preferences', 'normal' );
 
-          add_meta_box( 'businesspress_', __('Search settings', 'businesspress'), array( $this, 'settings_results_style' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_search', __('Tweaks', 'businesspress'), array( $this, 'settings_box_search' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_notices', __('Admin Notices', 'businesspress'), array( $this, 'settings_box_notices' ), 'businesspress_settings_preferences', 'normal' );
-          
-          add_meta_box( 'businesspress_login', __('Login Protection', 'businesspress'), array( $this, 'settings_box_login' ), 'businesspress_settings_preferences', 'normal' );
-          add_meta_box( 'businesspress_cdn', __('CDN', 'businesspress'), array( $this, 'settings_box_cdn' ), 'businesspress_settings_preferences', 'normal' );
+          add_meta_box( 'businesspress_tweaks_wp_admin', __('WordPress Admin Dashboard', 'businesspress'), array( $this, 'settings_box_tweaks_wp_admin' ), 'businesspress_settings_tweaks', 'normal' );
+          add_meta_box( 'businesspress_tweaks', __('Front-End', 'businesspress'), array( $this, 'settings_box_tweaks' ), 'businesspress_settings_tweaks', 'normal' );
+          add_meta_box( 'businesspress_tweaks_users', __('User Improvements', 'businesspress'), array( $this, 'settings_box_tweaks_users' ), 'businesspress_settings_tweaks', 'normal' );
           
           add_meta_box( 'businesspress_branding', __('Branding', 'businesspress'), array( $this, 'settings_box_branding' ), 'businesspress_settings_branding', 'normal' );
           add_meta_box( 'businesspress_user', __('User Profiles', 'businesspress'), array( $this, 'settings_box_user' ), 'businesspress_settings_branding', 'normal' );
@@ -123,6 +124,11 @@ class BusinessPress_Settings {
               <?php do_meta_boxes('businesspress_settings_preferences', 'normal', false ); ?>            
               <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />            
             </div>
+
+            <div id='tweaks' class='postbox-container'>
+              <?php do_meta_boxes('businesspress_settings_tweaks', 'normal', false ); ?>            
+              <input type="submit" name="businesspress-submit" class="button-primary" value="<?php _e('Save All Changes', 'businesspress'); ?>" />            
+            </div>            
             
             <div id='branding' class='postbox-container'>
               <?php do_meta_boxes('businesspress_settings_branding', 'normal', false ); ?>            
@@ -445,6 +451,13 @@ class BusinessPress_Settings {
         'Require Email Address for Login',
         __('This is useful if you get too many bot login attempts and your account gets locked out. The bots can find out what is the user login, but not the user email address. So repeated bot logins using user login will not count for the Login Lockout.', 'businesspress' ) );
 
+      $this->admin_show_setting(
+        'businesspress-simpler-login-errors',
+        'simpler-login-errors',
+        'Simpler Login Errors',
+        __('We do not want to give too many hints if somebody is trying to guess the password. So we do not let them know if the user name or email was invalid.', 'businesspress' ),
+        'checkbox_readonly'
+      );
       ?>
     </table>
     <?php
@@ -487,7 +500,34 @@ class BusinessPress_Settings {
         </tr>
         <?php endif;
       endif; ?>
-    </table>           
+
+      <?php
+      $this->admin_show_setting(
+        'businesspress-polylang-review-nag',
+        'polylang-review-nag',
+        'Polylang',
+        __('Remove Polylang review nag.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-simple-history-clean-up',
+        'simple-history-clean-up',
+        'Simple History',
+        __('Remove Simple History wp-admin add-on ads etc.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-yarpp-rating-nag',
+        'yarpp-rating-nag',
+        'YARPP',
+        __('Remove YARPP rating nag.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+      ?>
+
+    </table>
     <?php
   }  
   
@@ -498,19 +538,7 @@ class BusinessPress_Settings {
     global $businesspress;
     ?>
     <table class="form-table">
-      <?php $this->admin_show_setting(
-                    'businesspress-disable-emojis',
-                    'disable-emojis',
-                    'Disable',
-                    __('Emojis', 'businesspress' ) );
-      ?>
-      
-      <?php $this->admin_show_setting(
-                    'businesspress-disable-oembed',
-                    'disable-oembed',
-                    '',
-                    __('oEmbed', 'businesspress' ) );
-      ?>
+
     </table>           
     <?php
   }
@@ -564,8 +592,39 @@ class BusinessPress_Settings {
 
 
 
-  function settings_box_search() {
-    global $businesspress;
+  function settings_box_tweaks() {
+    ?>
+    <table class="form-table">
+      <?php
+      $this->admin_show_setting(
+              'businesspress-disable-emojis',
+              'disable-emojis',
+              'Disable',
+              __('Emojis', 'businesspress' ) );
+
+      $this->admin_show_setting(
+              'businesspress-disable-oembed',
+              'disable-oembed',
+              '',
+              __('oEmbed', 'businesspress' ) );
+
+      $this->admin_show_setting(
+                    'frontend_login_check',
+                    'frontend_login_check',
+                    'Front-end Login Check',
+                    __('Useful for membership websites. Runs a login check when you come back to the browser tab or wake up your phone.', 'businesspress' ) );
+
+      $this->admin_show_setting(
+                    'hide_password_posts',
+                    'hide_password_posts',
+                    'Hide Password Protected Posts',
+                    __('Password protected posts won\'t show up anywhere unless you have the direct link or your are the admin or editor.', 'businesspress' ) );
+      ?>	      
+    </table>           
+    <?php
+  }
+
+  function settings_box_tweaks_wp_admin() {
     ?>
     <table class="form-table">
       <?php 
@@ -593,19 +652,33 @@ class BusinessPress_Settings {
                     'hide_password_posts',
                     'Hide Password Protected Posts',
                     __('Password protected posts won\'t show up anywhere unless you have the direct link or your are the admin or editor.', 'businesspress' ) );
-
-      $this->admin_show_setting(
-                    'businesspress-login-redirect',
-                    'login-redirect',
-                    'Login Redirect',
-                    __('After you log in you will be redirected back to the page where you clicked <code>wp-login.php</code> link, unless there was a custom <code>redirect_to</code> parameter. Uses HTTP referer.', 'businesspress' ),
-                    'checkbox_readonly' );
       
       $this->admin_show_setting(
                     'businesspress-auto-set-featured-image',
                     'auto-set-featured-image',
                     'Set Featured Images Automatically',
                     __('First image in the post becomes the featured image on save.', 'businesspress' ) );
+
+      $this->admin_show_setting(
+                    'businesspress-sort-wp-admin-settings',
+                    'sort-wp-admin-settings',
+                    'Sort wp-admin Settings',
+                    __('Alphabetically sorts the wp-admin -> Settings menu.', 'businesspress' ),
+                    'checkbox_readonly' );
+
+      $this->admin_show_setting(
+                    'businesspress-users-by-date-registered',
+                    'users-by-date-registered',
+                    'Users by Date Registered',
+                    __('Adds a new column to the users table for "Date Registered".', 'businesspress' ),
+                    'checkbox_readonly' );
+
+      $this->admin_show_setting(
+                    'businesspress-user-login-sessions',
+                    'user-login-sessions',
+                    'User Login Sessions',
+                    __('Show user login sessions in wp-admin user profile screen.', 'businesspress' ),
+                    'checkbox_readonly' );
 
       $this->admin_show_setting(
                     'businesspress-admin-woocommerce-search-speed',
@@ -623,8 +696,46 @@ class BusinessPress_Settings {
     <?php
   }
   
-  
-  
+  function settings_box_tweaks_users() {
+    ?>
+    <p><?php _e('BusinessPress improves the user login and registration in many ways:', 'businesspress' ); ?></p>
+    <table class="form-table">
+      <?php
+      $this->admin_show_setting(
+        'businesspress-user-activation-improvement',
+        'user-activation-improvement',
+        'Activation Improvement',
+        __('Make sure user will not be able to log in until he sets the password, if sending out the "Login Details" email. Normally WordPress would just say the password is incorrect, we show that it needs to be set. And we extend the link valid from 1 day to 1 week.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-user-activation-email-subject',
+        'user-activation-email-subject',
+        'Activation Email Subject',
+        __('Change the core WordPress activation email subject line from "[Site name] Login Details" to "[Site Name] Set your password".', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-password-reset-autologin',
+        'password-reset-autologin',
+        'Autologin after Password Reset',
+        __('When user sets the new password, he still has to go to login form and enter the same password again. We make it simpler and log the user right in.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-login-redirect',
+        'login-redirect',
+        'Login Redirect',
+        __('After you log in you will be redirected back to the page where you clicked <code>wp-login.php</code> link, unless there was a custom <code>redirect_to</code> parameter. Uses HTTP referer.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+      ?>
+    </table>
+    <?php
+  }
   
   function settings_box_security() {
     global $businesspress;

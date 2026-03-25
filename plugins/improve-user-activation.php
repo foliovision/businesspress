@@ -62,7 +62,7 @@ function fv_businesspress_user_activation__login_check( $user, $username ) {
 
 /**
  * Normally the link to set a password expires in 24 hours.
- * We extend it to 6 months.
+ * We extend it to 1 week.
  */
 add_filter( 'password_reset_expiration', 'fv_businesspress_user_activation__expiration' );
 

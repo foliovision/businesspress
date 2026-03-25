@@ -1,7 +1,7 @@
 <?php
 /*
-  * We do not want to give too many hits if somebody is trying to guess the password.
-  * So we do not let them know if the user name or email was invalid
+  * We do not want to give too many hints if somebody is trying to guess the password.
+  * So we do not let them know if the user name or email was invalid.
   */
 
 // Core WordPress
