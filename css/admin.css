@@ -36,6 +36,9 @@
     margin-right: 0;
     padding: 0 1em;
 }
+#businesspress-header-nav .nav-tab:focus {
+    box-shadow: none;
+}
 #businesspress-header-nav .nav-tab-active {
     background: #f1f1f1 none repeat scroll 0 0;
     position: relative;
