@@ -743,32 +743,33 @@ class BusinessPress_Settings {
 
     ?>
     <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-fix-new-user-nicenames',
+                    'fix-new-user-nicenames',
+                    'Enable',
+                    __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
+      ?>
+
       <?php if( !is_multisite() ) {
               $this->admin_show_setting(
                       'businesspress-clickjacking-protection',
                       'clickjacking-protection',
-                      __('Enable'),
+                      '',
                       __('Clickjacking Protection ', 'businesspress' ) );
 
-              if(isset($options['anticlickjack_rewrite_result'])) {
-                ?> 
-                  <tr>
-                    <th>
-                      <label></label>
-                    </th>
-                    <td>
-                      <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
-                    </td>
-                  </tr>
-                <?php
-              }
-
-              $this->admin_show_setting(
-                'businesspress-fix-new-user-nicenames',
-                'fix-new-user-nicenames',
-                '',
-                __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
-            }
+        if(isset($options['anticlickjack_rewrite_result'])) {
+          ?> 
+            <tr>
+              <th>
+                <label></label>
+              </th>
+              <td>
+                <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+              </td>
+            </tr>
+          <?php
+        }
+      }
       ?>
 
       <?php $this->admin_show_setting(
