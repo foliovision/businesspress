@@ -331,25 +331,12 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $this->get_setting('autoupdates_vcs') ) add_filter( 'automatic_updates_is_vcs_checkout', '__return_false', 999 );
     
     if( ( $this->get_setting('wp_admin_bar_subscribers') || $this->get_setting('wp_admin_redirect_subscribers') ) && get_current_user_id() > 0 ) {
-      $objUser = get_userdata( get_current_user_id() );
-      if( $objUser && isset($objUser->roles) && is_array($objUser->roles) ) {
-        $roles = $objUser->roles;
-        if(
-          // this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
-          count($roles) == 2 && ( $roles[0] == 'subscriber' && $roles[1] == 'bbp_participant' || $roles[0] == 'bbp_participant' && $roles[1] == 'subscriber' ) ||
-          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'subscriber' ||
-          // Easy Digital Downloads with subscriptions
-          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'edd_subscriber' ||
-          count($roles) == 0
-        ) {
-          if (
-            ! current_user_can( 'edit_ads_txt' )
-          ) {
-            add_filter('show_admin_bar', '__return_false');
-            add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
-            add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
-          }
-        }
+      if (
+        ! current_user_can( 'edit_posts' ) &&  ! current_user_can( 'edit_ads_txt' )
+      ) {
+        add_filter('show_admin_bar', '__return_false');
+        add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
+        add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
       }
     }  
     
@@ -722,7 +709,7 @@ class BusinessPress extends BusinessPress_Plugin {
     $msg = (wp_cache_get($username, 'userlogins'))
 							? "Authentication failure for $username from "
 							: "Authentication attempt for unknown user $username from ";
-
+    
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }

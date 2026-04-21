@@ -339,14 +339,14 @@ class BusinessPress_Settings {
       <?php $this->admin_show_setting(
                     'wp_admin_bar_subscribers',
                     'wp_admin_bar_subscribers',
-                    'Hide WP Admin Bar for subscribers',
+                    'Hide WP Admin Bar for Subscribers',
                     __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.", 'businesspress' ) );
       ?>
       <?php $this->admin_show_setting(
                     'wp_admin_redirect_subscribers',
                     'wp_admin_redirect_subscribers',
-                    'Redirect WP Admin for subscribers',
-                    __("Will redirect to homepage.", 'businesspress' ) );
+                    'Redirect WP Admin for Subscribers',
+                    __("Will redirect to homepage, other user levels will retain access to the admin dashboard.", 'businesspress' ) );
       ?>
       <tr>
         <th>
