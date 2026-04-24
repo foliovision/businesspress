@@ -121,8 +121,9 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
     add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_admin_bar_items' ) );
     
-    remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
+    add_action( 'user_edit_form_tag', array( $this, 'admin_color_setting_remove' ) );
+
     add_filter( 'login_title', array( $this, 'login_title' ) );
     
     /*
@@ -236,8 +237,12 @@ class BusinessPress extends BusinessPress_Plugin {
     return $this->get_setting('admin-color');
   }
   
-  
-  
+  /**
+   * Remove "Administration Color Scheme" from the user profile page as we set it globally with admin_color_force().
+   */
+  public function admin_color_setting_remove() {
+    remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
+  }
   
   function admin_plugin_action_links($links, $file) {
   	$plugin_file = basename(__FILE__);
