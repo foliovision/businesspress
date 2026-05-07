@@ -1384,6 +1384,8 @@ JSH;
     if ( defined( 'POLYLANG_VERSION' ) ) {
       include( dirname(__FILE__) . '/plugins/remove-polylang-review-nag.php' );
     }
+
+    include( dirname(__FILE__) . '/plugins/fv-wp-admin-behavior-check.php' );
   }
   
   
