@@ -51,8 +51,8 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 	$user = get_userdata( $user_id );
 
 	if ( $column_name === 'registered' ) {
-		$t_time    = get_the_time( __( 'Y/m/d g:i:s a' ) );
 		$m_time    = $user->user_registered;
+		$t_time    = date( 'g:i:s a', strtotime( $m_time ) );
 		$time      = mysql2date( 'G', $m_time, false );
 
 		$time_diff = time() - $time;
