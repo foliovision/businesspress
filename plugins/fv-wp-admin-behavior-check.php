@@ -161,6 +161,21 @@ class FV_WP_Admin_Behavior_Check {
 			return;
 		}
 
+		// Skip current or past RCP members.
+		if ( function_exists('rcp_get_customer_by_user_id') ) {
+			$customer = rcp_get_customer_by_user_id( $user_id );
+			if ( $customer ) {
+				$memberships = $customer->get_memberships();
+				if ( $memberships ) {
+					foreach ( $memberships as $membership ) {
+						if ( in_array( $membership->get_status(), array( 'active', 'cancelled', 'expired' ) ) ) {
+							return;
+						}
+					}
+				}
+			}
+		}
+
 		wp_update_user(
 			array(
 				'ID'          => $user_id,
