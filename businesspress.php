@@ -1350,10 +1350,6 @@ JSH;
       include( dirname(__FILE__).'/plugins/social-warfare-pro-tweaks.php' );
     }
 
-    if( get_option( 'surge_installed' ) ) {
-      include( dirname(__FILE__).'/plugins/surge-cache-purge.php' );
-    }
-
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
 
     include( dirname(__FILE__).'/plugins/fv-user-login-sessions.php' );

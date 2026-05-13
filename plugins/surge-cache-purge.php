@@ -17,7 +17,7 @@ class BusinessPress_Surge_Cache_Purge {
 		add_action(
 			'admin_bar_menu',
 			function( $wp_admin_bar ) {
-				if ( is_admin() && function_exists( 'Surge\key') ) {
+				if ( is_admin() ) {
 					$wp_admin_bar->add_node(
 						array(
 							'id'    => 'businesspress-surge-cache-purge',
