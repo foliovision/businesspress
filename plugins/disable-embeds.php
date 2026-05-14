@@ -22,6 +22,10 @@
 function disable_embeds_init() {
 	global $businesspress;
 
+	// Remove author information from oEmbed REST API response.
+	add_filter( 'oembed_response_data', 'disable_embeds_oembed_response_data' );
+
+	// If we are not disabling oEmbed, we don't need to do anything else.
 	if ( ! $businesspress->get_setting( 'disable-oembed' ) ) {
 		return;
 	}
@@ -53,6 +57,22 @@ function disable_embeds_init() {
 }
 
 add_action( 'init', 'disable_embeds_init', 9999 );
+
+/**
+ * Remove author information from oEmbed REST API response.
+ *
+ * @param array $data The oEmbed response data.
+ * @return array The modified oEmbed response data.
+ */
+function disable_embeds_oembed_response_data( $data ) {
+	if ( isset( $data['author_name'] ) ) {
+		unset( $data['author_name'] );
+	}
+	if ( isset( $data['author_url'] ) ) {
+		unset( $data['author_url'] );
+	}
+	return $data;
+}
 
 /**
  * Removes the 'wpembed' TinyMCE plugin.
