@@ -101,7 +101,7 @@ Guides:
 
 == Changelog ==
 
-= 1.6 - 2026-05-14 =
+= 1.6.1 - 2026-05-14 =
 
 Security improvements:
 
