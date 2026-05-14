@@ -27,7 +27,8 @@ class BusinessPress_Settings {
             <?php elseif( $type == 'text' ) : ?>
               <input type="text" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="<?php echo esc_attr( $businesspress->get_setting($option_key) ); ?>" />
             <?php elseif( $type == 'checkbox_readonly' ) : ?>
-              <input type="checkbox" id="<?php echo $name; ?>" checked="checked" readonly disabled="true" /> 
+              <input type="checkbox" id="<?php echo $name; ?>" checked="checked" readonly disabled="true" />
+              <i class="dashicons dashicons-info" title="<?php _e('This setting is enabled by default and cannot be disabled', 'businesspress' ); ?>"></i>
             <?php else : ?>
               <input type="hidden" name="<?php echo $name; ?>" value="0" /> 
               <input type="checkbox" id="<?php echo $name; ?>" name="<?php echo $name; ?>" value="1" <?php if( $businesspress->get_setting($option_key) ) echo 'checked="checked"'; ?> /> 
@@ -799,7 +800,8 @@ class BusinessPress_Settings {
                     'businesspress-disable-user-login-scanning',
                     'disable-user-login-scanning',
                     '',
-                    __('User login scanning (using requests like <code>/?author=1</code> to find admin user login)', 'businesspress' ) );
+                    __('User login scanning (using requests like <code>/?author=1</code> to find admin user login)', 'businesspress' ),
+                  'checkbox_readonly' );
       ?>
 
       <?php $this->admin_show_setting(

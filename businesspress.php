@@ -147,11 +147,9 @@ class BusinessPress extends BusinessPress_Plugin {
     add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
     add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
 
-    if( $this->get_setting('disable-user-login-scanning') ) {
-      if( !empty($_GET['author']) ) {
-        if( is_admin() && !defined('DOING_AJAX') ) return;
-        die();
-      }
+    if( !empty($_GET['author']) ) {
+      if( is_admin() && !defined('DOING_AJAX') ) return;
+      die();
     }
 
     add_filter( 'login_redirect', array( $this, 'tweak_login_redirect' ) );
@@ -1016,7 +1014,6 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'hide-notices' ) return false;
     if( $key == 'autoupdates_vcs' ) return true;
     if( $key == 'clickjacking-protection' ) return true;
-    if( $key == 'disable-user-login-scanning' ) return true;
     if( $key == 'login-lockout' ) return true;
     if( $key == 'login-duration') return '2_weeks';
 
@@ -1129,8 +1126,6 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
 
       $this->aOptions['fix-new-user-nicenames'] = isset($_POST['businesspress-fix-new-user-nicenames']) && $_POST['businesspress-fix-new-user-nicenames'] == 1 ? true : false;
-
-      $this->aOptions['disable-user-login-scanning'] = isset($_POST['businesspress-disable-user-login-scanning']) && $_POST['businesspress-disable-user-login-scanning'] == 1 ? true : false;
 
       $this->aOptions['limit-search-requests-by-ip'] = isset($_POST['businesspress-limit-search-requests-by-ip']) && $_POST['businesspress-limit-search-requests-by-ip'] == 1 ? true : false;
 
