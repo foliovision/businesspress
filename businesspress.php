@@ -1314,10 +1314,9 @@ JSH;
       remove_filter( 'the_post_thumbnail_caption', 'convert_smilies' );
       remove_filter( 'comment_text', 'convert_smilies', 20 );
     }
-    
-    if( !function_exists('disable_embeds_init') && $this->get_setting('disable-oembed') ) {
+
+    if( !function_exists('disable_embeds_init') ) {
       include( dirname(__FILE__).'/plugins/disable-embeds.php' );
-      add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
     }
 
     if ( !function_exists('DRA_Disable_Via_Filters') ) {
@@ -1491,15 +1490,6 @@ JSH;
     
     if( !empty($this->aOptions['multisite-tracking']) ) echo $this->aOptions['multisite-tracking'];
   }
-
-  function oembed_template() {
-    if( get_query_var('embed') ) {
-      add_filter( 'template_include', '__return_false' );
-    }
-  }
-
-
-
 
   function plugin_action_links( $actions, $plugin_file ) {
     if( stripos($plugin_file,'businesspress') !== false ) {

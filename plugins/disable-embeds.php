@@ -20,14 +20,11 @@
  * @since 1.0.0
  */
 function disable_embeds_init() {
-	/* @var WP $wp */
-  /// Modification by Foliovision
-	/*global $wp;
+	global $businesspress;
 
-	// Remove the embed query var.
-	$wp->public_query_vars = array_diff( $wp->public_query_vars, array(
-		'embed',
-	) );*/
+	if ( ! $businesspress->get_setting( 'disable-oembed' ) ) {
+		return;
+	}
 
 	// Remove the REST API endpoint.
 	remove_action( 'rest_api_init', 'wp_oembed_register_route' );
@@ -51,6 +48,8 @@ function disable_embeds_init() {
 
 	// Remove filter of the oEmbed result before any HTTP requests are made.
 	remove_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result', 10 );
+
+	add_filter( 'template_redirect', array( 'disable_embeds_oembed_template' ) );
 }
 
 add_action( 'init', 'disable_embeds_init', 9999 );
@@ -83,6 +82,12 @@ function disable_embeds_rewrites( $rules ) {
 	}
 
 	return $rules;
+}
+
+function disable_embeds_oembed_template() {
+	if( get_query_var( 'embed' ) ) {
+		add_filter( 'template_include', '__return_false' );
+	}
 }
 
 /**
