@@ -3,7 +3,7 @@
  * Origin Plugin Name: Disable REST API
  * Plugin URI: http://www.binarytemplar.com/disable-json-api
  * Description: Disable the use of the JSON REST API on your website to anonymous users
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: Dave McHale
  * Author URI: http://www.binarytemplar.com
  * License: GPL2+
@@ -74,8 +74,15 @@ function DRA_only_allow_logged_in_rest_access( $access ) {
  * If it does, it then checks if the endpoint is allowed:
  * - Easy Digital Downloads (EDD) webhooks
  * - oEmbed, if not disabled in BusinessPress
+ *
+ * @return boolean True if the endpoint is allowed or if it's not a WP REST API URL, false if it should be blocked.
  */
 function fv_DRA_is_allowed_endpoint() {
+
+    // Logged in users can do it all.
+    if ( is_user_logged_in() ) {
+        return true;
+    }
 
     /**
      * First check if it's a WP REST API URL at all.
@@ -96,21 +103,33 @@ function fv_DRA_is_allowed_endpoint() {
         return true;
     }    
 
-    // Allow Easy Digital Downloads (EDD) webhooks
-    $allowed_endpoints = array(
-        '/edd/webhook'
-    );
-
     global $businesspress;
-    if ( ! $businesspress->get_setting('disable-oembed' ) ) {
-        $allowed_endpoints[] = '/oembed';
-    }
 
-    foreach( $allowed_endpoints as $path ) {
-        if ( stripos( $request_url, $path ) !== false ) {
-            return true;
+    // REST API is disabled
+    if ( $businesspress->get_setting( 'disable-rest-api' ) ) {
+        /**
+         * Even if "REST API" is disabled, we want to allow access to the following endpoints:
+         * - EDD webhooks
+         * - oEmbed, if not disabled in BusinessPress
+         */
+        $allowed_endpoints = array(
+            '/edd/webhook'
+        );
+
+        if ( ! $businesspress->get_setting('disable-oembed' ) ) {
+            $allowed_endpoints[] = '/oembed';
         }
-    }
 
-    return false;
+        foreach( $allowed_endpoints as $path ) {
+            if ( stripos( $request_url, $path ) !== false ) {
+                return true;
+            }
+        }
+
+        return false;
+
+    // REST API is enabled
+    } else {
+        return true;
+    }
 }

@@ -1319,8 +1319,10 @@ JSH;
       include( dirname(__FILE__).'/plugins/disable-embeds.php' );
       add_filter( 'template_redirect', array( $this, 'oembed_template' ) );
     }
-    
-    if( !function_exists('DRA_Disable_Via_Filters') && $this->get_setting('disable-rest-api') ) include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+
+    if ( !function_exists('DRA_Disable_Via_Filters') ) {
+      include( dirname(__FILE__).'/plugins/disable-json-api.php' );
+    }
     
     if( !function_exists('apt_publish_post') && $this->get_setting('auto-set-featured-image') ) {
       include( dirname(__FILE__).'/plugins/auto-post-thumbnail.php' );
