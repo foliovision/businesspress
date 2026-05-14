@@ -29,6 +29,9 @@ function DRA_Force_Auth_Error() {
     /// Addition by Foliovision
     remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
     add_filter( 'rest_authentication_errors', 'DRA_only_allow_logged_in_rest_access' );
+
+    // Remove REST API endpoints from /wp-json/
+    add_filter( 'rest_endpoints', 'DRA_remove_rest_endpoints' );
 }
 
 /**
@@ -69,6 +72,21 @@ function DRA_only_allow_logged_in_rest_access( $access ) {
 }
 
 /**
+ * Get the disallowed endpoints for non-logged in users.
+ *
+ * These are blocked for security reasons.
+ *
+ * @return array
+ */
+function DRA_get_disallowed_endpoints_for_non_logged_in_users() {
+    return array(
+        // Block user enumeration
+        // Note: This does not only block wp/v2/users endpoint, but also any other endpoint that looks like a user endpoint
+        '/users'
+    );
+}
+
+/**
  * Checks if the URL looks like a WP REST API URL.
  *
  * If it does, it then checks if the endpoint is allowed:
@@ -79,7 +97,10 @@ function DRA_only_allow_logged_in_rest_access( $access ) {
  */
 function fv_DRA_is_allowed_endpoint() {
 
-    // Logged in users can do it all.
+    /**
+     * Permit all endpoints if the user is logged in.
+     * For example the block editor uses all kinds of REST API endpoints to get list of tags, users etc.
+     */
     if ( is_user_logged_in() ) {
         return true;
     }
@@ -101,7 +122,7 @@ function fv_DRA_is_allowed_endpoint() {
     ) {
         // The page URL is not a WP REST API URL, so we stop checking
         return true;
-    }    
+    }
 
     global $businesspress;
 
@@ -130,6 +151,47 @@ function fv_DRA_is_allowed_endpoint() {
 
     // REST API is enabled
     } else {
+
+        // Even if "REST API" is not disabled, we don't want non-logged in users to access disallowed endpoints
+        foreach( DRA_get_disallowed_endpoints_for_non_logged_in_users() as $path ) {
+            if ( stripos( $request_url, $path ) !== false ) {
+                return false;
+            }
+        }
+
         return true;
+    }
+}
+
+/**
+ * Remove the REST API endpoints conditionally.
+ * - If the user is logged in, we permit all endpoints to keep block editor working.
+ * - If the user is not logged in, we remove the disallowed endpoints.
+ *
+ * @param array $endpoints The REST API endpoints.
+ * @return array The modified REST API endpoints.
+ */
+function DRA_remove_rest_endpoints( $endpoints ) {
+
+    /**
+     * Permit all endpoints if the user is logged in.
+     * For example the block editor uses all kinds of REST API endpoints to get list of tags, users etc.
+     */
+    if ( is_user_logged_in() ) {
+        return $endpoints;
+
+    /**
+     * Even if "REST API" is enabled, we don't want non-logged in users to access "users" endpoint
+     */
+    } else {
+        // Remove all disallowed endpoints from /wp-json/
+        foreach( $endpoints as $key => $endpoint ) {
+            foreach( DRA_get_disallowed_endpoints_for_non_logged_in_users() as $path ) {
+                if ( stripos( $key, $path ) !== false ) {
+                    unset( $endpoints[ $key ] );
+                }
+            }
+        }
+        return $endpoints;
     }
 }

@@ -789,7 +789,7 @@ class BusinessPress_Settings {
                     'businesspress-disable-rest-api',
                     'disable-rest-api',
                     '',
-                    __('REST API (except for logged in users and EDD webhooks)', 'businesspress' ) );
+                    __('REST API (except for logged in users and EDD webhooks, <code>users</code> is always disabled if not logged in)', 'businesspress' ) );
       ?>      
       
       <?php $this->admin_show_setting(
