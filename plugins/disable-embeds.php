@@ -53,7 +53,7 @@ function disable_embeds_init() {
 	// Remove filter of the oEmbed result before any HTTP requests are made.
 	remove_filter( 'pre_oembed_result', 'wp_filter_pre_oembed_result', 10 );
 
-	add_filter( 'template_redirect', array( 'disable_embeds_oembed_template' ) );
+	add_filter( 'template_redirect', 'disable_embeds_oembed_template' );
 }
 
 add_action( 'init', 'disable_embeds_init', 9999 );
