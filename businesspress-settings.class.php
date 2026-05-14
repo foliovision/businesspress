@@ -770,6 +770,22 @@ class BusinessPress_Settings {
           <?php
         }
       }
+
+      $this->admin_show_setting(
+        'businesspress-wp-admin-behavior-check',
+        'wp-admin-behavior-check',
+        '',
+        __('Ban users who repeatedly attempt to load forbidden wp-admin pages - triggers if user tries to access more than 2 <code>/wp-admin</code> screens where he does not have the permission in 24 hours.', 'businesspress' ),
+        'checkbox_readonly'
+      );
+
+      $this->admin_show_setting(
+        'businesspress-block-user-enumeration',
+        'block-user-enumeration',
+        '',
+        __('Block user enumeration - Disables the <code>wp/v2/users</code> REST API and <code>wp-sitemap-users.xml</code>, removes author information from oEmbed REST API.', 'businesspress' ),
+        'checkbox_readonly'
+      );
       ?>
 
       <?php $this->admin_show_setting(

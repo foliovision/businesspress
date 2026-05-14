@@ -101,6 +101,28 @@ Guides:
 
 == Changelog ==
 
+= 1.6 - 2026-05-14 =
+
+Security improvements:
+
+* Ban repeated bad XML-RPC requests with fail2ban
+* Ban XML-RPC requests if disabled right away with WAF, uses fail2ban
+* Ban users for bad wp-admin actions: Triggers if user tries to access more than 2 wp-admin screens where he does not have the permission in 24 hours
+* Disable oEmbed: Always remove author information from oEmbed REST API response, to avoid user enumeration
+* Disable REST API: Always disallow wp/v2/users for non-logged in users to avoid user enumeration
+* Disable the users sitemap: It makes it too easy to enumerate users
+
+Other improvements:
+
+* Adding global color settings: Fix removal of the per-user setting
+* Button to purge the Surge plugin HTML page cache: Removed, as it's part of FV Surge now
+* Change WP activation email subject "Login Details" to "Set your password"
+* Hide WP Admin Bar for subscribers: Only check for edit_posts and edit_ads_txt
+* Hide Admin Notices: Avoid touching Gravity Forms pages
+* Limit Search requests by IP: Quick stats on settings page
+* User login sessions: Improve to show oldest and newest by default
+* Settings screen: Create Tweaks tab and add all the forced tweaks to it
+
 = 1.5 - 2026-02-13 =
 
 * Bugfix: Clickjacking Protection: Avoid loosing .htaccess rules
