@@ -51,8 +51,8 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 	$user = get_userdata( $user_id );
 
 	if ( $column_name === 'registered' ) {
-		$t_time    = get_the_time( __( 'Y/m/d g:i:s a' ) );
 		$m_time    = $user->user_registered;
+		$t_time    = date( 'g:i:s a', strtotime( $m_time ) );
 		$time      = mysql2date( 'G', $m_time, false );
 
 		$time_diff = time() - $time;
@@ -69,7 +69,14 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 			$h_time = mysql2date( get_option( 'date_format' ), $m_time );
 		}
 
-		return '<abbr title="' . $t_time . '">' . apply_filters( 'user_registered_date_column_time', $h_time, $user ) . '</abbr>';
+		$html = '<abbr title="' . $t_time . '">' . apply_filters( 'user_registered_date_column_time', $h_time, $user ) . '</abbr>';
+
+		// Show ban status for plugins/fv-wp-admin-behavior-check.php
+		if ( 4 === absint( $user->user_status ) ) {
+			$html .= '<p style="background-color: #d00; color: white; display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 12px;">Banned</p>';
+		}
+
+		return $html;
 	}
 
 	return $val;

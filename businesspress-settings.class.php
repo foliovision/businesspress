@@ -339,14 +339,14 @@ class BusinessPress_Settings {
       <?php $this->admin_show_setting(
                     'wp_admin_bar_subscribers',
                     'wp_admin_bar_subscribers',
-                    'Hide WP Admin Bar for subscribers',
+                    'Hide WP Admin Bar for Subscribers',
                     __("With this setting it's up to you to provide the front-end interface for profile editing and so on. WP Admin Dashboard remains accessible, but is restricted to the Profile screen.", 'businesspress' ) );
       ?>
       <?php $this->admin_show_setting(
                     'wp_admin_redirect_subscribers',
                     'wp_admin_redirect_subscribers',
-                    'Redirect WP Admin for subscribers',
-                    __("Will redirect to homepage.", 'businesspress' ) );
+                    'Redirect WP Admin for Subscribers',
+                    __("Will redirect to homepage, other user levels will retain access to the admin dashboard.", 'businesspress' ) );
       ?>
       <tr>
         <th>
@@ -743,32 +743,33 @@ class BusinessPress_Settings {
 
     ?>
     <table class="form-table">
+      <?php $this->admin_show_setting(
+                    'businesspress-fix-new-user-nicenames',
+                    'fix-new-user-nicenames',
+                    'Enable',
+                    __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
+      ?>
+
       <?php if( !is_multisite() ) {
               $this->admin_show_setting(
                       'businesspress-clickjacking-protection',
                       'clickjacking-protection',
-                      __('Enable'),
+                      '',
                       __('Clickjacking Protection ', 'businesspress' ) );
 
-              if(isset($options['anticlickjack_rewrite_result'])) {
-                ?> 
-                  <tr>
-                    <th>
-                      <label></label>
-                    </th>
-                    <td>
-                      <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
-                    </td>
-                  </tr>
-                <?php
-              }
-
-              $this->admin_show_setting(
-                'businesspress-fix-new-user-nicenames',
-                'fix-new-user-nicenames',
-                '',
-                __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
-            }
+        if(isset($options['anticlickjack_rewrite_result'])) {
+          ?> 
+            <tr>
+              <th>
+                <label></label>
+              </th>
+              <td>
+                <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+              </td>
+            </tr>
+          <?php
+        }
+      }
       ?>
 
       <?php $this->admin_show_setting(

@@ -121,8 +121,9 @@ class BusinessPress extends BusinessPress_Plugin {
     add_action( 'admin_head', array( $this, 'admin_screen_cleanup_css') );
     add_action( 'wp_before_admin_bar_render', array( $this, 'remove_wp_admin_bar_items' ) );
     
-    remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
     add_filter( 'get_user_option_admin_color', array( $this, 'admin_color_force' ) );
+    add_action( 'user_edit_form_tag', array( $this, 'admin_color_setting_remove' ) );
+
     add_filter( 'login_title', array( $this, 'login_title' ) );
     
     /*
@@ -236,8 +237,12 @@ class BusinessPress extends BusinessPress_Plugin {
     return $this->get_setting('admin-color');
   }
   
-  
-  
+  /**
+   * Remove "Administration Color Scheme" from the user profile page as we set it globally with admin_color_force().
+   */
+  public function admin_color_setting_remove() {
+    remove_action( 'admin_color_scheme_picker', 'admin_color_scheme_picker' );
+  }
   
   function admin_plugin_action_links($links, $file) {
   	$plugin_file = basename(__FILE__);
@@ -331,25 +336,12 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $this->get_setting('autoupdates_vcs') ) add_filter( 'automatic_updates_is_vcs_checkout', '__return_false', 999 );
     
     if( ( $this->get_setting('wp_admin_bar_subscribers') || $this->get_setting('wp_admin_redirect_subscribers') ) && get_current_user_id() > 0 ) {
-      $objUser = get_userdata( get_current_user_id() );
-      if( $objUser && isset($objUser->roles) && is_array($objUser->roles) ) {
-        $roles = $objUser->roles;
-        if(
-          // this is silly, but we can't rely on !current_user_can() with edit_posts or delete_posts to detect Subscribers because of bbPress
-          count($roles) == 2 && ( $roles[0] == 'subscriber' && $roles[1] == 'bbp_participant' || $roles[0] == 'bbp_participant' && $roles[1] == 'subscriber' ) ||
-          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'subscriber' ||
-          // Easy Digital Downloads with subscriptions
-          count($roles) > 0 && ! empty( $roles[0] ) && $roles[0] == 'edd_subscriber' ||
-          count($roles) == 0
-        ) {
-          if (
-            ! current_user_can( 'edit_ads_txt' )
-          ) {
-            add_filter('show_admin_bar', '__return_false');
-            add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
-            add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
-          }
-        }
+      if (
+        ! current_user_can( 'edit_posts' ) &&  ! current_user_can( 'edit_ads_txt' )
+      ) {
+        add_filter('show_admin_bar', '__return_false');
+        add_action( 'admin_init', array( $this, 'subscriber__dashboard_redirect' ) );
+        add_action( 'admin_head', array( $this, 'subscriber__hide_menus' ) );
       }
     }  
     
@@ -722,7 +714,7 @@ class BusinessPress extends BusinessPress_Plugin {
     $msg = (wp_cache_get($username, 'userlogins'))
 							? "Authentication failure for $username from "
 							: "Authentication attempt for unknown user $username from ";
-
+    
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }
@@ -1359,10 +1351,6 @@ JSH;
       include( dirname(__FILE__).'/plugins/social-warfare-pro-tweaks.php' );
     }
 
-    if( get_option( 'surge_installed' ) ) {
-      include( dirname(__FILE__).'/plugins/surge-cache-purge.php' );
-    }
-
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
 
     include( dirname(__FILE__).'/plugins/fv-user-login-sessions.php' );
@@ -1393,6 +1381,8 @@ JSH;
     if ( defined( 'POLYLANG_VERSION' ) ) {
       include( dirname(__FILE__) . '/plugins/remove-polylang-review-nag.php' );
     }
+
+    include( dirname(__FILE__) . '/plugins/fv-wp-admin-behavior-check.php' );
   }
   
   
