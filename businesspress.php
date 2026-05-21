@@ -713,6 +713,12 @@ class BusinessPress extends BusinessPress_Plugin {
 							? "Authentication failure for $username from "
 							: "Authentication attempt for unknown user $username from ";
     
+    // Do not ban users for failed login attempts via TR mobile app as they seem to occur too often due to bug in the mobile app.
+    if ( ! wp_cache_get($username, 'userlogins') && stripos( $_SERVER['REQUEST_URI'], '/generate_auth_cookie' ) !== false ) {
+      syslog( LOG_INFO,'BusinessPress mobile app login error, not banning for now - '.$msg.$this->get_remote_addr() );
+      return;
+    }
+    
     $this->fail2ban_openlog();
     syslog( LOG_INFO,'BusinessPress fail2ban login error - '.$msg.$this->get_remote_addr() );
   }

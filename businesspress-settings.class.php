@@ -784,7 +784,7 @@ class BusinessPress_Settings {
         'businesspress-block-user-enumeration',
         'block-user-enumeration',
         '',
-        __('Block user enumeration - Disables the <code>wp/v2/users</code> REST API and <code>wp-sitemap-users.xml</code>, removes author information from oEmbed REST API.', 'businesspress' ),
+        __('Block user enumeration - Disables the <code>wp/v2/users</code> REST API and <code>wp-sitemap-users.xml</code>, <code>/?author=1</code> archives, removes author information from oEmbed REST API.', 'businesspress' ),
         'checkbox_readonly'
       );
       ?>
@@ -794,14 +794,6 @@ class BusinessPress_Settings {
                     'remove-generator',
                     __('Disable'),
                     __('Generator Tag (WP, EDD)', 'businesspress' ) );
-      ?>
-
-      <?php $this->admin_show_setting(
-                    'businesspress-disable-user-login-scanning',
-                    'disable-user-login-scanning',
-                    '',
-                    __('User login scanning (using requests like <code>/?author=1</code> to find admin user login)', 'businesspress' ),
-                  'checkbox_readonly' );
       ?>
 
       <?php $this->admin_show_setting(
@@ -815,7 +807,8 @@ class BusinessPress_Settings {
                     'businesspress-disable-application-passwords',
                     'disable-application-passwords',
                     '',
-                    __('Application Passwords (blocks use of REST API with external tools for users who are not Administrators)', 'businesspress' ) );
+                    __('Application Passwords (blocks use of REST API with external tools for users who are not Administrators)', 'businesspress' ),
+                    'checkbox_readonly' );
       ?>
 
       <?php $this->admin_show_setting(
