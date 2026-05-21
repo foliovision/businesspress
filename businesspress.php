@@ -1348,6 +1348,8 @@ JSH;
 
     include( dirname(__FILE__).'/plugins/users-by-date-registered.php' );
 
+    include( dirname(__FILE__).'/plugins/fv-deny-application-passwords.php' );
+
     include( dirname(__FILE__).'/plugins/fv-user-login-sessions.php' );
 
     if ( $this->get_setting('limit-search-requests-by-ip') ) {

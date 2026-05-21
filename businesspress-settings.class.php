@@ -809,8 +809,15 @@ class BusinessPress_Settings {
                     'disable-rest-api',
                     '',
                     __('REST API (except for logged in users and EDD webhooks, <code>users</code> is always disabled if not logged in)', 'businesspress' ) );
-      ?>      
-      
+      ?>
+
+      <?php $this->admin_show_setting(
+                    'businesspress-disable-application-passwords',
+                    'disable-application-passwords',
+                    '',
+                    __('Application Passwords (blocks use of REST API with external tools for users who are not Administrators)', 'businesspress' ) );
+      ?>
+
       <?php $this->admin_show_setting(
                     'businesspress-disable-xml-rpc',
                     'disable-xml-rpc',
