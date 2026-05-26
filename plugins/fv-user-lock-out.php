@@ -1,6 +1,9 @@
 <?php
 
 class FV_User_Lock_Out {
+	const META_COUNT            = '_fv_bad_logins_count';
+	const META_LAST             = '_fv_bad_logins_last';
+	const META_LOCKOUT_EMAIL    = 'fv_user_lockout_email';
 
   function __construct() {
     // If the user had more than 20 bad attempts, with last attempt in last 24 hours, stop the login and email the user
@@ -28,14 +31,20 @@ class FV_User_Lock_Out {
   }
 
   function admin_ajax() {
-    if( !wp_verify_nonce($_POST['nonce'], 'fv_user_lock_out_unlock='.$_POST['user_id']) ) {
+		if ( ! current_user_can( 'edit_users' ) ) {
+			wp_send_json( array( 'error' => __( 'You do not have permission to unlock users.', 'businesspress' ) ) );
+		}
+
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+
+		if ( ! $user_id || ! wp_verify_nonce( $_POST['nonce'], 'fv_user_lock_out_unlock-' . $user_id ) ) {
       wp_send_json( array( 'error' => 'Nonce error.' ) );
     }
     
-    $this->remove_lock( $_POST['user_id'] );
+		$this->remove_lock( $user_id );
 
     if( function_exists("SimpleLogger") ) {
-      $user = get_user( $_POST['user_id'] );
+			$user = get_user( $user_id );
       SimpleLogger()->info( 'Admin unlocked locked out user account for: ' . $user->user_email );
     }
 
@@ -49,10 +58,10 @@ class FV_User_Lock_Out {
 
   function admin_column_content( $content, $column_name, $user_id ) {
 
-    if( $column_name == 'fv_user_lock_out' && $data = $this->is_user_locked_out( $user_id ) ) {
-      $content = '<div data-fv_user_lock_out_unlock_wrap="'.$user_id.'">';
-      $content .= '<span title="BusinessPress has detected '.$data['count'].' bad login attempts and has blocked further logis for this account." style="display: inline-flex; color: #fff; border-radius: 3px; line-height: 30px; padding: 0 0.75rem; margin-right: 0.35rem; background: #AF4c50">Locked Out</span>';
-      $content .= '<div class="row-actions"><a href="#" data-fv_user_lock_out_unlock="'.$user_id.'" data-nonce="'.wp_create_nonce('fv_user_lock_out_unlock='.$user_id).'">Unlock</a></div>';
+		if ( $column_name === 'fv_user_lock_out' && $data = $this->is_user_locked_out( $user_id ) ) {
+			$content  = '<div data-fv_user_lock_out_unlock_wrap="' . esc_attr( $user_id ) . '">';
+			$content .= '<span title="BusinessPress has detected ' . esc_attr( $data['count'] ) . ' bad login attempts and has blocked further logins for this account." style="display: inline-flex; color: #fff; border-radius: 3px; line-height: 30px; padding: 0 0.75rem; margin-right: 0.35rem; background: #AF4c50">Locked Out</span>';
+			$content .= '<div class="row-actions"><a href="#" data-fv_user_lock_out_unlock="' . esc_attr( $user_id ) . '" data-nonce="' . esc_attr( wp_create_nonce( 'fv_user_lock_out_unlock-' . $user_id ) ) . '">Unlock</a></div>';
       $content .= '</div>';
 
       add_action( 'admin_footer', array( $this, 'admin_script' ) );
@@ -88,9 +97,13 @@ jQuery( function($) {
     <?php
   }
 
+	/**
+	 * @param int $user_id User ID.
+	 * @return array|false Lock data for UI, or false.
+	 */
   function is_user_locked_out( $user_id ) {
-    $count = get_user_meta( $user_id, '_fv_bad_logins_count', true );
-    $time = get_user_meta( $user_id, '_fv_bad_logins_last', true );
+    $count = get_user_meta( $user_id, self::META_COUNT, true );
+    $time = get_user_meta( $user_id, self::META_LAST, true );
     if( $count > 20 && $time + DAY_IN_SECONDS > time() ) {
       return array(
         'count' => $count,
@@ -104,14 +117,14 @@ jQuery( function($) {
   function lockout_email( $user ) {
     $user_id = $user->ID;
   
-    $last_lockout = get_user_meta( $user_id, 'fv_user_lockout_email', true );
+		$last_lockout = get_user_meta( $user_id, self::META_LOCKOUT_EMAIL, true );
   
     // Only send email once per week
     if( $last_lockout && ( $last_lockout + WEEK_IN_SECONDS ) > time() ) {
       return;
     }
   
-    update_user_meta( $user_id, 'fv_user_lockout_email', time() );
+		update_user_meta( $user_id, self::META_LOCKOUT_EMAIL, time() );
   
     $key = get_password_reset_key( $user );
   
@@ -160,13 +173,13 @@ All at %4$s
   
       login_header( __( 'Unlock Login' ), '', $errors );    
       ?>
-      <a class="button" href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php _e( 'Password Reset' ); ?></a>
+			<a class="button" href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php esc_html_e( 'Password Reset' ); ?></a>
       <?php
       login_footer();
       exit;
     }
   
-    $user = check_password_reset_key( $_GET['ukey'], $_GET['login'] );
+		$user = check_password_reset_key( wp_unslash( $_GET['ukey'] ), wp_unslash( $_GET['login'] ) );
     if ( ! $user || is_wp_error( $user ) ) {
       if ( $user && $user->get_error_code() === 'expired_key' ) {
         wp_redirect( site_url( 'wp-login.php?action=unlock&error=expiredkey' ) );
@@ -224,16 +237,20 @@ All at %4$s
     return $user_logged_in;
   }
 
-  // Remove block, but backup old values
+	/**
+	 * Clear lock flag and failure counters; backup previous values.
+	 *
+	 * @param int $user_id User ID.
+	 */
   function remove_lock( $user_id ) {
-    foreach( array(
-      '_fv_bad_logins_last',
-      '_fv_bad_logins_count',
-      'fv_user_lockout_email'
-    ) AS $meta_key ) {
+		foreach ( array(
+			self::META_LAST,
+			self::META_COUNT,
+			self::META_LOCKOUT_EMAIL,
+		) as $meta_key ) {
       $meta_value = get_user_meta( $user_id, $meta_key, true );
       delete_user_meta( $user_id, $meta_key );
-      update_user_meta( $user_id, $meta_key.'_previous', $meta_value );
+			update_user_meta( $user_id, $meta_key . '_previous', $meta_value );
     }
   }
 
@@ -254,10 +271,8 @@ All at %4$s
    * Record number of bad login attempts and last time of bad login attempt.
    * Not if user just provided the username while the email address is required.
    * 
-   * @param string $username
-   * @param WP_Error $error Only available with WordPress 5.4 and later.
-   *
-   * @return void
+	 * @param string       $username Username.
+	 * @param WP_Error|bool $error   Error object (WordPress 5.4+).
    */
   function wp_login_failed( $username, $error = false ) {
 
@@ -281,15 +296,15 @@ All at %4$s
     }
 
     if( $user ) {
-      $count = get_user_meta( $user->ID, '_fv_bad_logins_count', true );
+      $count = get_user_meta( $user->ID, self::META_COUNT, true );
       if( !$count ) {
         $count = 0;
       }
 
       $count++;
 
-      update_user_meta( $user->ID, '_fv_bad_logins_count', $count );
-      update_user_meta( $user->ID, '_fv_bad_logins_last', time() );
+      update_user_meta( $user->ID, self::META_COUNT, $count );
+      update_user_meta( $user->ID, self::META_LAST, time() );
 
       // user_status is 0 if the user is active, otherwise do not send the email
       if ( $this->is_user_locked_out( $user->ID ) && 0 === intval( $user->user_status ) ) {
@@ -300,4 +315,5 @@ All at %4$s
 
 }
 
-new FV_User_Lock_Out;
+new FV_User_Lock_Out();
+
