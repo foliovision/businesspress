@@ -45,7 +45,7 @@ Plugin by default moves the admin notices into Dashboard -> Notices screen where
 
 Plugin also supports fail2ban, see install instructions.
 
-Login Lockout makes sure any user account that gets repeated bad login attempts (even from different IP addresses) gets locked down to ensure the password does not get guessed. User then gets an "Failed login attempts detected" email letting him unlock the account and reminding him to use a strong password.
+Login Lockout makes sure any user account that gets repeated bad login attempts (even from different IP addresses) gets locked down to ensure the password does not get guessed. User then gets an "Failed login attempts detected" email letting him unlock the account and reminding him to use a strong password. Stored failure counts decay weekly for idle accounts.
 
 **Tweaks**
 

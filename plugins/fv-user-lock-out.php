@@ -1,9 +1,14 @@
 <?php
 
 class FV_User_Lock_Out {
+
+	const META_LOCKED           = '_fv_account_locked';
 	const META_COUNT            = '_fv_bad_logins_count';
 	const META_LAST             = '_fv_bad_logins_last';
 	const META_LOCKOUT_EMAIL    = 'fv_user_lockout_email';
+	const LOCK_THRESHOLD        = 20;
+	const CRON_HOOK             = 'businesspress_fv_user_lock_out_decay_counts';
+	const DECAY_BATCH_SIZE      = 500;
 
   function __construct() {
     // If the user had more than 20 bad attempts, with last attempt in last 24 hours, stop the login and email the user
@@ -24,10 +29,86 @@ class FV_User_Lock_Out {
     add_filter( 'manage_users_columns', array( $this, 'admin_column' ) );
     add_filter( 'manage_users_custom_column', array( $this, 'admin_column_content' ), 10, 3 );
 
-    add_action( 'wp_ajax_fv_user_lock_out_unlock', array( $this, 'admin_ajax') );
+		add_action( 'wp_ajax_fv_user_lock_out_unlock', array( $this, 'admin_ajax') );
 
     // The "Unlock" link to allow your account login should not expire in 1, but 3 days
     add_filter( 'password_reset_expiration', array( $this, 'password_reset_expiration' ) );
+
+		add_action( 'init', array( $this, 'maybe_schedule_decay_cron' ) );
+		add_action( self::CRON_HOOK, array( $this, 'decay_bad_login_counts' ) );
+	}
+
+	/**
+	 * Schedule weekly decay of stored failure counts (not the lock flag).
+	 */
+	function maybe_schedule_decay_cron() {
+		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+			wp_schedule_event( time(), 'weekly', self::CRON_HOOK );
+		}
+	}
+
+	/**
+	 * Halve failure counts for idle accounts that are not actively locked out.
+	 */
+	function decay_bad_login_counts() {
+		$paged = 1;
+
+		do {
+			$query = new WP_User_Query(
+				array(
+					'fields'     => 'ID',
+					'number'     => self::DECAY_BATCH_SIZE,
+					'paged'      => $paged,
+					'meta_query' => array(
+						array(
+							'key'     => self::META_COUNT,
+							'value'   => 0,
+							'compare' => '>',
+							'type'    => 'NUMERIC',
+						),
+					),
+				)
+			);
+
+			$user_ids = $query->get_results();
+
+			if ( empty( $user_ids ) ) {
+				break;
+			}
+
+			foreach ( $user_ids as $user_id ) {
+				$this->maybe_decay_user_count( (int) $user_id );
+			}
+
+			$paged++;
+		} while ( count( $user_ids ) === self::DECAY_BATCH_SIZE );
+	}
+
+	/**
+	 * @param int $user_id User ID.
+	 */
+	function maybe_decay_user_count( $user_id ) {
+		if ( $this->is_user_locked_out( $user_id ) ) {
+			return;
+		}
+
+		$last = (int) get_user_meta( $user_id, self::META_LAST, true );
+		if ( $last && ( $last + DAY_IN_SECONDS ) > time() ) {
+			return;
+		}
+
+		$count = (int) get_user_meta( $user_id, self::META_COUNT, true );
+		if ( $count < 1 ) {
+			return;
+		}
+
+		$new_count = (int) floor( $count / 2 );
+
+		if ( $new_count < 1 ) {
+			delete_user_meta( $user_id, self::META_COUNT );
+		} else {
+			update_user_meta( $user_id, self::META_COUNT, $new_count );
+		}
   }
 
   function admin_ajax() {
@@ -43,7 +124,7 @@ class FV_User_Lock_Out {
     
 		$this->remove_lock( $user_id );
 
-    if( function_exists("SimpleLogger") ) {
+		if( function_exists("SimpleLogger") ) {
 			$user = get_user( $user_id );
       SimpleLogger()->info( 'Admin unlocked locked out user account for: ' . $user->user_email );
     }
@@ -52,7 +133,7 @@ class FV_User_Lock_Out {
   }
 
   function admin_column( $columns ) {
-    $columns['fv_user_lock_out'] = "Locked Out?";
+		$columns['fv_user_lock_out'] = "Locked Out?";
     return $columns;
   }
 
@@ -102,10 +183,21 @@ jQuery( function($) {
 	 * @return array|false Lock data for UI, or false.
 	 */
   function is_user_locked_out( $user_id ) {
-    $count = get_user_meta( $user_id, self::META_COUNT, true );
-    $time = get_user_meta( $user_id, self::META_LAST, true );
-    if( $count > 20 && $time + DAY_IN_SECONDS > time() ) {
+    $locked = get_user_meta( $user_id, self::META_LOCKED, true );
+    if( $locked ) {
       return array(
+        'count' => (int) get_user_meta( $user_id, self::META_COUNT, true ),
+        'time'  => (int) get_user_meta( $user_id, self::META_LAST, true ),
+      );
+    }
+
+    // Migrate accounts that were locked under the old count + 24h rule.
+		$count = (int) get_user_meta( $user_id, self::META_COUNT, true );
+		$time  = (int) get_user_meta( $user_id, self::META_LAST, true );
+
+		if ( $count > self::LOCK_THRESHOLD && $time && ( $time + DAY_IN_SECONDS ) > time() ) {
+			update_user_meta( $user_id, self::META_LOCKED, $time );
+			return array(
         'count' => $count,
         'time' => $time
       );
@@ -119,8 +211,8 @@ jQuery( function($) {
   
 		$last_lockout = get_user_meta( $user_id, self::META_LOCKOUT_EMAIL, true );
   
-    // Only send email once per week
-    if( $last_lockout && ( $last_lockout + WEEK_IN_SECONDS ) > time() ) {
+		// Only send email once per week
+		if( $last_lockout && ( $last_lockout + WEEK_IN_SECONDS ) > time() ) {
       return;
     }
   
@@ -244,6 +336,7 @@ All at %4$s
 	 */
   function remove_lock( $user_id ) {
 		foreach ( array(
+			self::META_LOCKED,
 			self::META_LAST,
 			self::META_COUNT,
 			self::META_LOCKOUT_EMAIL,
@@ -308,6 +401,8 @@ All at %4$s
 
       // user_status is 0 if the user is active, otherwise do not send the email
       if ( $this->is_user_locked_out( $user->ID ) && 0 === intval( $user->user_status ) ) {
+        update_user_meta( $user->ID, self::META_LOCKED, time() );
+
         $this->lockout_email($user);
       }
     }

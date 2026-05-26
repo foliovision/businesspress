@@ -444,7 +444,8 @@ class BusinessPress_Settings {
         'businesspress-login-lockout',
         'login-lockout',
         'Login Lockout',
-        __('If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email let user re-enable login for his account.', 'businesspress' ) );
+        __('If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email lets user re-enable login 
+        for his account. Failed attempt counts decay weekly when the account is idle.', 'businesspress' ) );
 
       $this->admin_show_setting(
         'businesspress-login-email-address',
