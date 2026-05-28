@@ -785,7 +785,7 @@ class BusinessPress_Settings {
         'businesspress-block-user-enumeration',
         'block-user-enumeration',
         '',
-        __('Block user enumeration - Disables the <code>wp/v2/users</code> REST API and <code>wp-sitemap-users.xml</code>, <code>/?author=1</code> archives, removes author information from oEmbed REST API.', 'businesspress' ),
+        __('Block user enumeration - Disables the <code>wp/v2/users</code> REST API and <code>wp-sitemap-users.xml</code>, <code>/?author=1</code> archives, removes author information from oEmbed REST API, removes <code>comment-author-{user_nicename}</code> from comment classes.', 'businesspress' ),
         'checkbox_readonly'
       );
       ?>

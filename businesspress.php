@@ -1386,6 +1386,8 @@ JSH;
     }
 
     include( dirname(__FILE__) . '/plugins/fv-disable-wp-sitemap-users.php' );
+    
+    include( dirname(__FILE__) . '/plugins/fv-remove-user_nicename-comment-class.php' );
 
     include( dirname(__FILE__) . '/plugins/fv-wp-admin-behavior-check.php' );
   }
