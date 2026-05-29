@@ -433,6 +433,7 @@ class BusinessPress_Settings {
   
   
   function settings_box_login() {
+    global $businesspress;
     ?>
     <p><?php _e('Failed login attempts are logged into auth.log, so you can setup fail2ban on your server to read these entries and ban the IP addresses for brute-force login hacking protection. Check the <a href="https://wordpress.org/plugins/businesspress/installation/" target="_blank">installation instructions</a>.', 'businesspress' ); ?></p>
     <p><?php _e("If you don't have fail2ban available, we recommend <a href='https://wordpress.org/plugins/login-lockdown/' target='_blank'>Login LockDown</a>.", 'businesspress' ); ?></p>
@@ -447,11 +448,34 @@ class BusinessPress_Settings {
         __('If a user account gets more than 20 bad login attempts, login is disabled and user get an email notification. Link in that email lets user re-enable login 
         for his account. Failed attempt counts decay weekly when the account is idle.', 'businesspress' ) );
 
-      $this->admin_show_setting(
-        'businesspress-login-email-address',
-        'login-email-address',
-        'Require Email Address for Login',
-        __('This is useful if you get too many bot login attempts and your account gets locked out. The bots can find out what is the user login, but not the user email address. So repeated bot logins using user login will not count for the Login Lockout.', 'businesspress' ) );
+      $login_email_address = $businesspress->get_setting( 'login-email-address' );
+      ?>
+      <tr class="businesspress-setting-businesspress-login-email-address">
+        <th>
+          <label for="businesspress-login-email-address"><?php _e( 'Require Email Address for Login', 'businesspress' ); ?></label>
+        </th>
+        <td>
+          <select id="businesspress-login-email-address" name="businesspress-login-email-address">
+            <?php
+            foreach (
+              array(
+                'off'                    => __( 'No', 'businesspress' ),
+                'editors_administrators' => __( 'For Editors and Administrators', 'businesspress' ),
+                'all'                    => __( 'Yes, for all users', 'businesspress' ),
+              ) as $value => $label
+            ) {
+              $selected = selected( $login_email_address, $value, false );
+              echo '<option value="' . esc_attr( $value ) . '"' . $selected . '>' . esc_html( $label ) . '</option>';
+            }
+            ?>
+          </select>
+          <label for="businesspress-login-email-address"">
+            <?php esc_html_e( 'This is useful if you get too many bot login attempts and your account gets locked out. The bots can find out what is the user login, but not the user email address. So repeated bot logins using user login will not count for the Login Lockout.', 'businesspress' ); ?>
+          </label>
+        </td>
+      </tr>
+
+      <?php
 
       $this->admin_show_setting(
         'businesspress-simpler-login-errors',

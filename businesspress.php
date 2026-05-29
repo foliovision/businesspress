@@ -1001,11 +1001,24 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   
-  /* this is basic handler for getting FVSB data from database
-  * @param $key = can contain {all | version | upgradeType | capsDisabled | adminEmail}
-  */
+  /**
+   * Get the setting value from the database.
+   *
+   * @param string $key The setting key.
+   * @return mixed The setting value.
+   */
   function get_setting( $key ) {
     $this->aOptions = is_multisite() ? get_site_option('businesspress') : get_option( 'businesspress' );
+
+    /**
+     * "Require Email Address for Login" was a boolean setting in the past, so we simply convert
+     * boolean true to the new "all" value to retain the same behavior on plugin update.
+     */
+    if ( 'login-email-address' === $key ) {
+      if ( is_bool( $this->aOptions[$key] ) && true === $this->aOptions[$key] ) {
+        return 'all';
+      }
+    }
 
     if( isset($this->aOptions[$key]) ) {
       if( $this->aOptions[$key] === true || $this->aOptions[$key] === 'true' ) return true;
@@ -1137,7 +1150,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->aOptions['login-lockout'] = isset($_POST['businesspress-login-lockout']) && $_POST['businesspress-login-lockout'] == 1 ? true : false;
 
-      $this->aOptions['login-email-address'] = isset($_POST['businesspress-login-email-address']) && $_POST['businesspress-login-email-address'] == 1 ? true : false;
+      $login_email_address = isset( $_POST['businesspress-login-email-address'] ) ? sanitize_text_field( wp_unslash( $_POST['businesspress-login-email-address'] ) ) : 'off';
+      $this->aOptions['login-email-address'] = in_array( $login_email_address, array( 'off', 'editors_administrators', 'all' ), true ) ? $login_email_address : 'off';
 
       $this->save_settings();
 
@@ -1342,7 +1356,7 @@ JSH;
       include( dirname(__FILE__).'/plugins/fv-fix-new-user-nicenames.php' );
     }
 
-    if( $this->get_setting('login-email-address') ) {
+    if( 'off' !== $this->get_setting('login-email-address') ) {
       include( dirname(__FILE__).'/plugins/fv-require-email-address-for-login.php' );
     }
 

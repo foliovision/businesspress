@@ -375,10 +375,13 @@ All at %4$s
     }
 
     // If using WordPress before 5.4, we need to check if $_POST['log'] is not an email address
-    if ( ! is_email( $_POST['log'] ) ) {
-      global $businesspress;
-      // And if we have "Require Email Address for Login" enabled, then we don't need to record anything as it's a login attempt that cannot succeed
-      if ( $businesspress->get_setting( 'login-email-address' ) ) {
+    $login = isset( $_POST['log'] ) ? wp_unslash( $_POST['log'] ) : '';
+
+    if ( ! is_email( $login ) ) {
+      if (
+        function_exists( 'fv_require_email_login_for_user_role_check' ) &&
+        fv_require_email_login_for_user_role_check( $login )
+      ) {
         return;
       }
     }
