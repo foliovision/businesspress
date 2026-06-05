@@ -361,6 +361,45 @@ All at %4$s
   }
 
   /**
+   * Beagle Security scanner IPs.
+   *
+   * @return array
+   */
+  function get_beagle_security_ips() {
+    return array(
+      '61.2.45.236',
+      '202.191.67.66',
+      '40.160.7.58',
+      '40.160.7.50',
+      '54.91.159.245',
+      '35.171.183.143',
+      '44.203.241.170',
+      '44.203.21.113',
+      '15.204.216.152',
+      '40.160.7.108',
+      '40.160.7.113',
+      '40.160.6.71',
+    );
+  }
+
+  /**
+   * Whether the current request is from a Beagle Security scanner IP.
+   *
+   * Uses REMOTE_ADDR only so client-supplied proxy headers cannot be spoofed.
+   *
+   * @return bool
+   */
+  function is_beagle_security_ip() {
+    if ( ! isset( $_SERVER['REMOTE_ADDR'] ) ) {
+      return false;
+    }
+
+    $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+
+    return in_array( $ip, $this->get_beagle_security_ips(), true );
+  }
+
+  /**
    * Record number of bad login attempts and last time of bad login attempt.
    * Not if user just provided the username while the email address is required.
    * 
@@ -371,6 +410,11 @@ All at %4$s
 
     // Ignore if using "Require Email Address for Login"
     if( $error && $error->get_error_code() == 'email_required' ) {
+      return;
+    }
+
+    // Ignore Beagle Security scanner failed login attempts
+    if( $this->is_beagle_security_ip() ) {
       return;
     }
 
