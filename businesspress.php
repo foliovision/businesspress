@@ -1155,6 +1155,8 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->save_settings();
 
+      FV_Htaccess_Rules::process();
+
       wp_redirect( $this->get_settings_url() );
       die();
     }
@@ -1377,6 +1379,7 @@ JSH;
     include( dirname(__FILE__) . '/plugins/simple-history-clean-up.php' );
 
     include( dirname(__FILE__).'/plugins/fv-clickjacking-protection.php' );
+    include( dirname(__FILE__).'/plugins/fv-htaccess-rules.php' );
 
     include( dirname(__FILE__).'/plugins/fv-wp_new_user_notification_email.php' );
 
@@ -1538,9 +1541,14 @@ JSH;
         update_option( 'businesspress', $this->aOptions );
       }
 
+      FV_Htaccess_Rules::process();
+
       // Clean-up the old .htaccess rules
       FV_Clickjacking_Protection::clean_up();
     }
+
+    // Try to force put in the .htaccess rules once per hour.
+    FV_Htaccess_Rules::maybe_process();
     
     // Clean-up the old .htaccess rules
     FV_Clickjacking_Protection::maybe_clean_up();

@@ -774,27 +774,24 @@ class BusinessPress_Settings {
                     'fix-new-user-nicenames',
                     'Enable',
                     __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
-      ?>
 
-      <?php if( !is_multisite() ) {
               $this->admin_show_setting(
                       'businesspress-clickjacking-protection',
                       'clickjacking-protection',
                       '',
                       __('Clickjacking Protection ', 'businesspress' ) );
 
-        if(isset($options['anticlickjack_rewrite_result'])) {
+      if ( isset( $options['htaccess_rules_result'] ) ) {
           ?> 
             <tr>
               <th>
                 <label></label>
               </th>
               <td>
-                <p class="description"><?php echo $options['anticlickjack_rewrite_result'] ?></p>
+              <p class="description"><?php echo $options['htaccess_rules_result'] ?></p>
               </td>
             </tr>
           <?php
-        }
       }
 
       $this->admin_show_setting(
