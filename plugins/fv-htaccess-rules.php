@@ -9,6 +9,11 @@ class FV_Htaccess_Rules {
 	const MARKER = 'BusinessPress';
 
 	const RULES = array(
+		'http-strict-transport-security'  => array(
+			'<IfModule mod_headers.c>',
+			'Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"',
+			'</IfModule>',
+		),
 		'clickjacking-protection'         => array(
 			'<IfModule mod_headers.c>',
 			'Header set X-Frame-Options "SAMEORIGIN"',

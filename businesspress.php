@@ -1033,6 +1033,7 @@ class BusinessPress extends BusinessPress_Plugin {
     if( $key == 'hide-notices' ) return false;
     if( $key == 'autoupdates_vcs' ) return true;
     if( $key == 'clickjacking-protection' ) return true;
+    if( $key == 'http-strict-transport-security' ) return true;
     if( $key == 'login-lockout' ) return true;
     if( $key == 'login-duration') return '2_weeks';
 
@@ -1143,6 +1144,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['hide_password_posts'] = isset($_POST['hide_password_posts']) && $_POST['hide_password_posts'] == 1 ? true : false;
 
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
+      $this->aOptions['http-strict-transport-security'] = isset($_POST['businesspress-http-strict-transport-security']) && $_POST['businesspress-http-strict-transport-security'] == 1 ? true : false;
 
       $this->aOptions['fix-new-user-nicenames'] = isset($_POST['businesspress-fix-new-user-nicenames']) && $_POST['businesspress-fix-new-user-nicenames'] == 1 ? true : false;
 

@@ -781,6 +781,12 @@ class BusinessPress_Settings {
                       '',
                       __('Clickjacking Protection ', 'businesspress' ) );
 
+      $this->admin_show_setting(
+                    'businesspress-http-strict-transport-security',
+                    'http-strict-transport-security',
+                    '',
+                    __('HTTP Strict Transport Security', 'businesspress' ) );
+
       if ( isset( $options['htaccess_rules_result'] ) ) {
           ?> 
             <tr>
