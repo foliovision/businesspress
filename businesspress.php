@@ -1155,8 +1155,6 @@ class BusinessPress extends BusinessPress_Plugin {
 
       $this->save_settings();
 
-      FV_Clickjacking_Protection::process();
-
       wp_redirect( $this->get_settings_url() );
       die();
     }
@@ -1540,11 +1538,12 @@ JSH;
         update_option( 'businesspress', $this->aOptions );
       }
 
-      FV_Clickjacking_Protection::process();
+      // Clean-up the old .htaccess rules
+      FV_Clickjacking_Protection::clean_up();
     }
     
-    // Try to force put in "Clickjacking Protection" once per hour
-    FV_Clickjacking_Protection::maybe_process();
+    // Clean-up the old .htaccess rules
+    FV_Clickjacking_Protection::maybe_clean_up();
   }
   
   
