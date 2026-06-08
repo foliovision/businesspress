@@ -9,6 +9,16 @@ class FV_Htaccess_Rules {
 	const MARKER = 'BusinessPress';
 
 	const RULES = array(
+		'block-access-to-sensitive-files' => array(
+			'<IfModule mod_rewrite.c>',
+			'RewriteRule ^(.*/)?\.(git|svn|hg|idea|vscode)(/.*)?$ - [F,L]',
+			'RewriteRule ^(.*/)?(composer\.json|composer\.lock|package\.json|package-lock\.json|yarn\.lock)$ - [F,L]',
+			'RewriteRule ^(.*/)?(\.env.*|\.user\.ini|php\.ini)$ - [F,L]',
+			'RewriteRule ^(.*/)?(\.DS_Store|Thumbs\.db|.*\.log)$ - [NC,F,L]',
+			'RewriteRule ^(.*/)?(readme|changelog|license)\.(txt|md)$ - [NC,F,L]',
+			'RewriteRule ^(.*/)?(docker-compose\.yml|\.gitlab-ci\.yml|\.travis\.yml|tsconfig\.json|webpack\.config\.js)$ - [NC,F,L]',
+			'</IfModule>',
+		),
 		'http-strict-transport-security'  => array(
 			'<IfModule mod_headers.c>',
 			'Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"',

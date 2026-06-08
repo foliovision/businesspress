@@ -1026,6 +1026,7 @@ class BusinessPress extends BusinessPress_Plugin {
     }
 
     //default settings
+    if( $key == 'block-access-to-sensitive-files' ) return true;
     if( $key == 'search-results-domain' ) return true;
     if( $key == 'disable-rest-api' ) return true;
     if( $key == 'disable-emojis' ) return true;
@@ -1144,6 +1145,7 @@ class BusinessPress extends BusinessPress_Plugin {
       $this->aOptions['hide_password_posts'] = isset($_POST['hide_password_posts']) && $_POST['hide_password_posts'] == 1 ? true : false;
 
       $this->aOptions['clickjacking-protection'] = isset($_POST['businesspress-clickjacking-protection']) && $_POST['businesspress-clickjacking-protection'] == 1 ? true : false;
+      $this->aOptions['block-access-to-sensitive-files'] = isset($_POST['businesspress-block-access-to-sensitive-files']) && $_POST['businesspress-block-access-to-sensitive-files'] == 1 ? true : false;
       $this->aOptions['http-strict-transport-security'] = isset($_POST['businesspress-http-strict-transport-security']) && $_POST['businesspress-http-strict-transport-security'] == 1 ? true : false;
 
       $this->aOptions['fix-new-user-nicenames'] = isset($_POST['businesspress-fix-new-user-nicenames']) && $_POST['businesspress-fix-new-user-nicenames'] == 1 ? true : false;

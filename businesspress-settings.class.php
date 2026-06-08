@@ -774,12 +774,18 @@ class BusinessPress_Settings {
                     'fix-new-user-nicenames',
                     'Enable',
                     __('Prevent use of email address for <code>user_nicename</code> field for new users - used for author URLs and comment classes.', 'businesspress' ) );
+      
+      $this->admin_show_setting(
+                    'businesspress-block-access-to-sensitive-files',
+                    'block-access-to-sensitive-files',
+                    '',
+                    __('Block access to files that might contain sensitive information', 'businesspress' ) );
 
-              $this->admin_show_setting(
-                      'businesspress-clickjacking-protection',
-                      'clickjacking-protection',
-                      '',
-                      __('Clickjacking Protection ', 'businesspress' ) );
+      $this->admin_show_setting(
+                    'businesspress-clickjacking-protection',
+                    'clickjacking-protection',
+                    '',
+                    __('Clickjacking Protection ', 'businesspress' ) );
 
       $this->admin_show_setting(
                     'businesspress-http-strict-transport-security',
@@ -788,16 +794,16 @@ class BusinessPress_Settings {
                     __('HTTP Strict Transport Security', 'businesspress' ) );
 
       if ( isset( $options['htaccess_rules_result'] ) ) {
-          ?> 
-            <tr>
-              <th>
-                <label></label>
-              </th>
-              <td>
+        ?> 
+          <tr>
+            <th>
+              <label></label>
+            </th>
+            <td>
               <p class="description"><?php echo $options['htaccess_rules_result'] ?></p>
-              </td>
-            </tr>
-          <?php
+            </td>
+          </tr>
+        <?php
       }
 
       $this->admin_show_setting(
