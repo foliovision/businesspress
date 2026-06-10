@@ -1307,9 +1307,9 @@ JSH;
   
   }
   
-  
-  
-  
+  /**
+   * This method is called also in FV Cache for Users, must remain accessible from within $businesspress->load_extensions()!
+   */
   function load_extensions() {
     include( dirname(__FILE__).'/businesspress-settings.class.php' );
     
@@ -1406,6 +1406,7 @@ JSH;
 
     include( dirname(__FILE__) . '/plugins/fv-disable-wp-sitemap-users.php' );
     
+    // Used in FV Cache for Users, must remain accessible from within $businesspress->load_extensions()!
     include( dirname(__FILE__) . '/plugins/fv-remove-user_nicename-comment-class.php' );
 
     include( dirname(__FILE__) . '/plugins/fv-wp-admin-behavior-check.php' );
@@ -2154,6 +2155,7 @@ JSR;
   
 }
 
+// This is used in FV Cache for Users, must remain accessible for the $businesspress->load_extensions() call!
 global $businesspress;
 $businesspress = new BusinessPress();
 
