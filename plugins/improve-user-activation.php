@@ -67,7 +67,7 @@ function fv_businesspress_user_activation__login_check( $user, $username ) {
 add_filter( 'password_reset_expiration', 'fv_businesspress_user_activation__expiration' );
 
 function fv_businesspress_user_activation__expiration( $expiration ) {
-  return WEEK_IN_SECONDS;
+  return constant( 'WEEK_IN_SECONDS' );
 }
 
 /**

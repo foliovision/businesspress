@@ -28,6 +28,8 @@ class BusinessPress_Plugin
 
   var $class_name;
 
+  public $pointer_boxes = array();
+
   /**
    * Stores the path to readme.txt available on trac, needs to be set from plugin
    * @var string
@@ -127,7 +129,6 @@ class BusinessPress_Plugin
               $request_headers_array = array(
                   sprintf('%s %s HTTP/1.1', $method, $request_uri), 
                   sprintf('Host: %s', $host), 
-                  sprintf('User-Agent: %s', W3TC_POWERED_BY), 
                   'Connection: close'
               );
               

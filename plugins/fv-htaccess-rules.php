@@ -208,7 +208,7 @@ Any changes to the directives between these markers will be overwritten.', 'busi
 			return;
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once constant( 'ABSPATH' ) . 'wp-admin/includes/file.php';
 
 		$home_path     = get_home_path();
 		$htaccess_file = $home_path . '.htaccess';

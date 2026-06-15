@@ -295,7 +295,7 @@ function apt_generate_post_thumb($matches, $key, $post_content, $post_id)
   
   $thumb_id = wp_insert_attachment($attachment, $filename, $post_id);
   if ( !is_wp_error($thumb_id) ) {
-    require_once(ABSPATH . '/wp-admin/includes/image.php');
+    require_once( constant( 'ABSPATH' ) . '/wp-admin/includes/image.php');
     
     // Added fix by misthero as suggested
     wp_update_attachment_metadata( $thumb_id, wp_generate_attachment_metadata( $thumb_id, $new_file ) );

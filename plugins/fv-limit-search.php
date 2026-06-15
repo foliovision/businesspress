@@ -31,7 +31,7 @@ class FV_Limit_Search {
         KEY blocked (blocked)
       ) $charset_collate;";
       
-      require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+      require_once( constant( 'ABSPATH' ) . 'wp-admin/includes/upgrade.php' );
       dbDelta( $sql );
     }
   }

@@ -52,7 +52,7 @@ class CWS_Login_Logo_Plugin {
 		if ( is_multisite() && function_exists( 'get_current_site' ) ) {
 			// First, see if there is one for this specific site (blog)
 			$this->logo_locations['site'] = array(
-				'path' => WP_CONTENT_DIR . '/login-logo-site-' . $blog_id . '.png',
+				'path' => constant( 'WP_CONTENT_DIR' ) . '/login-logo-site-' . $blog_id . '.png',
 				'url' => $this->maybe_ssl( content_url( 'login-logo-site-' . $blog_id . '.png' ) )
 			);
 
@@ -60,14 +60,14 @@ class CWS_Login_Logo_Plugin {
 			$site = get_current_site(); // Site = Network? Ugh.
 			if ( $site && isset( $site->id ) ) {
 				$this->logo_locations['network'] = array(
-					'path' => WP_CONTENT_DIR . '/login-logo-network-' . $site->id . '.png',
+					'path' => constant( 'WP_CONTENT_DIR' ) . '/login-logo-network-' . $site->id . '.png',
 					'url' => $this->maybe_ssl( content_url( 'login-logo-network-' . $site->id . '.png' ) )
 					);
 			}
 		}
 		// Finally, we do a global lookup
 		$this->logo_locations['global'] =  array(
-			'path' => WP_CONTENT_DIR . '/login-logo.png',
+			'path' => constant( 'WP_CONTENT_DIR' ) . '/login-logo.png',
 			'url' => $this->maybe_ssl( content_url( 'login-logo.png' ) )
 			);
     

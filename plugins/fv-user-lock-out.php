@@ -93,7 +93,7 @@ class FV_User_Lock_Out {
 		}
 
 		$last = (int) get_user_meta( $user_id, self::META_LAST, true );
-		if ( $last && ( $last + DAY_IN_SECONDS ) > time() ) {
+		if ( $last && ( $last + constant( 'DAY_IN_SECONDS' ) ) > time() ) {
 			return;
 		}
 
@@ -195,7 +195,7 @@ jQuery( function($) {
 		$count = (int) get_user_meta( $user_id, self::META_COUNT, true );
 		$time  = (int) get_user_meta( $user_id, self::META_LAST, true );
 
-		if ( $count > self::LOCK_THRESHOLD && $time && ( $time + DAY_IN_SECONDS ) > time() ) {
+		if ( $count > self::LOCK_THRESHOLD && $time && ( $time + constant( 'DAY_IN_SECONDS' ) ) > time() ) {
 			update_user_meta( $user_id, self::META_LOCKED, $time );
 			return array(
         'count' => $count,
@@ -212,7 +212,7 @@ jQuery( function($) {
 		$last_lockout = get_user_meta( $user_id, self::META_LOCKOUT_EMAIL, true );
   
 		// Only send email once per week
-		if( $last_lockout && ( $last_lockout + WEEK_IN_SECONDS ) > time() ) {
+		if( $last_lockout && ( $last_lockout + constant( 'WEEK_IN_SECONDS' ) ) > time() ) {
       return;
     }
   
@@ -303,7 +303,7 @@ All at %4$s
 
   function password_reset_expiration( $expiration_duration ) {
     if ( ! empty( $_GET['action'] ) && 'unlock' === $_GET['action'] ) {
-      $expiration_duration = 3 * DAY_IN_SECONDS;
+      $expiration_duration = 3 * constant( 'DAY_IN_SECONDS' );
     }
     return $expiration_duration;
   }

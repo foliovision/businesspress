@@ -450,9 +450,9 @@ class BusinessPress extends BusinessPress_Plugin {
     if( strcmp($duration, '2_weeks') == 0 ) {
       return $expiration; // 2 weeks is the default
     } else if ( strcmp($duration, '2_months') == 0 ) {
-      $expiration = 2 * MONTH_IN_SECONDS;
+      $expiration = 2 * constant( 'MONTH_IN_SECONDS' );
     } else if ( strcmp($duration, '6_months') == 0 ) {
-      $expiration = 6 * MONTH_IN_SECONDS;
+      $expiration = 6 * constant( 'MONTH_IN_SECONDS' );
     }
 
     return $expiration;
@@ -1245,7 +1245,7 @@ JSH;
         $form_action = 'update-core.php?action=do-core-reinstall';
       } else {
         $php_compat     = version_compare( $php_version, $update->php_version, '>=' );
-        if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && empty( $wpdb->is_mysql ) )
+        if ( file_exists( constant( 'WP_CONTENT_DIR' ) . '/db.php' ) && empty( $wpdb->is_mysql ) )
           $mysql_compat = true;
         else
           $mysql_compat = version_compare( $mysql_version, $update->mysql_version, '>=' );
@@ -1870,8 +1870,8 @@ JSR;
     $new_html .= "</h4>\n";
     
     if( !class_exists('Core_Upgrader') ) {
-      include_once( ABSPATH . '/wp-admin/includes/admin.php' );
-      include_once( ABSPATH . '/wp-admin/includes/class-wp-upgrader.php' );
+      include_once( constant( 'ABSPATH' ) . '/wp-admin/includes/admin.php' );
+      include_once( constant( 'ABSPATH' ) . '/wp-admin/includes/class-wp-upgrader.php' );
     }
 
     if( class_exists('Core_Upgrader') ) {
