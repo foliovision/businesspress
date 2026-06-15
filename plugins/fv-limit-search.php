@@ -70,7 +70,7 @@ class FV_Limit_Search {
       $search_term = get_search_query();
 
       global $businesspress;
-      $ip_address = $businesspress->get_remote_addr();
+      $ip_address = FV_Fail2ban()->get_remote_addr();
       
       // Check rate limit
       if ( $this->is_rate_limited( $ip_address ) ) {

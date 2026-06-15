@@ -2,7 +2,7 @@
 
 class BusinessPress_WAF {
 
-	public function __construct( $businesspress ) {
+	public function __construct() {
 
 		// If a phrase starts with / it means it only triggers if it's the start of the request URL or requested from a folder, but it will work if used in query string without /
 		// This way you can search for .ssh or phpmyadmin in articles using site.com/?s=phpmyadmin and not get banned
@@ -60,10 +60,11 @@ class BusinessPress_WAF {
 		}
 
 		if( $match ) {
-			$businesspress->fail2ban_openlog();
-			syslog( LOG_INFO,'BusinessPress WAF - '.$match.' request - '.$_SERVER['REQUEST_URI'].' from '.$businesspress->get_remote_addr() );
+			FV_Fail2ban()->write_to_log( 'WAF - ' . $match . ' request - ' . $_SERVER['REQUEST_URI'] );
 			exit;
 		}
 	}
 
 }
+
+new BusinessPress_WAF();
