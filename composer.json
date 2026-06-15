@@ -1,0 +1,12 @@
+{
+	"name": "foliovision/businesspress",
+	"description": "BusinessPress lets you control the WordPress core updates and plugin installing/editing/upgrading to prevent issues with your business websites.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"php-stubs/wordpress-stubs": "^6.5"
+	},
+	"config": {
+		"sort-packages": true
+	}
+}
