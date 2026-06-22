@@ -29,6 +29,13 @@ class FV_Fail2ban {
 		add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
 		add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
 		add_action( 'lostpassword_post', array( $this, 'fail2ban_lostpassword' ) );
+
+		/**
+		 * Detect bad application passwords.
+		 */
+
+		// wp_authenticate_application_password() calls this for XMLRPC_REQUEST and REST_REQUEST if there are HTTP Authentication headers
+		add_action( 'application_password_failed_authentication', array( $this, 'fail2ban_application_password_failed_authentication' ) );
 	}
 
 	function fail2ban_404() {
@@ -45,6 +52,16 @@ class FV_Fail2ban {
 		if( !is_404() || function_exists('bbp_is_single_user') && bbp_is_single_user() ) return;
 
 		$this->write_to_log( 'fail2ban 404 error - '.$_SERVER['REQUEST_URI'] );
+	}
+
+	/**
+	 * Detects if somebody is trying to use the incorrect application password.
+	 * Flags the attempt to fail2ban for banning.
+	 *
+	 * @param WP_Error $error The authentication error.
+	 */
+	public function fail2ban_application_password_failed_authentication( $error ) {
+		$this->write_to_log( 'fail2ban login error - Application password failed for ' . $_SERVER['PHP_AUTH_USER'] . ' at ' . $_SERVER['REQUEST_URI'] );
 	}
 
 	/**
