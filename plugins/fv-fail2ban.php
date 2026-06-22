@@ -36,6 +36,10 @@ class FV_Fail2ban {
 
 		// wp_authenticate_application_password() calls this for XMLRPC_REQUEST and REST_REQUEST if there are HTTP Authentication headers
 		add_action( 'application_password_failed_authentication', array( $this, 'fail2ban_application_password_failed_authentication' ) );
+
+		// ...however if no application passwords are set, wp_authenticate_application_password() would not trigger any error,
+		// so we check on determine_current_user.
+		add_action( 'determine_current_user', array( $this, 'fail2ban_application_password_not_enabled' ) );
 	}
 
 	function fail2ban_404() {
@@ -62,6 +66,44 @@ class FV_Fail2ban {
 	 */
 	public function fail2ban_application_password_failed_authentication( $error ) {
 		$this->write_to_log( 'fail2ban login error - Application password failed for ' . $_SERVER['PHP_AUTH_USER'] . ' at ' . $_SERVER['REQUEST_URI'] );
+	}
+
+	/**
+	 * Detects if somebody is trying to use the application password while it's not even enabled.
+	 * Flags the attempt to fail2ban for banning and exits the script.
+	 *
+	 * @param int|false $input_user User ID if one has been determined, false otherwise.
+	 * @return int|false The authenticated user ID if successful, false otherwise.
+	 */
+	public function fail2ban_application_password_not_enabled( $input_user ) {
+		// Don't authenticate twice.
+		if ( ! empty( $input_user ) ) {
+			return $input_user;
+		}
+
+		if ( isset( $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] ) ) {
+
+			// Let WordPress handle the authentication if it's enabled.
+			/**
+			 * Note: This will return false until first user set the application password. Then core
+			 * WordPress runs update_network_option( $network_id, self::OPTION_KEY_IN_USE, true ); to
+			 * remember that an application password was EVER set up and only then it starts checking
+			 * them... forever!
+			 */
+			if ( WP_Application_Passwords::is_in_use() ) {
+				return $input_user;
+			}
+
+			// This condition is taken from wp-includes/user.php wp_authenticate_application_password() function.
+			// The 'REST_REQUEST' check here may happen too early for the constant to be available.
+			$is_api_request = ( ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) );
+
+			if ( $is_api_request ) {
+				$this->write_to_log( 'fail2ban login error - Application passwords not enabled for ' . $_SERVER['PHP_AUTH_USER'] . ' at ' . $_SERVER['REQUEST_URI'] );
+			}
+		}
+
+		return $input_user;
 	}
 
 	/**
