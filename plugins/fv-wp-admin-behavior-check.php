@@ -47,6 +47,42 @@ class FV_WP_Admin_Behavior_Check {
 		add_filter( 'businesspess_users_by_date_registered_user_table_row', array( $this, 'users_by_date_registered_user_table_row' ), 10, 2 );
 
 		add_action( 'admin_footer', array( $this, 'admin_enqueue_scripts' ) );
+
+		add_action( 'wp_ajax_businesspress_admin_behavior_check_unbanUser', array( $this, 'admin_ajax_unbanUser' ) );
+	}
+
+	public function admin_ajax_unbanUser() {
+		if ( ! current_user_can( 'edit_users' ) ) {
+			wp_send_json_error( 'You do not have permission to unban users.' );
+		}
+
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+
+		if ( ! $user_id ) {
+			wp_send_json_error( 'User ID is required.' );
+		}
+
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'businesspress_admin_behavior_check_unbanUser' ) ) {
+			wp_send_json_error( 'Nonce is invalid.' );
+		}
+
+		wp_update_user( array( 'ID' => $user_id, 'user_status' => 0 ) );
+
+		if ( function_exists( 'SimpleLogger' ) ) {
+			$user = get_user_by( 'ID', $user_id );
+
+			SimpleLogger()->info(
+				'FV WP Admin Behavior Check: Unbanned user #{user_id} {user_email}',
+				array(
+					'source'       => 'FV WP Admin Behavior Check',
+					'user_id'      => $user_id,
+					'user_email'   => $user->user_email,
+					'_occasionsID' => 'fv_wp_admin_behavior_check:' . $user_id,
+				)
+			);
+		}
+
+		wp_send_json_success( 'User unbanned successfully.' );
 	}
 
 	public function admin_enqueue_scripts() {
@@ -61,8 +97,46 @@ class FV_WP_Admin_Behavior_Check {
 				border-radius: 3px;
 				font-size: 12px;
 			}
+			.businesspress-admin-behavior-user-list-wrap {
+				visibility: hidden;
+			}
+			tr:hover .businesspress-admin-behavior-user-list-wrap {
+				visibility: visible;
+			}
+			.businesspress-admin-behavior-check-banned-notice {
+				background-color: #d00;
+				color: white;
+				padding: 10px;
+				border-radius: 5px
+			}
+			.businesspress-admin-behavior-check-banned-notice a {
+				color: white;
+			}
 			</style>
+			<script>
+			function businesspress_admin_behavior_check_unbanUser( user_id ) {
+				foliopress_confirm(
+					'Are you sure you want to unban this user?',
+					function() {
+						jQuery.post( ajaxurl, {
+							action: 'businesspress_admin_behavior_check_unbanUser',
+							nonce: '<?php echo wp_create_nonce( 'businesspress_admin_behavior_check_unbanUser' ); ?>',
+							user_id: user_id
+						}, function( response ) {
+							if ( response.success ) {
+								jQuery( "[data-businesspress-admin-behavior-check-user-id='" + user_id + "']" ).remove();
+							} else {
+								foliopress_confirm( response.data, function() {} );
+							}
+						});
+					}
+				);
+			}
+			</script>
 			<?php
+
+			wp_enqueue_style( 'wp-components' );
+			wp_enqueue_script( 'foliopress-confirm', plugin_dir_url( dirname( __FILE__ ) ) . 'js/foliopress-confirm.js' );
 		}
 	}
 
@@ -82,6 +156,23 @@ class FV_WP_Admin_Behavior_Check {
 		}
 
 		return $data;
+	}
+
+	public function get_simple_history_url( $user ) {
+		return add_query_arg( array(
+			'page' => 'simple_history_admin_menu_page',
+			'users' => urlencode(
+				wp_json_encode(
+					array(
+						array(
+							'id' => (string) $user->ID,
+							'value' => $user->display_name . ' (' . $user->user_email . ')'
+						)
+					)
+				)
+			),
+			'context' => '_message_key:user_admin_page_access_denied'
+		), admin_url( 'index.php' ) );
 	}
 
 	/**
@@ -365,17 +456,42 @@ class FV_WP_Admin_Behavior_Check {
 		return $user;
 	}
 
-  public function personal_options( $profile_user ) {
-    if ( $profile_user && current_user_can( 'remove_users' ) ) {
-      if ( 4 === absint( $profile_user->user_status ) ) {
-        echo "<p style='background-color: #d00; color: white; padding: 10px; border-radius: 5px'>Account banned by BusinessPress based on bad used activity in wp-admin.</p>";
-      }
-    }
-  }
+	public function personal_options( $profile_user ) {
+		if ( $profile_user && current_user_can( 'remove_users' ) ) {
+			if ( 4 === absint( $profile_user->user_status ) ) {
+				$user_id = absint( $profile_user->ID );
+
+				echo "<p class='businesspress-admin-behavior-check-banned-notice' data-businesspress-admin-behavior-check-user-id='" . $user_id . "'>";
+				echo "Account banned by BusinessPress based on bad used activity in wp-admin.";
+
+				if ( class_exists( 'SimpleLogger' ) ) {
+					echo " <a href='" . $this->get_simple_history_url( $profile_user ) . "' target='_blank'>View bad actions</a>";
+				}
+
+				echo " <a href='javascript:void(0)' onclick='businesspress_admin_behavior_check_unbanUser(" . $user_id . ")'>Unban</a>";
+
+				echo "</p>";
+
+				$this->load_admin_styles = true;
+			}
+		}
+	}
 
 	public function users_by_date_registered_user_table_row( $html, $user ) {
 		if ( 4 === absint( $user->user_status ) ) {
-			$html .= '<p class="businesspress-admin-behavior-check-banned-label">Banned</p>';
+			$html .= '<p class="businesspress-admin-behavior-check-banned-label" data-businesspress-admin-behavior-check-user-id="' . $user->ID . '">Banned</p>';
+
+			$html .= '<div class="businesspress-admin-behavior-user-list-wrap" data-businesspress-admin-behavior-check-user-id="' . $user->ID . '">';
+
+			$links = array();
+			if ( class_exists( 'SimpleLogger' ) ) {
+				$links[] = '<a href="' . $this->get_simple_history_url( $user ) . '" target="_blank">View bad actions</a>';
+			}
+			$links[] = '<a href="javascript:void(0)" onclick="businesspress_admin_behavior_check_unbanUser(' . $user->ID . ')">Unban</a>';
+
+			$html .= implode( ' | ', $links );
+
+			$html .= '</div>';
 
 			$this->load_admin_styles = true;
 		}
