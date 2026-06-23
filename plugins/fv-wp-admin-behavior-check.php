@@ -89,6 +89,10 @@ class FV_WP_Admin_Behavior_Check {
 		if ( $this->load_admin_styles ) {
 			?>
 			<style>
+			.column-registered abbr {
+				margin-right: .5em;
+			}
+
 			p.businesspress-admin-behavior-check-banned-label {
 				background-color: #d00;
 				color: white;
