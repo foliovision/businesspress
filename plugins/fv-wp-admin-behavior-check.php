@@ -21,6 +21,8 @@ class FV_WP_Admin_Behavior_Check {
 	 */
 	const TYPE_BAN_APPLIED = 'ban_applied';
 
+	private $load_admin_styles = false;
+
 	/**
 	 * Constructor.
 	 *
@@ -42,7 +44,26 @@ class FV_WP_Admin_Behavior_Check {
 		// Show ban status in wp-admin
 		add_action( 'personal_options', array( $this, 'personal_options' ) );
 
-		// Note: Ban status in wp-admin -> Users is shown using code in plugins/users-by-date-registered.php
+		add_filter( 'businesspess_users_by_date_registered_user_table_row', array( $this, 'users_by_date_registered_user_table_row' ), 10, 2 );
+
+		add_action( 'admin_footer', array( $this, 'admin_enqueue_scripts' ) );
+	}
+
+	public function admin_enqueue_scripts() {
+		if ( $this->load_admin_styles ) {
+			?>
+			<style>
+			p.businesspress-admin-behavior-check-banned-label {
+				background-color: #d00;
+				color: white;
+				display: inline-block;
+				padding: 2px 4px;
+				border-radius: 3px;
+				font-size: 12px;
+			}
+			</style>
+			<?php
+		}
 	}
 
 	/**
@@ -351,6 +372,17 @@ class FV_WP_Admin_Behavior_Check {
       }
     }
   }
+
+	public function users_by_date_registered_user_table_row( $html, $user ) {
+		if ( 4 === absint( $user->user_status ) ) {
+			$html .= '<p class="businesspress-admin-behavior-check-banned-label">Banned</p>';
+
+			$this->load_admin_styles = true;
+		}
+
+		return $html;
+	}
+
 }
 
 new FV_WP_Admin_Behavior_Check();

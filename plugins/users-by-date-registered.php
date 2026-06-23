@@ -71,10 +71,7 @@ function sd_modify_user_table_row( $val, $column_name, $user_id ) {
 
 		$html = '<abbr title="' . $t_time . '">' . apply_filters( 'user_registered_date_column_time', $h_time, $user ) . '</abbr>';
 
-		// Show ban status for plugins/fv-wp-admin-behavior-check.php
-		if ( 4 === absint( $user->user_status ) ) {
-			$html .= '<p style="background-color: #d00; color: white; display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 12px;">Banned</p>';
-		}
+		$html = apply_filters( 'businesspess_users_by_date_registered_user_table_row', $html, $user );
 
 		return $html;
 	}
