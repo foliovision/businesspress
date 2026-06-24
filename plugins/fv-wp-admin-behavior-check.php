@@ -21,6 +21,11 @@ class FV_WP_Admin_Behavior_Check {
 	 */
 	const TYPE_BAN_APPLIED = 'ban_applied';
 
+	/**
+	 * Behavior event type for suspend action.
+	 */
+	const TYPE_SUSPEND_APPLIED = 'suspend_applied';
+
 	private $load_admin_styles = false;
 
 	/**
@@ -272,32 +277,64 @@ class FV_WP_Admin_Behavior_Check {
 	private function maybe_ban_user( $user, $blog_id, $screen, $distinct_screens ) {
 		$user_id = absint( $user->ID );
 
-		// Only subscribers are auto-banned. Other roles are still logged.
-		if ( ! in_array( 'subscriber', (array) $user->roles, true ) ) {
-			return;
-		}
+		$verb = 'banned';
+		$type = self::TYPE_BAN_APPLIED;
 
-		// Skip current or past RCP members.
-		if ( function_exists('rcp_get_customer_by_user_id') ) {
-			$customer = rcp_get_customer_by_user_id( $user_id );
-			if ( $customer ) {
-				$memberships = $customer->get_memberships();
-				if ( $memberships ) {
-					foreach ( $memberships as $membership ) {
-						if ( in_array( $membership->get_status(), array( 'active', 'cancelled', 'expired' ) ) ) {
-							return;
-						}
-					}
-				}
-			}
-		}
+		/**
+		 * We do not ban the user if he:
+		 * - is not just subscriber
+		 * - or he has or had a paid membership
+		 * - or posted approved comments in the last month.
+		 */
+		if ( ! $this->maybe_ban_user_condition( $user ) ) {
+			$verb = 'suspended';
+			$type = self::TYPE_SUSPEND_APPLIED;
 
-		wp_update_user(
-			array(
-				'ID'          => $user_id,
-				'user_status' => self::STATUS_BANNED,
-			)
-		);
+			/**
+			 * Generate random password to avoid further logins.
+			 */
+
+			// Remove all profile_update actions
+			remove_all_actions( 'profile_update' );
+
+			// Do not send any emails about the password change.
+			add_filter( 'send_password_change_email', '__return_false' );
+			add_filter( 'send_email_change_email', '__return_false' );
+
+			wp_update_user(
+				array(
+					'ID'            => $user_id,
+					'user_pass'     => wp_hash_password( wp_generate_password( 8, false ) ),
+				)
+			);
+
+			/**
+			 * Send email to the user to let him know his account has been suspended with a link to reset the password.
+			 */
+			$subject = '[%s] Account suspended due to unusual activity';
+
+			$message = "We have detected unusual activity in your account.\n\n";
+			$message .= "We had to end your login sessions to avoid security risks.\n\n";
+			$message .= "Please reset your password to retain access: %s\n\n";
+
+			wp_mail(
+				$user->user_email,
+				sprintf( $subject, get_bloginfo( 'name' ) ),
+				sprintf(
+					$message,
+					network_site_url( 'wp-login.php?action=rp&key=' . get_password_reset_key( $user ) . '&login=' . rawurlencode( $user->user_login ), 'login' )
+				)
+			);
+
+		// Otherwise just ban the user, so he gets no chance of logging back in unless admin removes the ban.
+		} else {
+			wp_update_user(
+				array(
+					'ID'          => $user_id,
+					'user_status' => self::STATUS_BANNED,
+				)
+			);
+		}
 
 		// End only the current active session.
 		wp_destroy_current_session();
@@ -308,7 +345,7 @@ class FV_WP_Admin_Behavior_Check {
 				'user_id'        => $user_id,
 				'blog_id'        => $blog_id,
 				'screen'         => $screen,
-				'type'           => self::TYPE_BAN_APPLIED,
+				'type'           => $type,
 				'request_uri'    => isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '',
 				'referrer'       => isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
 				'ip_address'     => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
@@ -318,11 +355,9 @@ class FV_WP_Admin_Behavior_Check {
 
 		if ( function_exists( 'SimpleLogger' ) ) {
 			SimpleLogger()->warning(
-				'FV WP Admin Behavior Check: Banned user #{user_id} after denied wp-admin access on multiple screens',
+				'FV WP Admin Behavior Check: User ' . $verb . ' after wp-admin access denied on multiple screens',
 				array(
 					'source'       => 'FV WP Admin Behavior Check',
-					'user_id'      => $user_id,
-					'user_email'   => $user->user_email,
 					'blog_id'      => $blog_id,
 					'screen'       => $screen,
 					'attempts'     => $distinct_screens,
@@ -333,6 +368,109 @@ class FV_WP_Admin_Behavior_Check {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Check if the user meets the conditions to be banned.
+	 *
+	 * @param WP_User $user User object.
+	 *
+	 * @return bool True if the user meets the conditions to be banned. False otherwise.
+	 */
+	function maybe_ban_user_condition( $user ) {
+		// Only subscribers are auto-banned. Other roles are still logged.
+
+		// On Multisite
+		if ( is_multisite() ) {
+
+			$sites = get_sites();
+			foreach( $sites AS $site ) {
+				$user_on_blog = new WP_User( $user->ID, '', $site->blog_id );
+				if ( ! empty( $user_on_blog->roles ) && ! in_array( 'subscriber', $user_on_blog->roles, true ) ) {
+					return false;
+				}
+			}
+
+		// Or on regular WordPress installation
+		} else {
+			if ( ! in_array( 'subscriber', (array) $user->roles, true ) ) {
+				return false;
+			}
+
+		}
+
+		// Skip current or past RCP members.
+		if ( function_exists('rcp_get_customer_by_user_id') ) {
+			$customer = rcp_get_customer_by_user_id( $user->ID );
+			if ( $customer ) {
+				$memberships = $customer->get_memberships();
+				if ( $memberships ) {
+					foreach ( $memberships as $membership ) {
+						if ( in_array( $membership->get_status(), array( 'active', 'cancelled', 'expired' ) ) ) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		// Skip user if he posted approved comments in the last month.
+
+		// On Multisite
+		if ( is_multisite() ) {
+
+			$sites = get_sites();
+			foreach( $sites AS $site ) {
+				switch_to_blog( $site->blog_id );
+
+				$has_approved_comments_in_last_month = $this->maybe_ban_user_condition_comments( $user->ID );
+				if ( $has_approved_comments_in_last_month ) {
+					restore_current_blog();
+					return false;
+				}
+
+				restore_current_blog();
+			}
+
+		// Or on regular WordPress installation
+		} else {
+			$has_approved_comments_in_last_month = $this->maybe_ban_user_condition_comments( $user->ID );
+			if ( $has_approved_comments_in_last_month ) {
+				return false;
+			}
+
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if the user has more than 2 approved comments in the last month.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return bool True if the user posted more than 2 approved comments in the last month. False otherwise.
+	 */
+	function maybe_ban_user_condition_comments( $user_id ) {
+		$approved_comments_count_in_last_month = get_comments(
+			array(
+				'user_id'    => $user_id,
+				'type'       => 'comment',
+				'status'     => 'approve',
+				'count'      => true,
+				'date_query' => array(
+					array(
+						'after' => '1 month ago',
+					)
+				),
+			)
+		);
+
+		if ( $approved_comments_count_in_last_month > 2 ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
