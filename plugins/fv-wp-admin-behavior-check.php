@@ -189,7 +189,7 @@ class FV_WP_Admin_Behavior_Check {
 
 		$table_name = $wpdb->base_prefix . 'user_behavior';
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		require_once constant( 'ABSPATH' ) . 'wp-admin/includes/upgrade.php';
 
 		$charset_collate = $wpdb->get_charset_collate();
 
@@ -387,7 +387,7 @@ class FV_WP_Admin_Behavior_Check {
 
 		$table_name = $wpdb->base_prefix . 'user_behavior';
 
-		$window_start = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$window_start = gmdate( 'Y-m-d H:i:s', time() - constant( 'DAY_IN_SECONDS' ) );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sql = "SELECT COUNT(DISTINCT screen) FROM {$table_name} WHERE user_id = %d AND blog_id = %d AND type = %s AND date >= %s";
