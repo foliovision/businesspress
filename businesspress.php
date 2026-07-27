@@ -1217,6 +1217,8 @@ JSH;
     include( dirname(__FILE__) . '/plugins/fv-remove-user_nicename-comment-class.php' );
 
     include( dirname(__FILE__) . '/plugins/fv-wp-admin-behavior-check.php' );
+
+    include( dirname(__FILE__) . '/plugins/site-health.php' );    
   }
   
   
