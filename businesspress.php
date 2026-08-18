@@ -584,6 +584,12 @@ class BusinessPress extends BusinessPress_Plugin {
       remove_action( 'wp_head', 'wlwmanifest_link' );
 
       if ( stripos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' ) !== false ) {
+
+        // FV_Fail2ban is loaded after this class and we block XML-RPC early, so we have to load it here.
+        if ( ! class_exists('FV_Fail2ban') ) {
+          include( dirname(__FILE__).'/plugins/fv-fail2ban.php' );
+        }
+
         FV_Fail2ban()->write_to_log( 'WAF - XML-RPC is disabled, request' );
         die();
       }
@@ -593,6 +599,11 @@ class BusinessPress extends BusinessPress_Plugin {
       remove_action( 'wp_head', 'rsd_link' );
       remove_action( 'wp_head', 'wlwmanifest_link' );
       if( stripos($_SERVER['REQUEST_URI'],'/xmlrpc.php') !== false && stripos($_SERVER['REQUEST_URI'], $this->get_setting('xml-rpc-key') ) === false ) {
+        // FV_Fail2ban is loaded after this class and we block XML-RPC early, so we have to load it here.
+        if ( ! class_exists('FV_Fail2ban') ) {
+          include( dirname(__FILE__).'/plugins/fv-fail2ban.php' );
+        }
+
         FV_Fail2ban()->write_to_log( 'fail2ban XML-RPC requires access key, missing in request' );
         die();
       }
