@@ -578,6 +578,16 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   function disable_xmlrpc() {
+
+    // Avoid infinite recursion as the FV_Fail2ban()->write_to_log() method calls BusinessPress constructor via BusinessPress().
+    static $disabled;
+
+    if ( $disabled ) {
+      return;
+    }
+
+    $disabled = true;
+
     if( $this->get_setting('disable-xml-rpc') ) {
       add_filter('xmlrpc_enabled', '__return_false');
       remove_action( 'wp_head', 'rsd_link' );
