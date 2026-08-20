@@ -431,11 +431,37 @@ class BusinessPress extends BusinessPress_Plugin {
   
   
   function contact_admin() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+      wp_send_json_error( 'You are not allowed to contact the admin.' );
+      exit;
+    }
+
+    if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'businesspress_contact_admin' ) ) {
+      wp_send_json_error( 'Invalid nonce.' );
+      exit;
+    }
+
     $current_user = wp_get_current_user();
-    if( $this->get_contact_email() == -1 ) die();
+    $email_to     = false;
+
+    if ( $this->get_contact_email() !== -1 ) {
+      $email_to = sanitize_email( $this->get_contact_email() );
+    } else if ( $this->get_whitelist_email() ) {
+      $email_to = sanitize_email( $this->get_whitelist_email() );
+    }
+
+    if( ! $email_to ) {
+      wp_send_json_error( 'Contact email not set.' );
+      exit;
+    }
     
-    wp_mail( $this->get_contact_email(), 'BusinessPress contact form submission', $_POST['message'], array( 'Reply-To: '.$current_user->display_name.' <'.$current_user->user_email.'>' ) );    
-    die('1');
+    $res = wp_mail( $this->get_contact_email(), 'BusinessPress contact form submission', sanitize_textarea_field( $_POST['message'] ), array( 'Reply-To: '.$current_user->display_name.' <'.$current_user->user_email.'>' ) );
+
+    if ( $res ) {
+      wp_send_json_success( 'Message sent.' );
+    } else {
+      wp_send_json_error( 'It seems there is a problem with the website email service.' );
+    }
   }
 
 

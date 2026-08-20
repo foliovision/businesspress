@@ -298,18 +298,19 @@ class BusinessPress_Settings {
         e.preventDefault();
         var message = $('.form-admin-contact textarea').val();
         if( message ) {
-          $.post('<?php echo site_url('wp-admin/admin-ajax.php'); ?>', {
-            'action' : 'businesspress_contact_admin',
-            'message' : message 
+          $.post(
+            '<?php echo site_url('wp-admin/admin-ajax.php'); ?>',
+            {
+              'action'  : 'businesspress_contact_admin',
+              'nonce'   : '<?php echo wp_create_nonce('businesspress_contact_admin'); ?>',
+              'message' : message 
             },
             function( response ) {
-              var result = '<p>Error sending your message.</p>';
-              if ( response == 1 ) {
-                var result = '<p>Sent!</p>';
-                button.prop('disabled','');
-              }
-              $('.form-admin-contact').append(result);
-            });
+              $('.form-admin-contact').append( response.data );
+
+              button.prop('disabled','');
+            }
+          );
         }
       });
       
@@ -1153,7 +1154,7 @@ class BusinessPress_Settings {
               printf( __('Access to this screen is limited to user with email address equal to %s.'), $email );
             } ?>        
           </p>
-          <?php if( !$businesspress->check_user_permission() ) :
+          <?php if ( !$businesspress->check_user_permission() && ( $businesspress->get_whitelist_email() || $businesspress->get_contact_email() !== -1 ) ) :
             $sFormStyle = isset($_GET['contact_form']) ? '' : ' style="display: none"';
             ?>          
             <p class="description">
