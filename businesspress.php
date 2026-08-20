@@ -1482,8 +1482,10 @@ JSH;
 
 
   function recovery_email($email_data) {
-    if( $this->get_whitelist_email() ) {
-      $email_data['to'] = $this->get_whitelist_email();
+    if ( $this->get_contact_email() !== -1 ) {
+      $email_data['to'] = sanitize_email( $this->get_contact_email() );
+    } else if ( $this->get_whitelist_email() ) {
+      $email_data['to'] = sanitize_email( $this->get_whitelist_email() );
     }
 
     return $email_data;
