@@ -288,6 +288,13 @@ class BusinessPress extends BusinessPress_Plugin {
       #wp-admin-bar-searchwp { display: none !important }
       .searchwp-settings-header-nav ul li a.searchwp-settings-nav-tab-support > span > span { display: none !important }
       #xyz-ihs-premium, .xyz_ihs_social_media, .xyz_ihs_sugession, .xyz_ihs_new_subscribe, .xyz_ihs_inmotion, .xyz_our_plugins_new, .xyz_poweredBy { display: none }
+      <?php
+      // Hide Gravity Forms splash popup after upgrade.
+      if ( ! $this->check_user_permission() ) : ?>
+        .gform-admin .gform-dialog__mask.gform-dialog--anim-in-ready:has(#splash-page-modal) {
+          display: none;
+        }
+      <?php endif; ?>
     </style>
     <?php
   }
