@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 class CWS_Login_Logo_Plugin {
 	static $instance;
-	const CUTOFF = 312;
+	const CUTOFF = 320;
 	var $logo_locations;
 	var $logo_location;
 	var $width = 0;
@@ -231,8 +231,6 @@ class CWS_Login_Logo_Plugin {
 			background: url(<?php echo esc_url_raw( $this->get_location( 'url' ) ); ?>) no-repeat top center;
 			width: <?php echo self::CUTOFF; ?>px;
 			height: <?php echo $this->get_height(); ?>px;
-			margin-left: 8px;
-			padding-bottom: 16px;
 			<?php
 			if ( self::CUTOFF < $this->get_original_width() )
 				$this->css3( 'background-size', 'contain' );
