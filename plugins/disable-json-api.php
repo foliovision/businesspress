@@ -118,7 +118,7 @@ function fv_DRA_is_allowed_endpoint() {
         // This detection works for pretty permalinks
         stripos( $request_url, $rest_url ) === false &&
         // ...and this one for when using query strings
-        empty( $_GET['rest_route'] )
+        empty( $_REQUEST['rest_route'] )
     ) {
         // The page URL is not a WP REST API URL, so we stop checking
         return true;
