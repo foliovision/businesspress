@@ -59,6 +59,10 @@ class BusinessPress_WAF {
 			}
 		}
 
+		if ( ! empty( $_POST['rest_route' ] ) ) {
+			$match = 'Obfuscated REST API request to: '.$_POST['rest_route'];
+		}
+
 		if( $match ) {
 			FV_Fail2ban()->write_to_log( 'WAF - ' . $match . ' request - ' . $_SERVER['REQUEST_URI'] );
 			exit;
