@@ -24,7 +24,7 @@ class FV_Fail2ban {
 	public function __construct() {
 		self::$instance = $this;
 
-		add_action( 'template_redirect', array( $this, 'fail2ban_404' ) );
+		add_action( 'template_redirect', array( $this, 'fail2ban_404' ), 999 );
 		add_action( 'wp_login_failed', array( $this, 'fail2ban_login' ) );
 		add_filter( 'xmlrpc_login_error', array( $this, 'fail2ban_xmlrpc' ) );
 		add_filter( 'xmlrpc_pingback_error', array( $this, 'fail2ban_xmlrpc_ping' ), 5 );
